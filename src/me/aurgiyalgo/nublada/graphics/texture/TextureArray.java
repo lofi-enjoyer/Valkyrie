@@ -36,7 +36,7 @@ public class TextureArray {
         int id = glGenTextures();
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
         glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, 8, 8, fileName.length, 0, GL_RGBA,
                 GL_UNSIGNED_BYTE, (ByteBuffer) null);
 

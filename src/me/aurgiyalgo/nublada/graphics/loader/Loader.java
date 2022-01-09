@@ -1,5 +1,6 @@
-package me.aurgiyalgo.nublada.graphics.model;
+package me.aurgiyalgo.nublada.graphics.loader;
 
+import me.aurgiyalgo.nublada.graphics.mesh.Mesh;
 import me.aurgiyalgo.nublada.graphics.texture.Texture;
 import me.aurgiyalgo.nublada.graphics.texture.TextureArray;
 import org.lwjgl.opengl.GL30;
@@ -7,40 +8,34 @@ import org.lwjgl.opengl.GL30;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModelLoader {
+public class Loader {
 
-    private List<Integer> vaoList, vboList, textureList;
+    private final List<Integer> vaoList;
+    private final List<Integer> vboList;
+    private final List<Integer> textureList;
 
-    public ModelLoader() {
+    public Loader() {
         this.vaoList = new ArrayList<>();
         this.vboList = new ArrayList<>();
         this.textureList = new ArrayList<>();
     }
 
-    public Model loadToVAO(float[] positions, float[] textureCoords, int[] indices) {
+    public Mesh loadToVAO(float[] positions, int[] indices, float[] uvs, float[] light) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);
-        storeDataInAttributeList(1, 2, textureCoords);
+        storeDataInAttributeList(1, 3, uvs);
+        storeDataInAttributeList(2, 1, light);
         bindIndicesBuffer(indices);
         unbindVAO();
-        return new Model(vao, indices.length);
+        return new Mesh(vao, indices.length);
     }
 
-    public Model loadToVAO(float[] positions, int[] indices, float[] colors) {
-        int vao = createVAO();
-        storeDataInAttributeList(0, 3, positions);
-        storeDataInAttributeList(1, 3, colors);
-        bindIndicesBuffer(indices);
-        unbindVAO();
-        return new Model(vao, indices.length);
-    }
-
-    public Model loadToVAO(float[] positions, int[] indices) {
+    public Mesh loadToVAO(float[] positions, int[] indices) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);
         bindIndicesBuffer(indices);
         unbindVAO();
-        return new Model(vao, indices.length);
+        return new Mesh(vao, indices.length);
     }
 
     private int createVAO() {

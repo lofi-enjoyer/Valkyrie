@@ -12,7 +12,7 @@ public class FrustumCullingTester {
 
     private final Matrix4f prjViewMatrix;
 
-    private FrustumIntersection frustumIntersection;
+    private final FrustumIntersection frustumIntersection;
 
     public FrustumCullingTester() {
         this.prjViewMatrix = new Matrix4f();

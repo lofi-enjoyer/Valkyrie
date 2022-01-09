@@ -10,7 +10,9 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera {
 
-    private Vector3f position;
+    private static final float SPEED = 16f;
+
+    private final Vector3f position;
     private float rotationY, rotationX, roll;
 
     boolean mouseLocked = false;
@@ -23,12 +25,10 @@ public class Camera {
     boolean rotX = false;
     boolean rotY = false;
 
-    private Vector3f direction;
-
-    private float speed = 16f;
+    private final Vector3f direction;
 
     public Camera() {
-        this.position = new Vector3f(0, 64, 0);
+        this.position = new Vector3f(0, 128, 0);
         this.direction = new Vector3f();
         rotationX = 180;
         rotationY = 30;
@@ -38,49 +38,50 @@ public class Camera {
     public void updateDirection() {
         float yaw = (float) Math.toRadians(rotationX + 90);
         float pitch = (float) Math.toRadians(rotationY);
-//        direction.z = -(float) (Math.cos(Math.toRadians(rotationX)) * Math.cos(Math.toRadians(rotationY)));
+
         direction.x = (float) (Math.cos(yaw) * Math.cos(pitch));
         direction.y = (float) Math.sin(pitch);
         direction.z = (float) (Math.cos(pitch) * Math.sin(yaw));
-//        direction.x = -(float) Math.sin(Math.sin(Math.toRadians(rotationX)) * Math.cos(Math.toRadians(rotationY)));
 
         direction.normalize().mul(-1);
     }
 
+    // FIXME: 09/01/2022 replace the camera update with a playercontroller
     public void update(long window, float delta) {
-//        if (GLFW.glfwGetKey(window, GLFW_KEY_ESCAPE) == 1) {
-//            mouseLocked = !mouseLocked;
-//            GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, mouseLocked ? GLFW.GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
-//            if (mouseLocked)
-//                GLFW.glfwSetCursorPos(window, 320, 180);
-//        }
+
+        if (GLFW.glfwGetKey(window, GLFW_KEY_ESCAPE) == 1) {
+            mouseLocked = !mouseLocked;
+            GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, mouseLocked ? GLFW.GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+            if (mouseLocked)
+                GLFW.glfwSetCursorPos(window, 320, 180);
+        }
 
         if (GLFW.glfwGetKey(window, GLFW_KEY_W) == 1) {
-            this.position.z -= Math.cos(Math.toRadians(rotationX)) * speed * delta;
-            this.position.x += Math.sin(Math.toRadians(rotationX)) * speed * delta;
+            this.position.z -= Math.cos(Math.toRadians(rotationX)) * SPEED * delta;
+            this.position.x += Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
         }
 
         if (GLFW.glfwGetKey(window, GLFW_KEY_S) == 1) {
-            this.position.z += Math.cos(Math.toRadians(rotationX)) * speed * delta;
-            this.position.x -= Math.sin(Math.toRadians(rotationX)) * speed * delta;
+            this.position.z += Math.cos(Math.toRadians(rotationX)) * SPEED * delta;
+            this.position.x -= Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
         }
 
         if (GLFW.glfwGetKey(window, GLFW_KEY_A) == 1) {
-            this.position.x -= Math.cos(Math.toRadians(rotationX)) * speed * delta;
-            this.position.z -= Math.sin(Math.toRadians(rotationX)) * speed * delta;
+            this.position.x -= Math.cos(Math.toRadians(rotationX)) * SPEED * delta;
+            this.position.z -= Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
         }
 
         if (GLFW.glfwGetKey(window, GLFW_KEY_D) == 1) {
-            this.position.x += Math.cos(Math.toRadians(rotationX)) * speed * delta;
-            this.position.z += Math.sin(Math.toRadians(rotationX)) * speed * delta;
+            this.position.x += Math.cos(Math.toRadians(rotationX)) * SPEED * delta;
+            this.position.z += Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
         }
 
         if (GLFW.glfwGetKey(window, GLFW_KEY_SPACE) == 1) {
-            this.position.y += 1 * speed * delta;
+            this.position.y += 1 * SPEED * delta;
         }
 
         if (GLFW.glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == 1) {
-            this.position.y -= 1 * speed * delta;
+            this.position.y -= 1 * SPEED * delta;
         }
 
         if (GLFW.glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {

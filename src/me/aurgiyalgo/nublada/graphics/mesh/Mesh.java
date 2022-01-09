@@ -1,12 +1,12 @@
-package me.aurgiyalgo.nublada.graphics.model;
+package me.aurgiyalgo.nublada.graphics.mesh;
 
-public class Model {
+public class Mesh {
 
     private int vao;
     private int vertexCount;
     private int textureId;
 
-    public Model(int vao, int vertexCount) {
+    public Mesh(int vao, int vertexCount) {
         this.vao = vao;
         this.vertexCount = vertexCount;
     }

@@ -6,6 +6,7 @@ import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
 import java.nio.*;
+import java.util.function.BiConsumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -77,7 +78,7 @@ public class Window {
         }
 
         glfwMakeContextCurrent(id);
-        glfwSwapInterval(0);
+        glfwSwapInterval(1);
     }
 
     public void show() {
@@ -91,6 +92,13 @@ public class Window {
     public void update() {
         glfwSwapBuffers(id);
         glfwPollEvents();
+    }
+
+    public void setResizeCallback(BiConsumer<Integer, Integer> action) {
+        glfwSetWindowSizeCallback(id, (window, newWidth, newHeight) -> {
+            glViewport(0, 0, newWidth, newHeight);
+            action.accept(newWidth, newHeight);
+        });
     }
 
     public void setClearColor(float r, float g, float b, float a) {

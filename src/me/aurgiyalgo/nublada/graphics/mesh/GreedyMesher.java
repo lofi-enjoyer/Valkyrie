@@ -1,7 +1,7 @@
-package me.aurgiyalgo.nublada.world;
+package me.aurgiyalgo.nublada.graphics.mesh;
 
 import me.aurgiyalgo.nublada.Nublada;
-import me.aurgiyalgo.nublada.graphics.model.Model;
+import me.aurgiyalgo.nublada.world.Chunk;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -11,14 +11,14 @@ import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 import static me.aurgiyalgo.nublada.world.World.CHUNK_HEIGHT;
 
 /**
- * @author roboleary
+ * Based on roboleary's algorithm, but improved to support non-cubic chunks
  * @see <a href="https://github.com/roboleary/GreedyMesh">GreedyMesh</a>
  */
-public class WorldMesher {
+public class GreedyMesher {
 
     private static final int[] dims = { CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH };
 
-    private Chunk chunk;
+    private final Chunk chunk;
 
     private int passes = 0;
 
@@ -31,44 +31,61 @@ public class WorldMesher {
 
     private List<Float> positions;
     private List<Integer> indices;
-    private List<Float> colors;
+    private List<Float> uvs;
+    private List<Float> light;
 
     private float[] positionsArray;
     private int[] indicesArray;
-    private float[] colorsArray;
+    private float[] uvsArray;
+    private float[] lightArray;
 
-    public WorldMesher(Chunk chunk) {
+    public GreedyMesher(Chunk chunk) {
         this.chunk = chunk;
     }
 
     public void compute() {
         this.positions = new ArrayList<>();
         this.indices = new ArrayList<>();
-        this.colors = new ArrayList<>();
+        this.uvs = new ArrayList<>();
+        this.light = new ArrayList<>();
 
-        greedy();
+        computeMesh();
 
         positionsArray = new float[positions.size()];
         for (int i = 0; i < positions.size(); i++) {
             positionsArray[i] = positions.get(i);
         }
+        positions = null;
 
         indicesArray = new int[indices.size()];
         for (int i = 0; i < indices.size(); i++) {
             indicesArray[i] = indices.get(i);
         }
+        indices = null;
 
-        colorsArray = new float[colors.size()];
-        for (int i = 0; i < colors.size(); i++) {
-            colorsArray[i] = colors.get(i);
+        uvsArray = new float[uvs.size()];
+        for (int i = 0; i < uvs.size(); i++) {
+            uvsArray[i] = uvs.get(i);
         }
+        uvs = null;
+
+        lightArray = new float[light.size()];
+        for (int i = 0; i < light.size(); i++) {
+            lightArray[i] = light.get(i);
+        }
+        light = null;
     }
 
-    public Model loadModel() {
-        return Nublada.modelLoader.loadToVAO(positionsArray, indicesArray, colorsArray);
+    public Mesh loadMeshToGpu() {
+        Mesh mesh = Nublada.loader.loadToVAO(positionsArray, indicesArray, uvsArray, lightArray);
+        positionsArray = null;
+        indicesArray = null;
+        uvsArray = null;
+        lightArray = null;
+        return mesh;
     }
 
-    void greedy() {
+    void computeMesh() {
         /*
          * These are just working variables for the algorithm - almost all taken
          * directly from Mikola Lysenko's javascript implementation.
@@ -128,7 +145,7 @@ public class WorldMesher {
                  */
                 if (d == 0)      { side = backFace ? WEST   : EAST;  }
                 else if (d == 1) { side = backFace ? BOTTOM : TOP;   }
-                else if (d == 2) { side = backFace ? SOUTH  : NORTH; }
+                else { side = backFace ? SOUTH  : NORTH; }
 
                 /*
                  * We move through the dimension from front to back
@@ -232,7 +249,8 @@ public class WorldMesher {
                                             w,
                                             h,
                                             mask[n],
-                                            backFace);
+                                            backFace,
+                                            d);
                                 }
 
                                 /*
@@ -261,14 +279,14 @@ public class WorldMesher {
         }
     }
 
-    void quad(final Vector3f bottomLeft,
+    private void quad(final Vector3f bottomLeft,
               final Vector3f topLeft,
               final Vector3f topRight,
               final Vector3f bottomRight,
               final int width,
               final int height,
               final int voxel,
-              final boolean backFace) {
+              final boolean backFace, int direction) {
 
         final Vector3f [] vertices = new Vector3f[4];
 
@@ -277,7 +295,11 @@ public class WorldMesher {
         vertices[0] = bottomLeft;
         vertices[1] = bottomRight;
 
-        final int [] indexes = backFace ? new int[] { 2,0,1, 1,3,2 } : new int[]{ 2,3,1, 1,0,2 };
+        int [] indexes = backFace ? new int[] { 2,0,1, 1,3,2 } : new int[]{ 2,3,1, 1,0,2 };
+
+        if (direction == 0) {
+            indexes = backFace ? new int[] { 2,0,1, 1,3,2 } : new int[]{ 2,3,1, 1,0,2 };
+        }
 
         for (int i = 0; i < 4; i++) {
             positions.add(vertices[i].x);
@@ -285,25 +307,125 @@ public class WorldMesher {
             positions.add(vertices[i].z);
         }
 
-        for (int i = 0; i < indexes.length; i++) {
-            indices.add(indexes[i] + passes * 4);
+        for (int index : indexes) {
+            indices.add(index + passes * 4);
         }
 
-        colors.add(0f);
-        colors.add(0f);
-        colors.add((float) voxel - 1);
+        // Texture re-orientation based on the direction
+        if (direction == 2) {
+            if (!backFace) {
+                // 2
+                uvs.add(0f);
+                uvs.add((float) height);
+                uvs.add((float) voxel - 1);
 
-        colors.add((float) height);
-        colors.add(0f);
-        colors.add((float) voxel - 1);
+                // 0
+                uvs.add(0f);
+                uvs.add(0f);
+                uvs.add((float) voxel - 1);
 
-        colors.add(0f);
-        colors.add((float) width);
-        colors.add((float) voxel - 1);
+                // 3
+                uvs.add((float) width);
+                uvs.add((float) height);
+                uvs.add((float) voxel - 1);
 
-        colors.add((float) height);
-        colors.add((float) width);
-        colors.add((float) voxel - 1);
+                // 1
+                uvs.add((float) width);
+                uvs.add(0f);
+                uvs.add((float) voxel - 1);
+            } else {
+                // 3
+                uvs.add((float) width);
+                uvs.add((float) height);
+                uvs.add((float) voxel - 1);
+
+                // 1
+                uvs.add((float) width);
+                uvs.add(0f);
+                uvs.add((float) voxel - 1);
+
+                // 2
+                uvs.add(0f);
+                uvs.add((float) height);
+                uvs.add((float) voxel - 1);
+
+                // 0
+                uvs.add(0f);
+                uvs.add(0f);
+                uvs.add((float) voxel - 1);
+            }
+        } else if (direction == 0) {
+            if (backFace) {
+                // 2
+                uvs.add(0f);
+                uvs.add((float) width);
+                uvs.add((float) voxel - 1);
+
+                // 3
+                uvs.add((float) height);
+                uvs.add((float) width);
+                uvs.add((float) voxel - 1);
+                // 0
+                uvs.add(0f);
+                uvs.add(0f);
+                uvs.add((float) voxel - 1);
+
+                // 1
+                uvs.add((float) height);
+                uvs.add(0f);
+                uvs.add((float) voxel - 1);
+            } else {
+                // 3
+                uvs.add((float) height);
+                uvs.add((float) width);
+                uvs.add((float) voxel - 1);
+
+                // 2
+                uvs.add(0f);
+                uvs.add((float) width);
+                uvs.add((float) voxel - 1);
+
+                // 1
+                uvs.add((float) height);
+                uvs.add(0f);
+                uvs.add((float) voxel - 1);
+
+                // 0
+                uvs.add(0f);
+                uvs.add(0f);
+                uvs.add((float) voxel - 1);
+            }
+        } else {
+            // 0
+            uvs.add(0f);
+            uvs.add(0f);
+            uvs.add((float) voxel - 1);
+
+            // 1
+            uvs.add((float) height);
+            uvs.add(0f);
+            uvs.add((float) voxel - 1);
+
+            // 2
+            uvs.add(0f);
+            uvs.add((float) width);
+            uvs.add((float) voxel - 1);
+
+            // 3
+            uvs.add((float) height);
+            uvs.add((float) width);
+            uvs.add((float) voxel - 1);
+        }
+
+        if (direction == 1) {
+            for (int i = 0; i < 4; i++) {
+                light.add(backFace ? 0.4f : 1f);
+            }
+        } else {
+            for (int i = 0; i < 4; i++) {
+                light.add(0.7f);
+            }
+        }
 
         passes++;
     }

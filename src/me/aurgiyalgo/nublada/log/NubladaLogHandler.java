@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 
 public class NubladaLogHandler extends Handler {
 
+    // FIXME: 09/01/2022 make this useful
+
     public static Logger initLogs() {
         Logger logger;
         LogManager.getLogManager().reset();

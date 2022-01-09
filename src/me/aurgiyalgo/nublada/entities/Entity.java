@@ -1,22 +1,22 @@
 package me.aurgiyalgo.nublada.entities;
 
-import me.aurgiyalgo.nublada.graphics.model.Model;
+import me.aurgiyalgo.nublada.graphics.mesh.Mesh;
 import org.joml.Vector3f;
 
 public class Entity {
 
-    private Model model;
+    private Mesh mesh;
     private Vector3f position;
     private Vector3f rotation;
 
-    public Entity(Model model, Vector3f position, Vector3f rotation) {
-        this.model = model;
+    public Entity(Mesh mesh, Vector3f position, Vector3f rotation) {
+        this.mesh = mesh;
         this.position = position;
         this.rotation = rotation;
     }
 
-    public Model getModel() {
-        return model;
+    public Mesh getModel() {
+        return mesh;
     }
 
     public Vector3f getPosition() {

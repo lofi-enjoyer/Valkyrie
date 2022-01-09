@@ -2,17 +2,15 @@ package me.aurgiyalgo.nublada;
 
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.graphics.display.Window;
-import me.aurgiyalgo.nublada.graphics.model.ModelLoader;
+import me.aurgiyalgo.nublada.graphics.loader.Loader;
 import me.aurgiyalgo.nublada.graphics.render.WorldRenderer;
 import me.aurgiyalgo.nublada.graphics.shaders.StaticShader;
 import me.aurgiyalgo.nublada.log.NubladaLogHandler;
 import me.aurgiyalgo.nublada.world.World;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL30;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Nublada {
@@ -20,13 +18,19 @@ public class Nublada {
     public static final Logger LOG = NubladaLogHandler.initLogs();
 
     private final Window window;
-    public static ModelLoader modelLoader;
+    public static Loader loader;
     private final WorldRenderer worldRenderer;
 
     public Nublada() {
+        LOG.setLevel(Level.INFO);
+
+        // FIXME: 09/01/2022 Make this customizable
         this.window = new Window(1280, 720, "Nublada");
-        modelLoader = new ModelLoader();
+        loader = new Loader();
         this.worldRenderer = new WorldRenderer();
+        worldRenderer.setupProjectionMatrix(1280, 720);
+
+        window.setResizeCallback(worldRenderer::setupProjectionMatrix);
     }
 
     public void init() {
@@ -39,7 +43,7 @@ public class Nublada {
         window.show();
         window.setClearColor(0.5f, 0.125f, 0.25f, 1f);
 
-        World world = new World(modelLoader);
+        World world = new World(loader);
 
         int mouse = 0;
 
@@ -47,7 +51,7 @@ public class Nublada {
             while (window.keepOpen()) {
                 world.generateNextChunk();
                 try {
-                    Thread.sleep(15);
+                    Thread.sleep(5);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -68,10 +72,6 @@ public class Nublada {
             worldRenderer.render(world, shader, camera);
             shader.stop();
 
-            long update = System.nanoTime();
-            world.updateNextChunk();
-            System.out.println((System.nanoTime() - update) / 1000000f);
-
             if (GLFW.glfwGetMouseButton(window.getId(), 0) == 0 &&
                     GLFW.glfwGetMouseButton(window.getId(), 1) == 0) mouse = 0;
 
@@ -87,13 +87,15 @@ public class Nublada {
 
             window.update();
 
+            world.updateNextChunk();
+
             delta = (System.nanoTime() - timer) / 1000000000f;
             timer = System.nanoTime();
 
             GLFW.glfwSetWindowTitle(window.getId(), "Nublada | FPS: " + (int) (1f / delta) + " (delta: " + delta + "s)");
         }
 
-        modelLoader.dispose();
+        loader.dispose();
     }
 
 }

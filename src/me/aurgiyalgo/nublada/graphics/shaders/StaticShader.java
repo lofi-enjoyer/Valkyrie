@@ -32,6 +32,7 @@ public class StaticShader extends ShaderProgram{
     protected void bindAttributes() {
         super.bindAttribute(0, "position");
         super.bindAttribute(1, "color");
+        super.bindAttribute(2, "light");
     }
 
     public void loadTransformationMatrix(Matrix4f matrix) {
