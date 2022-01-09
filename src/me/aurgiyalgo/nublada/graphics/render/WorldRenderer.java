@@ -42,7 +42,7 @@ public class WorldRenderer {
             shader.loadTranslation(position);
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
-        System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + counter.get() + " chunks)");
+//        System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + counter.get() + " chunks)");
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, 0);
         GL30.glDisableVertexAttribArray(0);

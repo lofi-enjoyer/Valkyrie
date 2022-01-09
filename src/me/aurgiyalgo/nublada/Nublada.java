@@ -6,6 +6,7 @@ import me.aurgiyalgo.nublada.graphics.loader.Loader;
 import me.aurgiyalgo.nublada.graphics.render.WorldRenderer;
 import me.aurgiyalgo.nublada.graphics.shaders.StaticShader;
 import me.aurgiyalgo.nublada.log.NubladaLogHandler;
+import me.aurgiyalgo.nublada.world.BlockRegistry;
 import me.aurgiyalgo.nublada.world.World;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
@@ -31,6 +32,8 @@ public class Nublada {
         worldRenderer.setupProjectionMatrix(1280, 720);
 
         window.setResizeCallback(worldRenderer::setupProjectionMatrix);
+
+        BlockRegistry.setup();
     }
 
     public void init() {

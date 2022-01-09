@@ -14,7 +14,7 @@ public class World {
     public static final int CHUNK_HEIGHT = 128;
 
     // FIXME: 09/01/2022 temporary world dimensions, they will be loaded dynamically around the player
-    public static final int WORLD_SIDE = 16;
+    public static final int WORLD_SIDE = 32;
 
     private final Map<Vector2f, Chunk> chunks;
 
@@ -32,7 +32,12 @@ public class World {
         this.noise = new PerlinNoise(40595);
 
         // FIXME: 09/01/2022 load textures dynamically
-        this.textureId = loader.loadTextureArray("res/textures/stone.png", "res/textures/obsidian.png", "res/textures/grass_top.png");
+        this.textureId = loader.loadTextureArray(
+                "res/textures/stone.png",
+                "res/textures/grass_side.png",
+                "res/textures/grass_top.png",
+                "res/textures/log_oak.png",
+                "res/textures/log_top.png");
 
         for (int x = 0; x < WORLD_SIDE; x++) {
             for (int z = 0; z < WORLD_SIDE; z++) {
@@ -53,7 +58,7 @@ public class World {
         Chunk nextChunk  = toGenChunks.get(0);
         nextChunk.populateChunk(noise);
         nextChunk.computeMesh();
-        toGenChunks.remove(0);
+        toGenChunks.remove(nextChunk);
         toLoadChunks.add(nextChunk);
     }
 
@@ -61,11 +66,11 @@ public class World {
         if (toLoadChunks.isEmpty()) return;
         Chunk nextChunk = toLoadChunks.get(0);
         nextChunk.loadModel();
-        toLoadChunks.remove(0);
+        toLoadChunks.remove(nextChunk);
     }
 
     public synchronized void addChunkToUpdate(Chunk chunk) {
-        toGenChunks.add(chunk);
+        toGenChunks.add(0, chunk);
     }
 
     public void raycast(Vector3f position, Vector3f direction, float distance, boolean isPlace) {
@@ -86,7 +91,7 @@ public class World {
                 if (!isPlace) {
                     setBlock(0, (int)xPos, (int)yPos, (int)zPos);
                 }
-                else setBlock(1, (int)(xPos + faceX), (int)(yPos + faceY), (int)(zPos + faceZ));
+                else setBlock(3, (int)(xPos + faceX), (int)(yPos + faceY), (int)(zPos + faceZ));
                 break;
             }
             if (tMax.x < tMax.y) {
