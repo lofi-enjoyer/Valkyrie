@@ -32,7 +32,7 @@ public class Chunk {
         long timer = System.nanoTime();
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
-                double maxHeight = (noise.noise(x + position.x * CHUNK_WIDTH, z + position.y * CHUNK_WIDTH) + 1) / 2f * 120 + 4;
+                double maxHeight = (noise.noise(x + position.x * CHUNK_WIDTH, z + position.y * CHUNK_WIDTH) + 1) / 2f * 250 + 4;
                 for (int y = 0; y < CHUNK_HEIGHT; y++) {
                     if (maxHeight >= y) {
                         if ((int) (maxHeight) == y)
@@ -53,7 +53,7 @@ public class Chunk {
         this.mesher = new GreedyMesher(this);
         this.mesher.compute();
 
-        voxels = null;
+//        voxels = null;
     }
 
     public void loadModel() {
@@ -71,6 +71,13 @@ public class Chunk {
     public void setBlock(int voxel, int x, int y, int z) {
         if (x < 0 || y < 0 || z < 0) return;
         if (x > CHUNK_WIDTH - 1 || y > CHUNK_HEIGHT - 1 || z > CHUNK_WIDTH - 1) return;
+        if (voxels == null) {
+            this.voxels = new int[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+            voxels[x][y][z] = voxel;
+            world.addChunkToUpdate(this);
+            updated = false;
+            return;
+        }
         voxels[x][y][z] = voxel;
         if (!updated) return;
         world.addChunkToUpdate(this);

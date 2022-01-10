@@ -11,10 +11,10 @@ import java.util.*;
 public class World {
 
     public static final int CHUNK_WIDTH = 32;
-    public static final int CHUNK_HEIGHT = 128;
+    public static final int CHUNK_HEIGHT = 256;
 
     // FIXME: 09/01/2022 temporary world dimensions, they will be loaded dynamically around the player
-    public static final int WORLD_SIDE = 32;
+    public static final int WORLD_SIDE = 8;
 
     private final Map<Vector2f, Chunk> chunks;
 
@@ -39,8 +39,8 @@ public class World {
                 "res/textures/log_oak.png",
                 "res/textures/log_top.png");
 
-        for (int x = 0; x < WORLD_SIDE; x++) {
-            for (int z = 0; z < WORLD_SIDE; z++) {
+        for (int x = -WORLD_SIDE/2; x < WORLD_SIDE/2; x++) {
+            for (int z = -WORLD_SIDE/2; z < WORLD_SIDE/2; z++) {
                 genChunk(new Vector2f(x, z));
             }
         }
@@ -55,7 +55,7 @@ public class World {
 
     public void generateNextChunk() {
         if (toGenChunks.isEmpty()) return;
-        Chunk nextChunk  = toGenChunks.get(0);
+        Chunk nextChunk = toGenChunks.get(0);
         nextChunk.populateChunk(noise);
         nextChunk.computeMesh();
         toGenChunks.remove(nextChunk);

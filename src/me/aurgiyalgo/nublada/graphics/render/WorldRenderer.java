@@ -5,12 +5,9 @@ import me.aurgiyalgo.nublada.graphics.shaders.StaticShader;
 import me.aurgiyalgo.nublada.utils.Maths;
 import me.aurgiyalgo.nublada.world.World;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
 import org.lwjgl.opengl.GL30;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 
 public class WorldRenderer {
 
@@ -25,6 +22,8 @@ public class WorldRenderer {
 
     public void render(World world, StaticShader shader, Camera camera) {
         GL30.glEnable(GL30.GL_DEPTH_TEST);
+        GL30.glEnable(GL30.GL_CULL_FACE);
+        GL30.glCullFace(GL30.GL_BACK);
 
         shader.loadProjectionMatrix(projectionMatrix);
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, world.getTextureId());
@@ -42,7 +41,7 @@ public class WorldRenderer {
             shader.loadTranslation(position);
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
-//        System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + counter.get() + " chunks)");
+        System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + counter.get() + " chunks)");
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, 0);
         GL30.glDisableVertexAttribArray(0);

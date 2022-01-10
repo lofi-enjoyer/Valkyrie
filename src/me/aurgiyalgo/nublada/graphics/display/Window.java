@@ -47,15 +47,6 @@ public class Window {
                 wireframe = !wireframe;
                 GL30.glPolygonMode(GL30.GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             }
-            if (key == GLFW_KEY_T && action == GLFW_RELEASE) {
-                faceCulling = !faceCulling;
-                if (faceCulling) {
-                    glEnable(GL_CULL_FACE);
-                    glCullFace(GL_BACK);
-                } else {
-                    glDisable(GL_CULL_FACE);
-                }
-            }
         });
 
         glfwSetWindowSizeCallback(id, (window, newwidth, newheight) -> {

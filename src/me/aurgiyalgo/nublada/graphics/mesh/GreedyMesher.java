@@ -168,8 +168,8 @@ public class GreedyMesher {
                             /*
                              * Here we retrieve two voxel faces for comparison.
                              */
-                            voxelFace  = (x[d] >= 0 )             ? chunk.getBlock(x[0], x[1], x[2])                      : 0;
-                            voxelFace1 = (x[d] < dims[d] - 1) ? chunk.getBlock(x[0] + q[0], x[1] + q[1], x[2] + q[2]) : 0;
+                            voxelFace  = chunk.getBlock(x[0], x[1], x[2]);
+                            voxelFace1 = chunk.getBlock(x[0] + q[0], x[1] + q[1], x[2] + q[2]);
 
                             /*
                              * Note that we're using the equals function in the voxel face class here, which lets the faces
