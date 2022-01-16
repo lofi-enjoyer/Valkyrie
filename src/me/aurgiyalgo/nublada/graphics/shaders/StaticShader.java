@@ -4,6 +4,7 @@ import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.utils.Maths;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 public class StaticShader extends ShaderProgram{
@@ -47,7 +48,7 @@ public class StaticShader extends ShaderProgram{
         super.loadMatrix(locationViewMatrix, Maths.createViewMatrix(camera));
     }
 
-    public void loadTranslation(Vector2f position) {
+    public void loadTranslation(Vector2i position) {
         super.loadVector(locationTranslation, new Vector2f(position).mul(32));
     }
 

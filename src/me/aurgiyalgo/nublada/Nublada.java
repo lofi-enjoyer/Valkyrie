@@ -26,10 +26,10 @@ public class Nublada {
         LOG.setLevel(Level.INFO);
 
         // FIXME: 09/01/2022 Make this customizable
-        this.window = new Window(1280, 720, "Nublada");
+        this.window = new Window(640, 360, "Nublada");
         loader = new Loader();
         this.worldRenderer = new WorldRenderer();
-        worldRenderer.setupProjectionMatrix(1280, 720);
+        worldRenderer.setupProjectionMatrix(640, 360);
 
         window.setResizeCallback(worldRenderer::setupProjectionMatrix);
 
@@ -88,9 +88,9 @@ public class Nublada {
                 world.raycast(camera.getPosition(), camera.getDirection(), 10, true);
             }
 
-            window.update();
-
             world.updateNextChunk();
+
+            window.update();
 
             delta = (System.nanoTime() - timer) / 1000000000f;
             timer = System.nanoTime();

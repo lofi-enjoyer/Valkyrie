@@ -16,8 +16,8 @@ public class Camera {
     private float rotationY, rotationX, roll;
 
     boolean mouseLocked = false;
-    double newX = 400;
-    double newY = 300;
+    double newX = 320;
+    double newY = 180;
 
     double prevX = 0;
     double prevY = 0;

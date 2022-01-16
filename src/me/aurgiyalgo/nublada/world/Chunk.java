@@ -4,14 +4,22 @@ import me.aurgiyalgo.nublada.graphics.mesh.Mesh;
 import me.aurgiyalgo.nublada.graphics.mesh.GreedyMesher;
 import me.aurgiyalgo.nublada.utils.PerlinNoise;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 
 import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 import static me.aurgiyalgo.nublada.world.World.CHUNK_HEIGHT;
 
 public class Chunk {
 
+    private static final int SOUTH      = 0;
+    private static final int NORTH      = 2;
+    private static final int EAST       = 1;
+    private static final int WEST       = 3;
+    
+    private static final Vector2i[] NEIGHBOR_VECTORS = { };
+
     private int[][][] voxels;
-    private final Vector2f position;
+    private final Vector2i position;
     private Mesh mesh;
 
     private GreedyMesher mesher;
@@ -20,9 +28,12 @@ public class Chunk {
 
     public boolean updated = false;
 
-    public Chunk(Vector2f position, World world) {
+    private final Chunk[] neighbors;
+
+    public Chunk(Vector2i position, World world) {
         this.position = position;
         this.world = world;
+        this.neighbors = new Chunk[4];
     }
 
     public void populateChunk(PerlinNoise noise) {
@@ -60,6 +71,14 @@ public class Chunk {
         mesh = mesher.loadMeshToGpu();
         updated = true;
     }
+    
+    public void setupNeighbors() {
+        
+    }
+
+    public void updateNeighborChunks() {
+
+    }
 
     public int getBlock(int x, int y, int z) {
         if (voxels == null) return 0;
@@ -84,7 +103,7 @@ public class Chunk {
         updated = false;
     }
 
-    public Vector2f getPosition() {
+    public Vector2i getPosition() {
         return position;
     }
 

@@ -4,6 +4,7 @@ import me.aurgiyalgo.nublada.graphics.loader.Loader;
 import me.aurgiyalgo.nublada.utils.Maths;
 import me.aurgiyalgo.nublada.utils.PerlinNoise;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -14,9 +15,9 @@ public class World {
     public static final int CHUNK_HEIGHT = 256;
 
     // FIXME: 09/01/2022 temporary world dimensions, they will be loaded dynamically around the player
-    public static final int WORLD_SIDE = 8;
+    public static final int WORLD_SIDE = 32;
 
-    private final Map<Vector2f, Chunk> chunks;
+    private final Map<Vector2i, Chunk> chunks;
 
     private final List<Chunk> toGenChunks;
     private final List<Chunk> toLoadChunks;
@@ -41,22 +42,22 @@ public class World {
 
         for (int x = -WORLD_SIDE/2; x < WORLD_SIDE/2; x++) {
             for (int z = -WORLD_SIDE/2; z < WORLD_SIDE/2; z++) {
-                genChunk(new Vector2f(x, z));
+                genChunk(new Vector2i(x, z));
             }
         }
     }
 
-    private void genChunk(Vector2f position) {
+    private void genChunk(Vector2i position) {
         Chunk chunk = new Chunk(position, this);
 
         chunks.put(position, chunk);
+        chunk.populateChunk(noise);
         toGenChunks.add(chunk);
     }
 
     public void generateNextChunk() {
         if (toGenChunks.isEmpty()) return;
         Chunk nextChunk = toGenChunks.get(0);
-        nextChunk.populateChunk(noise);
         nextChunk.computeMesh();
         toGenChunks.remove(nextChunk);
         toLoadChunks.add(nextChunk);
@@ -69,8 +70,11 @@ public class World {
         toLoadChunks.remove(nextChunk);
     }
 
-    public synchronized void addChunkToUpdate(Chunk chunk) {
-        toGenChunks.add(0, chunk);
+    public void addChunkToUpdate(Chunk chunk) {
+        synchronized (toGenChunks) {
+            toGenChunks.remove(chunk);
+            toGenChunks.add(toGenChunks.isEmpty() ? 0 : 1, chunk);
+        }
     }
 
     public void raycast(Vector3f position, Vector3f direction, float distance, boolean isPlace) {
@@ -133,7 +137,7 @@ public class World {
     }
 
     public int getBlock(int x, int y, int z) {
-        Vector2f position = getChunkPositionAt(x, z);
+        Vector2i position = getChunkPositionAt(x, z);
         if (!chunks.containsKey(position)) return 0;
         return chunks.get(position)
                 .getBlock((int)Math.abs(position.x * CHUNK_WIDTH - x), y, (int)Math.abs(position.y * CHUNK_WIDTH - z));
@@ -144,7 +148,7 @@ public class World {
     }
 
     public void setBlock(int voxel, int x, int y, int z) {
-        Vector2f position = getChunkPositionAt(x, z);
+        Vector2i position = getChunkPositionAt(x, z);
         if (!chunks.containsKey(position)) {
             Chunk chunk = new Chunk(position, this);
             chunks.put(position, chunk);
@@ -158,11 +162,11 @@ public class World {
         setBlock(voxel, (int)position.x, (int)position.y, (int)position.z);
     }
 
-    private Vector2f getChunkPositionAt(int x, int z) {
-        return new Vector2f((int)Math.floor(x / (float)CHUNK_WIDTH), (int)Math.floor(z / (float)CHUNK_WIDTH));
+    private Vector2i getChunkPositionAt(int x, int z) {
+        return new Vector2i((int)Math.floor(x / (float)CHUNK_WIDTH), (int)Math.floor(z / (float)CHUNK_WIDTH));
     }
 
-    public Map<Vector2f, Chunk> getChunks() {
+    public Map<Vector2i, Chunk> getChunks() {
         return chunks;
     }
 
