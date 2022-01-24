@@ -50,10 +50,8 @@ public class Camera {
     public void update(long window, float delta) {
 
         if (GLFW.glfwGetKey(window, GLFW_KEY_ESCAPE) == 1) {
-            mouseLocked = !mouseLocked;
-            GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, mouseLocked ? GLFW.GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
-            if (mouseLocked)
-                GLFW.glfwSetCursorPos(window, 320, 180);
+            mouseLocked = false;
+            GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
 
         if (GLFW.glfwGetKey(window, GLFW_KEY_W) == 1) {

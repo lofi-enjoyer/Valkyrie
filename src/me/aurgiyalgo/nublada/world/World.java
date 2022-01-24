@@ -8,21 +8,34 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class World {
 
     public static final int CHUNK_WIDTH = 32;
     public static final int CHUNK_HEIGHT = 256;
 
+    private static final ScheduledExecutorService generationService = new ScheduledThreadPoolExecutor(1, r -> {
+       Thread thread = new Thread(r, "Generation Thread");
+       thread.setDaemon(true);
+       return thread;
+    });
+
     private final Map<Vector2i, Chunk> chunks;
 
     private final int textureId;
     private final PerlinNoise noise;
 
+    private List<Future<Chunk>> chunkGenerationFutures;
+
     public World() {
         this.chunks = new HashMap<>();
 
         this.noise = new PerlinNoise(40595);
+        this.chunkGenerationFutures = new ArrayList<>();
 
         // FIXME: 09/01/2022 load textures dynamically
         this.textureId = Nublada.loader.loadTextureArray(
@@ -41,8 +54,13 @@ public class World {
         Chunk chunk = new Chunk(position, this);
 
         chunks.put(position, chunk);
-        chunk.populateChunk(noise);
-        initializeChunk(chunk);
+
+        Future<Chunk> future = generationService.submit(() -> {
+            chunk.populateChunk(noise);
+            return chunk;
+        });
+
+        chunkGenerationFutures.add(future);
     }
 
     private void initializeChunk(Chunk chunk) {
@@ -59,6 +77,24 @@ public class World {
                     other.updated = false;
                 }
 
+            }
+        }
+    }
+
+    public void checkGeneratingChunks() {
+        Iterator<Future<Chunk>> iterator = chunkGenerationFutures.iterator();
+
+        while (iterator.hasNext()) {
+            Future<Chunk> future = iterator.next();
+
+            if (future.isDone()) {
+                iterator.remove();
+
+                try {
+                    initializeChunk(future.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

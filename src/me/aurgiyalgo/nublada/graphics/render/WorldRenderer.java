@@ -25,6 +25,9 @@ public class WorldRenderer {
     }
 
     public void render(World world, StaticShader shader, Camera camera) {
+
+        world.checkGeneratingChunks();
+
         GL30.glEnable(GL30.GL_DEPTH_TEST);
         GL30.glEnable(GL30.GL_CULL_FACE);
         GL30.glCullFace(GL30.GL_BACK);
