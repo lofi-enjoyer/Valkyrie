@@ -43,13 +43,15 @@ public class GreedyMesher {
 
     public GreedyMesher(Chunk chunk) {
         this.chunk = chunk;
+
+        compute();
     }
 
     public void compute() {
-        this.positions = new ArrayList<>();
-        this.indices = new ArrayList<>();
-        this.uvs = new ArrayList<>();
-        this.light = new ArrayList<>();
+        this.positions = new ArrayList<>(10000);
+        this.indices = new ArrayList<>(6000);
+        this.uvs = new ArrayList<>(10000);
+        this.light = new ArrayList<>(10000);
 
         computeMesh();
 

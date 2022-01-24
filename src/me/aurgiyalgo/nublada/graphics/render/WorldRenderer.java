@@ -9,7 +9,11 @@ import org.lwjgl.opengl.GL30;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
+
 public class WorldRenderer {
+
+    private static final int VIEW_DISTANCE = 16;
 
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
@@ -30,7 +34,28 @@ public class WorldRenderer {
 
         long timer = System.nanoTime();
         AtomicInteger counter = new AtomicInteger();
+
+        int playerX = (int) Math.floor(camera.getPosition().x / (float) CHUNK_WIDTH);
+        int playerZ = (int) Math.floor(camera.getPosition().z / (float) CHUNK_WIDTH);
+
+        for(int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; x++){
+            for(int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; z++){
+                int chunkX = playerX + x;
+                int chunkZ = playerZ + z;
+
+                int distance = x * x + z * z;
+
+                if(distance < VIEW_DISTANCE * VIEW_DISTANCE){
+                    if (world.getChunk(chunkX, chunkZ) == null) {
+                        world.addChunk(chunkX, chunkZ);
+                    }
+                }
+
+            }
+        }
+
         world.getChunks().forEach((position, chunk) -> {
+            chunk.prepare();
             if (chunk.getModel() == null) return;
             if (!tester.isChunkInside(chunk, camera.getPosition().y)) return;
             counter.incrementAndGet();

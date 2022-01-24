@@ -20,11 +20,11 @@ public class Loader {
         this.textureList = new ArrayList<>();
     }
 
-    public Mesh loadToVAO(float[] positions, int[] indices, float[] uvs, float[] light) {
+    public Mesh loadToVAO(float[] positions, int[] indices, float[] uvs, float[] normals) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);
         storeDataInAttributeList(1, 3, uvs);
-        storeDataInAttributeList(2, 1, light);
+        storeDataInAttributeList(2, 1, normals);
         bindIndicesBuffer(indices);
         unbindVAO();
         return new Mesh(vao, indices.length);
@@ -77,6 +77,15 @@ public class Loader {
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
         GL30.glBufferData(GL30.GL_ARRAY_BUFFER, data, GL30.GL_STATIC_DRAW);
         GL30.glVertexAttribPointer(attributeNumber, size, GL30.GL_FLOAT, false, 0, 0);
+        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
+    }
+
+    private void storeDataInAttributeList(int attributeNumber, int size, int[] data) {
+        int vboId = GL30.glGenBuffers();
+        vboList.add(vboId);
+        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
+        GL30.glBufferData(GL30.GL_ARRAY_BUFFER, data, GL30.GL_STATIC_DRAW);
+        GL30.glVertexAttribPointer(attributeNumber, size, GL30.GL_INT, false, 0, 0);
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
     }
 

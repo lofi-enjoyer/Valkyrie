@@ -11,6 +11,7 @@ import me.aurgiyalgo.nublada.world.World;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
+import java.awt.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,24 +45,13 @@ public class Nublada {
         Camera camera = new Camera();
 
         window.show();
-        window.setClearColor(0.5f, 0.125f, 0.25f, 1f);
+        window.setClearColor(Color.CYAN);
 
-        World world = new World(loader);
+        World world = new World();
 
         int mouse = 0;
 
-        new Thread(() -> {
-            while (window.keepOpen()) {
-                world.generateNextChunk();
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-        float timer = System.nanoTime();
+        long timer = System.nanoTime();
         float delta = 1f;
 
         while (window.keepOpen()) {
@@ -87,8 +77,6 @@ public class Nublada {
                 mouse = 1;
                 world.raycast(camera.getPosition(), camera.getDirection(), 10, true);
             }
-
-            world.updateNextChunk();
 
             window.update();
 

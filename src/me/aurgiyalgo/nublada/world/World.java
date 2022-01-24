@@ -1,9 +1,9 @@
 package me.aurgiyalgo.nublada.world;
 
+import me.aurgiyalgo.nublada.Nublada;
 import me.aurgiyalgo.nublada.graphics.loader.Loader;
 import me.aurgiyalgo.nublada.utils.Maths;
 import me.aurgiyalgo.nublada.utils.PerlinNoise;
-import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
@@ -14,66 +14,52 @@ public class World {
     public static final int CHUNK_WIDTH = 32;
     public static final int CHUNK_HEIGHT = 256;
 
-    // FIXME: 09/01/2022 temporary world dimensions, they will be loaded dynamically around the player
-    public static final int WORLD_SIDE = 32;
-
     private final Map<Vector2i, Chunk> chunks;
-
-    private final List<Chunk> toGenChunks;
-    private final List<Chunk> toLoadChunks;
 
     private final int textureId;
     private final PerlinNoise noise;
 
-    public World(Loader loader) {
+    public World() {
         this.chunks = new HashMap<>();
-        this.toGenChunks = new LinkedList<>();
-        this.toLoadChunks = new LinkedList<>();
 
         this.noise = new PerlinNoise(40595);
 
         // FIXME: 09/01/2022 load textures dynamically
-        this.textureId = loader.loadTextureArray(
+        this.textureId = Nublada.loader.loadTextureArray(
                 "res/textures/stone.png",
                 "res/textures/grass_side.png",
                 "res/textures/grass_top.png",
                 "res/textures/log_oak.png",
                 "res/textures/log_top.png");
-
-        for (int x = -WORLD_SIDE/2; x < WORLD_SIDE/2; x++) {
-            for (int z = -WORLD_SIDE/2; z < WORLD_SIDE/2; z++) {
-                genChunk(new Vector2i(x, z));
-            }
-        }
     }
 
-    private void genChunk(Vector2i position) {
+    public void addChunk(int x, int z) {
+        Vector2i position = new Vector2i(x, z);
+        if (chunks.containsKey(position))
+            throw new RuntimeException("Chunk already loaded");
+
         Chunk chunk = new Chunk(position, this);
 
         chunks.put(position, chunk);
         chunk.populateChunk(noise);
-        toGenChunks.add(chunk);
+        initializeChunk(chunk);
     }
 
-    public void generateNextChunk() {
-        if (toGenChunks.isEmpty()) return;
-        Chunk nextChunk = toGenChunks.get(0);
-        nextChunk.computeMesh();
-        toGenChunks.remove(nextChunk);
-        toLoadChunks.add(nextChunk);
-    }
+    private void initializeChunk(Chunk chunk) {
+        chunk.generateMesh();
 
-    public void updateNextChunk() {
-        if (toLoadChunks.isEmpty()) return;
-        Chunk nextChunk = toLoadChunks.get(0);
-        nextChunk.loadModel();
-        toLoadChunks.remove(nextChunk);
-    }
+        for(int i = -1; i <= 1;i++){
+            for(int j = -1; j <= 1;j++){
+                if(i == 0 && j == 0){
+                    continue;
+                }
 
-    public void addChunkToUpdate(Chunk chunk) {
-        synchronized (toGenChunks) {
-            toGenChunks.remove(chunk);
-            toGenChunks.add(toGenChunks.isEmpty() ? 0 : 1, chunk);
+                Chunk other = getChunk(i + chunk.getPosition().x, j + chunk.getPosition().y);
+                if(other != null){
+                    other.updated = false;
+                }
+
+            }
         }
     }
 
@@ -136,11 +122,15 @@ public class World {
         } while (true);
     }
 
+    public Chunk getChunk(int x, int z) {
+        return chunks.get(new Vector2i(x, z));
+    }
+
     public int getBlock(int x, int y, int z) {
         Vector2i position = getChunkPositionAt(x, z);
         if (!chunks.containsKey(position)) return 0;
         return chunks.get(position)
-                .getBlock((int)Math.abs(position.x * CHUNK_WIDTH - x), y, (int)Math.abs(position.y * CHUNK_WIDTH - z));
+                .getBlock(Math.abs(position.x * CHUNK_WIDTH - x), y, Math.abs(position.y * CHUNK_WIDTH - z));
     }
 
     public int getBlock(Vector3f position) {
@@ -149,13 +139,10 @@ public class World {
 
     public void setBlock(int voxel, int x, int y, int z) {
         Vector2i position = getChunkPositionAt(x, z);
-        if (!chunks.containsKey(position)) {
-            Chunk chunk = new Chunk(position, this);
-            chunks.put(position, chunk);
-            chunk.setBlock(voxel, (int)Math.abs(position.x * CHUNK_WIDTH - x), y, (int)Math.abs(position.y * CHUNK_WIDTH - z));
-            return;
-        }
-        chunks.get(position).setBlock(voxel, (int)Math.abs(position.x * CHUNK_WIDTH - x), y, (int)Math.abs(position.y * CHUNK_WIDTH - z));
+        if (!chunks.containsKey(position))
+            throw new RuntimeException("Chunk does not exist");
+
+        chunks.get(position).setBlock(voxel, Math.abs(position.x * CHUNK_WIDTH - x), y, Math.abs(position.y * CHUNK_WIDTH - z));
     }
 
     public void setBlock(int voxel, Vector3f position) {

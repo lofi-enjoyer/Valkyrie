@@ -5,6 +5,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
+import java.awt.*;
 import java.nio.*;
 import java.util.function.BiConsumer;
 
@@ -37,7 +38,7 @@ public class Window {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_SAMPLES, 8);
 
         id = glfwCreateWindow(width, height, title, NULL, NULL);
         if (id == NULL)
@@ -95,6 +96,10 @@ public class Window {
 
     public void setClearColor(float r, float g, float b, float a) {
         glClearColor(r, g, b, a);
+    }
+
+    public void setClearColor(Color color) {
+        setClearColor(color.getRed() / 256f, color.getGreen() / 256f, color.getBlue() / 256f, color.getAlpha() / 256f);
     }
 
     public boolean keepOpen() {
