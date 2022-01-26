@@ -17,22 +17,12 @@ public class BlockRegistry {
     public static int TEXTURE_ARRAY_ID;
     private static List<String> texturesList;
 
-    private static class SortById implements Comparator<Block> {
-
-        @Override
-        public int compare(Block block1, Block block2) {
-            return block1.getId() - block2.getId();
-        }
-
-    }
-
     public static void setup() {
         BLOCKS = new ArrayList<>();
         texturesList = new ArrayList<>();
 
         File blocksFolder = new File("res/blocks");
         if (!blocksFolder.exists()) {
-            // TODO: 26/01/2022 no se
             return;
         }
 
@@ -58,7 +48,7 @@ public class BlockRegistry {
             BLOCKS.add(block);
         }
 
-        BLOCKS.sort(new SortById());
+        BLOCKS.sort(Comparator.comparingInt(Block::getId));
 
         TEXTURE_ARRAY_ID = Nublada.LOADER.loadTextureArray(texturesList.toArray(new String[0]));
     }
@@ -71,7 +61,7 @@ public class BlockRegistry {
         int textureId = texturesList.indexOf(textureName);
 
         if (textureId == -1) {
-            texturesList.add("res/textures/" + textureName);
+            texturesList.add("res/textures/" + textureName + ".png");
             textureId = texturesList.size() - 1;
         }
 

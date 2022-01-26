@@ -40,8 +40,6 @@ public class TextureArray {
         glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, 8, 8, fileName.length, 0, GL_RGBA,
                 GL_UNSIGNED_BYTE, (ByteBuffer) null);
 
-        long timer = System.nanoTime();
-
         for (int i = 0; i < fileName.length; i++) {
             ByteBuffer buf;
 
@@ -61,7 +59,6 @@ public class TextureArray {
             }
         }
 
-        System.out.println((System.nanoTime() - timer) / 1000000000f + "s (TextureArray)");
         glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
         return id;

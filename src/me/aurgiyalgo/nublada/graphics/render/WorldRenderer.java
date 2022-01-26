@@ -84,7 +84,6 @@ public class WorldRenderer {
     }
 
     public void setupProjectionMatrix(int width, int height) {
-        System.out.println(width / (float)height);
         this.projectionMatrix = new Matrix4f();
         this.projectionMatrix.perspective(70, width / (float)height, 0.01f, 5000f);
     }
