@@ -1,7 +1,7 @@
 package me.aurgiyalgo.nublada.graphics.render;
 
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
-import me.aurgiyalgo.nublada.graphics.shaders.StaticShader;
+import me.aurgiyalgo.nublada.graphics.shaders.WorldShader;
 import me.aurgiyalgo.nublada.utils.Maths;
 import me.aurgiyalgo.nublada.world.BlockRegistry;
 import me.aurgiyalgo.nublada.world.World;
@@ -18,14 +18,16 @@ public class WorldRenderer {
 
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
+    private final WorldShader shader;
 
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
+        this.shader = new WorldShader();
 
         this.tester = new FrustumCullingTester();
     }
 
-    public void render(World world, StaticShader shader, Camera camera) {
+    public void render(World world, Camera camera) {
 
         world.checkGeneratingChunks();
 
@@ -33,7 +35,6 @@ public class WorldRenderer {
         GL30.glEnable(GL30.GL_CULL_FACE);
         GL30.glCullFace(GL30.GL_BACK);
 
-        shader.loadProjectionMatrix(projectionMatrix);
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
 
         long timer = System.nanoTime();
@@ -58,6 +59,10 @@ public class WorldRenderer {
             }
         }
 
+        shader.start();
+        shader.loadProjectionMatrix(projectionMatrix);
+        shader.loadViewMatrix(camera);
+
         world.getChunks().forEach((position, chunk) -> {
             chunk.prepare();
             if (chunk.getModel() == null) return;
@@ -72,6 +77,7 @@ public class WorldRenderer {
         });
         System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + counter.get() + " chunks)");
 
+        shader.stop();
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, 0);
         GL30.glDisableVertexAttribArray(0);
         GL30.glDisableVertexAttribArray(1);

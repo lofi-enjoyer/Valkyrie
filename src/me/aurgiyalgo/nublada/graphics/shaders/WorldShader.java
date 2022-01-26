@@ -7,7 +7,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
-public class StaticShader extends ShaderProgram{
+public class WorldShader extends ShaderProgram{
 
     private static final String VERTEX_FILE = "res/shaders/vertex.glsl";
     private static final String FRAGMENT_FILE = "res/shaders/fragment.glsl";
@@ -17,7 +17,7 @@ public class StaticShader extends ShaderProgram{
     private int locationViewMatrix;
     private int locationTranslation;
 
-    public StaticShader() {
+    public WorldShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
     }
 

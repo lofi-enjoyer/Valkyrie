@@ -16,11 +16,11 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class Window {
 
-    private long id;
+    public static long id;
 
-    private int width;
-    private int height;
-    private String title;
+    private final int width;
+    private final int height;
+    private final String title;
 
     private boolean wireframe;
     private boolean faceCulling;

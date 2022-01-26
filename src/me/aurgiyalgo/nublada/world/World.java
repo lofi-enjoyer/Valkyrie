@@ -89,7 +89,7 @@ public class World {
         }
     }
 
-    public void raycast(Vector3f position, Vector3f direction, float distance, boolean isPlace) {
+    public Vector3f rayCast(Vector3f position, Vector3f direction, float distance, boolean isPlace) {
         float xPos = (float) Math.floor(position.x);
         float yPos = (float) Math.floor(position.y);
         float zPos = (float) Math.floor(position.z);
@@ -105,10 +105,10 @@ public class World {
         do {
             if (getBlock((int)xPos, (int)yPos, (int)zPos) != 0) {
                 if (!isPlace) {
-                    setBlock(0, (int)xPos, (int)yPos, (int)zPos);
+                    return new Vector3f((int)xPos, (int)yPos, (int)zPos);
+                } else {
+                    return new Vector3f((int)(xPos + faceX), (int)(yPos + faceY), (int)(zPos + faceZ));
                 }
-                else setBlock(3, (int)(xPos + faceX), (int)(yPos + faceY), (int)(zPos + faceZ));
-                break;
             }
             if (tMax.x < tMax.y) {
                 if (tMax.x < tMax.z) {
@@ -146,6 +146,8 @@ public class World {
                 }
             }
         } while (true);
+
+        return null;
     }
 
     public Chunk getChunk(int x, int z) {

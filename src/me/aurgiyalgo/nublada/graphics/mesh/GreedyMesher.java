@@ -321,83 +321,83 @@ public class GreedyMesher {
                 // 2
                 uvs.add(0f);
                 uvs.add((float) height);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 0
                 uvs.add(0f);
                 uvs.add(0f);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 3
                 uvs.add((float) width);
                 uvs.add((float) height);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 1
                 uvs.add((float) width);
                 uvs.add(0f);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
             } else {
                 // 3
                 uvs.add((float) width);
                 uvs.add((float) height);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 1
                 uvs.add((float) width);
                 uvs.add(0f);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 2
                 uvs.add(0f);
                 uvs.add((float) height);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 0
                 uvs.add(0f);
                 uvs.add(0f);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
             }
         } else if (direction == 0) {
             if (backFace) {
                 // 2
                 uvs.add(0f);
                 uvs.add((float) width);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 3
                 uvs.add((float) height);
                 uvs.add((float) width);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
                 // 0
                 uvs.add(0f);
                 uvs.add(0f);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 1
                 uvs.add((float) height);
                 uvs.add(0f);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
             } else {
                 // 3
                 uvs.add((float) height);
                 uvs.add((float) width);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 2
                 uvs.add(0f);
                 uvs.add((float) width);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 1
                 uvs.add((float) height);
                 uvs.add(0f);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
 
                 // 0
                 uvs.add(0f);
                 uvs.add(0f);
-                uvs.add((float) voxel.getSideTexture());
+                uvs.add((float) voxel.getNorthTexture());
             }
         } else {
             // 0
