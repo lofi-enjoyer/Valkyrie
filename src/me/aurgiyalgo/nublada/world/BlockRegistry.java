@@ -45,6 +45,22 @@ public class BlockRegistry {
 
             Block block = new Block(id, getTextureId(topTexture), getTextureId(sideTexture));
 
+            String northTexture = (String) data.get("northTexture");
+            if (northTexture != null)
+                block.setNorthTexture(getTextureId(northTexture));
+
+            String southTexture = (String) data.get("southTexture");
+            if (southTexture != null)
+                block.setSouthTexture(getTextureId(southTexture));
+
+            String westTexture = (String) data.get("westTexture");
+            if (westTexture != null)
+                block.setWestTexture(getTextureId(westTexture));
+
+            String eastTexture = (String) data.get("eastTexture");
+            if (eastTexture != null)
+                block.setEastTexture(getTextureId(eastTexture));
+
             BLOCKS.add(block);
         }
 

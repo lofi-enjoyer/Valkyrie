@@ -4,12 +4,12 @@ public class Block {
 
     private final int id;
 
-    private final int topTexture;
-    private final int bottomTexture;
-    private final int northTexture;
-    private final int southTexture;
-    private final int eastTexture;
-    private final int westTexture;
+    private int topTexture;
+    private int bottomTexture;
+    private int northTexture;
+    private int southTexture;
+    private int eastTexture;
+    private int westTexture;
 
     public Block(int id, int topTexture, int sideTexture) {
         this.id = id;
@@ -28,6 +28,30 @@ public class Block {
         this.northTexture = northTexture;
         this.southTexture = southTexture;
         this.eastTexture = eastTexture;
+        this.westTexture = westTexture;
+    }
+
+    public void setTopTexture(int topTexture) {
+        this.topTexture = topTexture;
+    }
+
+    public void setBottomTexture(int bottomTexture) {
+        this.bottomTexture = bottomTexture;
+    }
+
+    public void setNorthTexture(int northTexture) {
+        this.northTexture = northTexture;
+    }
+
+    public void setSouthTexture(int southTexture) {
+        this.southTexture = southTexture;
+    }
+
+    public void setEastTexture(int eastTexture) {
+        this.eastTexture = eastTexture;
+    }
+
+    public void setWestTexture(int westTexture) {
         this.westTexture = westTexture;
     }
 
