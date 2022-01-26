@@ -3,6 +3,7 @@ package me.aurgiyalgo.nublada.graphics.render;
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.graphics.shaders.StaticShader;
 import me.aurgiyalgo.nublada.utils.Maths;
+import me.aurgiyalgo.nublada.world.BlockRegistry;
 import me.aurgiyalgo.nublada.world.World;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
@@ -13,7 +14,7 @@ import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 
 public class WorldRenderer {
 
-    private static final int VIEW_DISTANCE = 16;
+    private static final int VIEW_DISTANCE = 4;
 
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
@@ -33,7 +34,7 @@ public class WorldRenderer {
         GL30.glCullFace(GL30.GL_BACK);
 
         shader.loadProjectionMatrix(projectionMatrix);
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, world.getTextureId());
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
 
         long timer = System.nanoTime();
         AtomicInteger counter = new AtomicInteger();

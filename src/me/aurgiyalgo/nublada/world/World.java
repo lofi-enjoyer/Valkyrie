@@ -1,7 +1,6 @@
 package me.aurgiyalgo.nublada.world;
 
 import me.aurgiyalgo.nublada.Nublada;
-import me.aurgiyalgo.nublada.graphics.loader.Loader;
 import me.aurgiyalgo.nublada.utils.Maths;
 import me.aurgiyalgo.nublada.utils.PerlinNoise;
 import org.joml.Vector2i;
@@ -26,24 +25,15 @@ public class World {
 
     private final Map<Vector2i, Chunk> chunks;
 
-    private final int textureId;
     private final PerlinNoise noise;
 
-    private List<Future<Chunk>> chunkGenerationFutures;
+    private final List<Future<Chunk>> chunkGenerationFutures;
 
     public World() {
         this.chunks = new HashMap<>();
 
         this.noise = new PerlinNoise(40595);
         this.chunkGenerationFutures = new ArrayList<>();
-
-        // FIXME: 09/01/2022 load textures dynamically
-        this.textureId = Nublada.loader.loadTextureArray(
-                "res/textures/stone.png",
-                "res/textures/grass_side.png",
-                "res/textures/grass_top.png",
-                "res/textures/log_oak.png",
-                "res/textures/log_top.png");
     }
 
     public void addChunk(int x, int z) {
@@ -191,9 +181,5 @@ public class World {
 
     public Map<Vector2i, Chunk> getChunks() {
         return chunks;
-    }
-
-    public int getTextureId() {
-        return textureId;
     }
 }

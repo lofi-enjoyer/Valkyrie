@@ -81,7 +81,7 @@ public class GreedyMesher {
     }
 
     public Mesh loadMeshToGpu() {
-        Mesh mesh = Nublada.loader.loadToVAO(positionsArray, indicesArray, uvsArray, lightArray);
+        Mesh mesh = Nublada.LOADER.loadToVAO(positionsArray, indicesArray, uvsArray, lightArray);
         positionsArray = null;
         indicesArray = null;
         uvsArray = null;

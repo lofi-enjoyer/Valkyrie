@@ -18,9 +18,9 @@ import java.util.logging.Logger;
 public class Nublada {
 
     public static final Logger LOG = NubladaLogHandler.initLogs();
+    public static final Loader LOADER = new Loader();
 
     private final Window window;
-    public static Loader loader;
     private final WorldRenderer worldRenderer;
 
     public Nublada() {
@@ -28,31 +28,29 @@ public class Nublada {
 
         // FIXME: 09/01/2022 Make this customizable
         this.window = new Window(640, 360, "Nublada");
-        loader = new Loader();
         this.worldRenderer = new WorldRenderer();
         worldRenderer.setupProjectionMatrix(640, 360);
 
         window.setResizeCallback(worldRenderer::setupProjectionMatrix);
-
-        BlockRegistry.setup();
     }
 
     public void init() {
         GL.createCapabilities();
 
+        BlockRegistry.setup();
+
         StaticShader shader = new StaticShader();
-
         Camera camera = new Camera();
-
-        window.show();
-        window.setClearColor(Color.CYAN);
-
         World world = new World();
+
+        window.setClearColor(Color.CYAN);
 
         int mouse = 0;
 
         long timer = System.nanoTime();
         float delta = 1f;
+
+        window.show();
 
         while (window.keepOpen()) {
             window.clearBuffers();
@@ -85,8 +83,10 @@ public class Nublada {
 
             GLFW.glfwSetWindowTitle(window.getId(), "Nublada | FPS: " + (int) (1f / delta) + " (delta: " + delta + "s)");
         }
+    }
 
-        loader.dispose();
+    public void dispose() {
+        LOADER.dispose();
     }
 
 }
