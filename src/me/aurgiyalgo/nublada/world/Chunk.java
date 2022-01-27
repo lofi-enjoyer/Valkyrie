@@ -16,6 +16,18 @@ import static me.aurgiyalgo.nublada.world.World.CHUNK_HEIGHT;
 
 public class Chunk {
 
+    private static final int NORTH = 0;
+    private static final int SOUTH = 2;
+    private static final int EAST = 1;
+    private static final int WEST = 3;
+
+    private static final Vector2i[] NEIGHBOR_VECTORS = {
+            new Vector2i( 0, -1),
+            new Vector2i(-1,  0),
+            new Vector2i( 0,  1),
+            new Vector2i( 1,  0),
+    };
+
     private static final ScheduledExecutorService meshService =
             new ScheduledThreadPoolExecutor(3, r -> {
        Thread thread = new Thread(r, "Meshing Thread");
@@ -30,6 +42,8 @@ public class Chunk {
 
     private final World world;
 
+    private final Chunk[] neighbors;
+
     public boolean updated = false;
 
     private Future<GreedyMesher> mesherFuture;
@@ -37,6 +51,8 @@ public class Chunk {
     public Chunk(Vector2i position, World world) {
         this.position = position;
         this.world = world;
+
+        this.neighbors = new Chunk[4];
     }
 
     // TODO: 24/01/2022 Implement generators for World Generation
@@ -89,7 +105,14 @@ public class Chunk {
             mesherFuture = null;
         }
 
+        cacheNeighbors();
         mesherFuture = meshService.submit(() -> new GreedyMesher(this));
+    }
+
+    private void cacheNeighbors() {
+        for (int i = 0; i < 4; i++) {
+            neighbors[i] = world.getChunk(position.x + NEIGHBOR_VECTORS[i].x, position.y + NEIGHBOR_VECTORS[i].y);
+        }
     }
 
     // TODO: 24/01/2022 Cache neighbor chunks
@@ -97,24 +120,28 @@ public class Chunk {
         if (voxels == null) return 0;
         if (y < 0 || y > CHUNK_HEIGHT - 1) return 0;
         if (x < 0) {
-            Chunk neighbor = world.getChunk(position.x - 1, position.y);
-            if (neighbor == null) return 0;
-            return neighbor.getBlock(x + CHUNK_WIDTH, y, z);
+            return neighbors[EAST] != null ? neighbors[EAST].getBlock(x + CHUNK_WIDTH, y, z) : 0;
+//            Chunk neighbor = world.getChunk(position.x - 1, position.y);
+//            if (neighbor == null) return 0;
+//            return neighbor.getBlock(x + CHUNK_WIDTH, y, z);
         }
         if (x > CHUNK_WIDTH - 1) {
-            Chunk neighbor = world.getChunk(position.x + 1, position.y);
-            if (neighbor == null) return 0;
-            return neighbor.getBlock(x - CHUNK_WIDTH, y, z);
+            return neighbors[WEST] != null ? neighbors[WEST].getBlock(x - CHUNK_WIDTH, y, z) : 0;
+//            Chunk neighbor = world.getChunk(position.x + 1, position.y);
+//            if (neighbor == null) return 0;
+//            return neighbor.getBlock(x - CHUNK_WIDTH, y, z);
         }
         if (z < 0) {
-            Chunk neighbor = world.getChunk(position.x, position.y - 1);
-            if (neighbor == null) return 0;
-            return neighbor.getBlock(x, y, z + CHUNK_WIDTH);
+            return neighbors[NORTH] != null ? neighbors[NORTH].getBlock(x, y, z + CHUNK_WIDTH) : 0;
+//            Chunk neighbor = world.getChunk(position.x, position.y - 1);
+//            if (neighbor == null) return 0;
+//            return neighbor.getBlock(x, y, z + CHUNK_WIDTH);
         }
         if (z > CHUNK_WIDTH - 1) {
-            Chunk neighbor = world.getChunk(position.x, position.y + 1);
-            if (neighbor == null) return 0;
-            return neighbor.getBlock(x, y, z - CHUNK_WIDTH);
+            return neighbors[SOUTH] != null ? neighbors[SOUTH].getBlock(x, y, z - CHUNK_WIDTH) : 0;
+//            Chunk neighbor = world.getChunk(position.x, position.y + 1);
+//            if (neighbor == null) return 0;
+//            return neighbor.getBlock(x, y, z - CHUNK_WIDTH);
         }
         return voxels[x][y][z];
     }
