@@ -6,3 +6,4 @@ northTexture: 'machine_north'
 southTexture: 'machine_south'
 eastTexture: 'machine_east'
 westTexture: 'machine_west'
+transparent: true

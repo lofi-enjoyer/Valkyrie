@@ -18,6 +18,13 @@ const vec3[6] normalVectors = vec3[6](
 
 void main() {
 
-    outColor = texture(textureSampler, passColor) * passLight;
+    float shadow = passLight;
+
+    vec4 textureColour = texture(textureSampler, passColor);
+    if (textureColour.a < 1) {
+        if (textureColour.a < 0.5) discard;
+        shadow = 1;
+    }
+    outColor = textureColour * shadow;
 
 }

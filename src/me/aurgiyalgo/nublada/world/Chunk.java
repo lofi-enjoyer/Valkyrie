@@ -6,6 +6,7 @@ import me.aurgiyalgo.nublada.utils.PerlinNoise;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -78,6 +79,34 @@ public class Chunk {
                     voxels[x][y][z] = voxel;
                 }
 
+            }
+        }
+
+        Random random = new Random();
+        for (int i = 0; i < 3; i++) {
+            int treeX = random.nextInt(CHUNK_WIDTH - 4) + 2;
+            int treeZ = random.nextInt(CHUNK_WIDTH - 4) + 2;
+
+            int treeY = 128;
+            for (int y = 1; y < CHUNK_HEIGHT; y++) {
+                if (voxels[treeX][y][treeZ] == 0 && voxels[treeX][y - 1][treeZ] == 1) {
+                    treeY = y;
+                    break;
+                }
+            }
+
+            for (int x = 0; x < 5; x++) {
+                for (int y = 0; y < 3; y++) {
+                    for (int z = 0; z < 5; z++) {
+                        voxels[x + treeX - 2][y + treeY + 3][z + treeZ - 2] = 6;
+                    }
+                }
+            }
+
+            voxels[treeX][treeY + 6][treeZ] = 6;
+
+            for (int y = 0; y < 4; y++) {
+                voxels[treeX][y + treeY][treeZ] = 3;
             }
         }
     }

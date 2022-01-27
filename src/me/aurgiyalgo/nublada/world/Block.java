@@ -11,6 +11,8 @@ public class Block {
     private int eastTexture;
     private int westTexture;
 
+    private boolean isTransparent;
+
     public Block(int id, int topTexture, int sideTexture) {
         this.id = id;
         this.topTexture = topTexture;
@@ -77,6 +79,14 @@ public class Block {
 
     public int getWestTexture() {
         return westTexture;
+    }
+
+    public boolean isTransparent() {
+        return isTransparent;
+    }
+
+    public void setTransparent(boolean transparent) {
+        isTransparent = transparent;
     }
 
     public int getId() {

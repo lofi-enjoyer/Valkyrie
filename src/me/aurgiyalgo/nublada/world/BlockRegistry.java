@@ -61,6 +61,11 @@ public class BlockRegistry {
             if (eastTexture != null)
                 block.setEastTexture(getTextureId(eastTexture));
 
+            Boolean isTransparent = (Boolean) data.get("transparent");
+            if (isTransparent != null) {
+                block.setTransparent(isTransparent);
+            }
+
             BLOCKS.add(block);
         }
 

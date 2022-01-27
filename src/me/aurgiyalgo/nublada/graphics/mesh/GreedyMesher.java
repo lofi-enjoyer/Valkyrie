@@ -179,9 +179,9 @@ public class GreedyMesher {
                              *
                              * Also, we choose the face to add to the mask depending on whether we're moving through on a backface or not.
                              */
-                            mask[n++] = ((voxelFace != 0 && voxelFace1 != 0))
-                                    ? 0
-                                    : backFace ? voxelFace1 : voxelFace;
+                            mask[n++] = ((voxelFace == 0 || voxelFace1 == 0) || ((BlockRegistry.getBLock(voxelFace).isTransparent() || BlockRegistry.getBLock(voxelFace1).isTransparent()) && voxelFace != voxelFace1))
+                                    ? backFace ? voxelFace1 : voxelFace
+                                    : 0;
                         }
                     }
 
