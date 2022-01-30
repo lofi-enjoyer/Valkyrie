@@ -82,30 +82,35 @@ public class Chunk {
             }
         }
 
-        Random random = new Random();
-        for (int i = 0; i < 3; i++) {
+        Random random = new Random(position.x | (long) position.y << 16);
+        for (int i = 0; i < random.nextInt(16); i++) {
             int treeX = random.nextInt(CHUNK_WIDTH - 4) + 2;
             int treeZ = random.nextInt(CHUNK_WIDTH - 4) + 2;
 
-            int treeY = 128;
-            for (int y = 1; y < CHUNK_HEIGHT; y++) {
+            int height = random.nextInt(8) + 3;
+
+            int treeY = 0;
+            for (int y = 1; y < CHUNK_HEIGHT - 15; y++) {
                 if (voxels[treeX][y][treeZ] == 0 && voxels[treeX][y - 1][treeZ] == 1) {
                     treeY = y;
                     break;
                 }
             }
 
+            if (treeY == 0) continue;
+
             for (int x = 0; x < 5; x++) {
                 for (int y = 0; y < 3; y++) {
                     for (int z = 0; z < 5; z++) {
-                        voxels[x + treeX - 2][y + treeY + 3][z + treeZ - 2] = 6;
+                        if (voxels[x + treeX - 2][y + treeY + height][z + treeZ - 2] == 0)
+                            voxels[x + treeX - 2][y + treeY + height][z + treeZ - 2] = 6;
                     }
                 }
             }
 
-            voxels[treeX][treeY + 6][treeZ] = 6;
+            voxels[treeX][treeY + height + 3][treeZ] = 6;
 
-            for (int y = 0; y < 4; y++) {
+            for (int y = 0; y < height + 2; y++) {
                 voxels[treeX][y + treeY][treeZ] = 3;
             }
         }
@@ -191,6 +196,15 @@ public class Chunk {
         if (x == CHUNK_WIDTH - 1) world.getChunk(position.x + 1, position.y).updated = false;
         if (z == 0) world.getChunk(position.x, position.y - 1).updated = false;
         if (z == CHUNK_WIDTH - 1) world.getChunk(position.x, position.y + 1).updated = false;
+    }
+
+    public void onDestroy() {
+        for (int i = 0; i < 4; i++) {
+            Chunk neighbor = neighbors[i];
+            if (neighbor == null) continue;
+            neighbor.neighbors[(i + 2) % 4] = null;
+            neighbor.updated = false;
+        }
     }
 
     public Vector2i getPosition() {

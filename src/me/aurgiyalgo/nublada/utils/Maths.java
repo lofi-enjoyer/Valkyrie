@@ -2,17 +2,17 @@ package me.aurgiyalgo.nublada.utils;
 
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
+
+import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 
 public class Maths {
 
-    public static Matrix4f createTransformationMatrix(Vector3f position, Vector3f rotation) {
+    public static Matrix4f createTransformationMatrix(Vector2i position) {
         Matrix4f matrix = new Matrix4f();
         matrix.identity();
-        matrix.translate(position);
-        matrix.rotate(rotation.x, 1, 0, 0);
-        matrix.rotate(rotation.y, 0, 1, 0);
-        matrix.rotate(rotation.z, 0, 0, 1);
+        matrix.translate(position.x * CHUNK_WIDTH, 0, position.y * CHUNK_WIDTH);
         return matrix;
     }
 

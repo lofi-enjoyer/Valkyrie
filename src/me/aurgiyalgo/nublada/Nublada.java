@@ -39,7 +39,7 @@ public class Nublada {
 
         BlockRegistry.setup();
 
-        window.setClearColor(Color.CYAN);
+        window.setClearColor(0.45f, 0.71f, 1.00f, 1f);
 
         long timer = System.nanoTime();
         float delta = 1f;

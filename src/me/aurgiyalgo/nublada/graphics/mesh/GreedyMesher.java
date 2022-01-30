@@ -445,15 +445,15 @@ public class GreedyMesher {
 
         if (direction == 1) {
             for (int i = 0; i < 4; i++) {
-                light.add(backFace ? 0.4f : 1f);
+                light.add(backFace ? 3f : 2f);
             }
         } else if (direction == 0) {
             for (int i = 0; i < 4; i++) {
-                light.add(0.75f);
+                light.add(backFace ? 1f : 0f);
             }
         } else {
             for (int i = 0; i < 4; i++) {
-                light.add(0.6f);
+                light.add(backFace ? 5f : 4f);
             }
         }
 
