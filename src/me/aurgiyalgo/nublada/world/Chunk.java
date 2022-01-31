@@ -155,27 +155,15 @@ public class Chunk {
         if (y < 0 || y > CHUNK_HEIGHT - 1) return 0;
         if (x < 0) {
             return neighbors[EAST] != null ? neighbors[EAST].getBlock(x + CHUNK_WIDTH, y, z) : 0;
-//            Chunk neighbor = world.getChunk(position.x - 1, position.y);
-//            if (neighbor == null) return 0;
-//            return neighbor.getBlock(x + CHUNK_WIDTH, y, z);
         }
         if (x > CHUNK_WIDTH - 1) {
             return neighbors[WEST] != null ? neighbors[WEST].getBlock(x - CHUNK_WIDTH, y, z) : 0;
-//            Chunk neighbor = world.getChunk(position.x + 1, position.y);
-//            if (neighbor == null) return 0;
-//            return neighbor.getBlock(x - CHUNK_WIDTH, y, z);
         }
         if (z < 0) {
             return neighbors[NORTH] != null ? neighbors[NORTH].getBlock(x, y, z + CHUNK_WIDTH) : 0;
-//            Chunk neighbor = world.getChunk(position.x, position.y - 1);
-//            if (neighbor == null) return 0;
-//            return neighbor.getBlock(x, y, z + CHUNK_WIDTH);
         }
         if (z > CHUNK_WIDTH - 1) {
             return neighbors[SOUTH] != null ? neighbors[SOUTH].getBlock(x, y, z - CHUNK_WIDTH) : 0;
-//            Chunk neighbor = world.getChunk(position.x, position.y + 1);
-//            if (neighbor == null) return 0;
-//            return neighbor.getBlock(x, y, z - CHUNK_WIDTH);
         }
         return voxels[x | y << 5 | z << 13];
     }
