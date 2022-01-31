@@ -37,7 +37,7 @@ public class Chunk {
        return thread;
     });
 
-    private int[][][] voxels;
+    private short[] voxels;
     private final Vector2i position;
     private Mesh mesh;
 
@@ -60,9 +60,9 @@ public class Chunk {
     public void populateChunk(PerlinNoise noise) {
         if (this.voxels != null) return;
 
-        this.voxels = new int[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+        this.voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
-        int voxel;
+        byte voxel;
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
 
@@ -76,7 +76,7 @@ public class Chunk {
                     } else {
                         voxel = 0;
                     }
-                    voxels[x][y][z] = voxel;
+                    voxels[x | y << 5 | z << 13] = voxel;
                 }
 
             }
@@ -91,7 +91,7 @@ public class Chunk {
 
             int treeY = 0;
             for (int y = 1; y < CHUNK_HEIGHT - 15; y++) {
-                if (voxels[treeX][y][treeZ] == 0 && voxels[treeX][y - 1][treeZ] == 1) {
+                if (getBlock(treeX, y, treeZ) == 0 && getBlock(treeX, y - 1, treeZ) == 1) {
                     treeY = y;
                     break;
                 }
@@ -102,16 +102,16 @@ public class Chunk {
             for (int x = 0; x < 5; x++) {
                 for (int y = 0; y < 3; y++) {
                     for (int z = 0; z < 5; z++) {
-                        if (voxels[x + treeX - 2][y + treeY + height][z + treeZ - 2] == 0)
-                            voxels[x + treeX - 2][y + treeY + height][z + treeZ - 2] = 6;
+                        if (getBlock(x + treeX - 2, y + treeY + height, z + treeZ - 2) == 0)
+                            setBlock(6, x + treeX - 2, y + treeY + height, z + treeZ - 2, false);
                     }
                 }
             }
 
-            voxels[treeX][treeY + height + 3][treeZ] = 6;
+            setBlock(6, treeX, treeY + height + 3, treeZ, false);
 
             for (int y = 0; y < height + 2; y++) {
-                voxels[treeX][y + treeY][treeZ] = 3;
+                setBlock(3, treeX, y + treeY, treeZ, false);
             }
         }
     }
@@ -177,21 +177,21 @@ public class Chunk {
 //            if (neighbor == null) return 0;
 //            return neighbor.getBlock(x, y, z - CHUNK_WIDTH);
         }
-        return voxels[x][y][z];
+        return voxels[x | y << 5 | z << 13];
     }
 
     public void setBlock(int voxel, int x, int y, int z) {
+        setBlock(voxel, x, y, z, true);
+    }
+
+    public void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
         if (x < 0 || y < 0 || z < 0) return;
         if (x > CHUNK_WIDTH - 1 || y > CHUNK_HEIGHT - 1 || z > CHUNK_WIDTH - 1) return;
-        if (voxels == null) {
-            this.voxels = new int[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
-            voxels[x][y][z] = voxel;
-            updated = false;
-            return;
-        }
-        voxels[x][y][z] = voxel;
-        updated = false;
+        voxels[x | y << 5 | z << 13] = (short) voxel;
 
+        if (!updateChunk) return;
+
+        updated = false;
         if (x == 0) world.getChunk(position.x - 1, position.y).updated = false;
         if (x == CHUNK_WIDTH - 1) world.getChunk(position.x + 1, position.y).updated = false;
         if (z == 0) world.getChunk(position.x, position.y - 1).updated = false;
