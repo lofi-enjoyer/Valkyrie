@@ -1,7 +1,9 @@
 package me.aurgiyalgo.nublada.world;
 
+import me.aurgiyalgo.nublada.graphics.mesh.DynamicMesher;
 import me.aurgiyalgo.nublada.graphics.mesh.Mesh;
 import me.aurgiyalgo.nublada.graphics.mesh.GreedyMesher;
+import me.aurgiyalgo.nublada.graphics.mesh.MeshBundle;
 import me.aurgiyalgo.nublada.utils.PerlinNoise;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -39,7 +41,7 @@ public class Chunk {
 
     private short[] voxels;
     private final Vector2i position;
-    private Mesh mesh;
+    private MeshBundle mesh;
 
     private final World world;
 
@@ -47,7 +49,7 @@ public class Chunk {
 
     public boolean updated = false;
 
-    private Future<GreedyMesher> mesherFuture;
+    private Future<MeshBundle> mesherFuture;
 
     public Chunk(Vector2i position, World world) {
         this.position = position;
@@ -140,7 +142,7 @@ public class Chunk {
         }
 
         cacheNeighbors();
-        mesherFuture = meshService.submit(() -> new GreedyMesher(this));
+        mesherFuture = meshService.submit(() -> new MeshBundle(this));
     }
 
     private void cacheNeighbors() {
@@ -199,7 +201,7 @@ public class Chunk {
         return position;
     }
 
-    public Mesh getModel() {
+    public MeshBundle getModel() {
         return mesh;
     }
 }

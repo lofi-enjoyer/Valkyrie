@@ -45,7 +45,7 @@ public class WorldScene implements IScene {
             mouse = 1;
             Vector3f position = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
             if (position != null)
-                world.setBlock(4, position);
+                world.setBlock(5, position);
         }
     }
 
