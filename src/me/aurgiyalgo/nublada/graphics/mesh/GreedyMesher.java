@@ -134,7 +134,15 @@ public class GreedyMesher {
                             voxelFace  = chunk.getBlock(x[0], x[1], x[2]);
                             voxelFace1 = chunk.getBlock(x[0] + q[0], x[1] + q[1], x[2] + q[2]);
 
-                            mask[n++] = ((voxelFace == 0 || voxelFace1 == 0) || ((BlockRegistry.getBLock(voxelFace).isTransparent() || BlockRegistry.getBLock(voxelFace1).isTransparent()) && voxelFace != voxelFace1))
+                            if (voxelFace != 0 && BlockRegistry.getBLock(voxelFace).isTransparent()) {
+                                voxelFace = 0;
+                            }
+
+                            if (voxelFace1 != 0 && BlockRegistry.getBLock(voxelFace1).isTransparent()) {
+                                voxelFace1 = 0;
+                            }
+
+                            mask[n++] = ((voxelFace == 0 || voxelFace1 == 0))
                                     ? backFace ? voxelFace1 : voxelFace
                                     : 0;
                         }
