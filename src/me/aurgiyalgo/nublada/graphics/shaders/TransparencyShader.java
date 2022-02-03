@@ -5,19 +5,18 @@ import me.aurgiyalgo.nublada.utils.Maths;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.joml.Vector3f;
 
-public class WorldShader extends ShaderProgram{
+public class TransparencyShader extends ShaderProgram{
 
-    private static final String VERTEX_FILE = "res/shaders/vertex.glsl";
-    private static final String FRAGMENT_FILE = "res/shaders/fragment.glsl";
+    private static final String VERTEX_FILE = "res/shaders/transparent_vertex.glsl";
+    private static final String FRAGMENT_FILE = "res/shaders/transparent_fragment.glsl";
 
     private int locationTransformationMatrix;
     private int locationProjectionMatrix;
     private int locationViewMatrix;
     private int locationTranslation;
 
-    public WorldShader() {
+    public TransparencyShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
     }
 

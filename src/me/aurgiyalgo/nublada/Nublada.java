@@ -1,19 +1,13 @@
 package me.aurgiyalgo.nublada;
 
 import me.aurgiyalgo.nublada.engine.scene.IScene;
-import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.graphics.display.Window;
 import me.aurgiyalgo.nublada.graphics.loader.Loader;
-import me.aurgiyalgo.nublada.graphics.render.WorldRenderer;
-import me.aurgiyalgo.nublada.graphics.shaders.WorldShader;
 import me.aurgiyalgo.nublada.log.NubladaLogHandler;
 import me.aurgiyalgo.nublada.world.BlockRegistry;
-import me.aurgiyalgo.nublada.world.World;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
-import java.awt.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

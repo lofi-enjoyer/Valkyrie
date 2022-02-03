@@ -21,18 +21,8 @@ const vec3[6] normalVectors = vec3[6](
     vec3( 0,  0, -1)
 );
 
-const float[6] lights = float[6](
-    0.85,
-    0.85,
-    1.00,
-    0.50,
-    0.70,
-    0.70
-);
-
 out vec3 toLightVector;
 out float visibility;
-out float faceLight;
 
 const float fogDensity = 0.002;
 const float fogGradient = 50;
@@ -51,6 +41,4 @@ void main() {
     float distance = length(positionRelativeToCam.xyz);
     visibility = exp(-pow((distance * fogDensity), fogGradient));
     visibility = clamp(visibility, 0.0, 1.0);
-
-    faceLight = lights[int(light)];
 }

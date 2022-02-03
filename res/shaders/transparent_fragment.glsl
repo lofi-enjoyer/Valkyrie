@@ -4,7 +4,6 @@ in vec3 passColor;
 in vec3 passLight;
 in vec3 toLightVector;
 in float visibility;
-in float faceLight;
 
 out vec4 outColor;
 
@@ -16,7 +15,7 @@ void main() {
 
     vec4 textureColour = texture(textureSampler, passColor);
 
-    outColor = textureColour * faceLight;
+    outColor = textureColour;
     outColor = mix(vec4(skyColor, 1.0), outColor, visibility);
 
 }

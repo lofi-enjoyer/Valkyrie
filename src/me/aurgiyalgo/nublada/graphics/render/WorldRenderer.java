@@ -1,7 +1,8 @@
 package me.aurgiyalgo.nublada.graphics.render;
 
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
-import me.aurgiyalgo.nublada.graphics.shaders.WorldShader;
+import me.aurgiyalgo.nublada.graphics.shaders.SolidsShader;
+import me.aurgiyalgo.nublada.graphics.shaders.TransparencyShader;
 import me.aurgiyalgo.nublada.utils.Maths;
 import me.aurgiyalgo.nublada.world.BlockRegistry;
 import me.aurgiyalgo.nublada.world.Chunk;
@@ -11,10 +12,8 @@ import org.joml.Vector2i;
 import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 
@@ -24,7 +23,9 @@ public class WorldRenderer {
 
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
-    private final WorldShader shader;
+
+    private final SolidsShader solidsShader;
+    private final TransparencyShader transparencyShader;
 
     private final Vector2i playerPosition;
 
@@ -32,7 +33,8 @@ public class WorldRenderer {
 
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
-        this.shader = new WorldShader();
+        this.solidsShader = new SolidsShader();
+        this.transparencyShader = new TransparencyShader();
 
         this.tester = new FrustumCullingTester();
         this.playerPosition = new Vector2i();
@@ -103,12 +105,12 @@ public class WorldRenderer {
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
 
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.loadViewMatrix(camera);
+        solidsShader.start();
+        solidsShader.loadProjectionMatrix(projectionMatrix);
+        solidsShader.loadViewMatrix(camera);
 
         chunksToRender.forEach(chunk -> {
-            shader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
+            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
 
             GL30.glBindVertexArray(chunk.getModel().getSolidMesh().getVao());
             GL30.glEnableVertexAttribArray(0);
@@ -118,11 +120,17 @@ public class WorldRenderer {
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMesh().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
 
+        solidsShader.stop();
+
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
 
+        transparencyShader.start();
+        transparencyShader.loadProjectionMatrix(projectionMatrix);
+        transparencyShader.loadViewMatrix(camera);
+
         chunksToRender.forEach(chunk -> {
-            shader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
+            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
 
             GL30.glBindVertexArray(chunk.getModel().getTransparentMesh().getVao());
             GL30.glEnableVertexAttribArray(0);
@@ -132,6 +140,8 @@ public class WorldRenderer {
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMesh().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
 
+        transparencyShader.stop();
+
         GL30.glDisable(GL30.GL_BLEND);
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, 0);
@@ -139,8 +149,6 @@ public class WorldRenderer {
         GL30.glDisableVertexAttribArray(1);
         GL30.glEnableVertexAttribArray(2);
         GL30.glBindVertexArray(0);
-
-        shader.stop();
 
         System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + chunksToRender.size() + " chunks)");
 
