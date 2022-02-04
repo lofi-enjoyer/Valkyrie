@@ -19,7 +19,7 @@ public class Maths {
     public static Matrix4f createTransformationMatrix(Vector3f position, int offset) {
         Matrix4f matrix = new Matrix4f();
         matrix.identity();
-        matrix.translate(position.x * offset, position.y * offset, position.z * offset);
+        matrix.translate(position.x, position.y, position.z);
         return matrix;
     }
 

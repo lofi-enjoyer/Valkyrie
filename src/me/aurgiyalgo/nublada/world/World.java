@@ -105,7 +105,7 @@ public class World {
         do {
             if (getBlock((int)xPos, (int)yPos, (int)zPos) != 0) {
                 if (!isPlace) {
-                    return new Vector3f((int)xPos, (int)yPos, (int)zPos);
+                    return new Vector3f(xPos, yPos, zPos);
                 } else {
                     return new Vector3f((int)(xPos + faceX), (int)(yPos + faceY), (int)(zPos + faceZ));
                 }

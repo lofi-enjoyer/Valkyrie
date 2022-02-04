@@ -1,6 +1,7 @@
 package me.aurgiyalgo.nublada.graphics.render;
 
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
+import me.aurgiyalgo.nublada.graphics.shaders.SelectorShader;
 import me.aurgiyalgo.nublada.graphics.shaders.SolidsShader;
 import me.aurgiyalgo.nublada.graphics.shaders.TransparencyShader;
 import me.aurgiyalgo.nublada.utils.Maths;
@@ -9,6 +10,7 @@ import me.aurgiyalgo.nublada.world.Chunk;
 import me.aurgiyalgo.nublada.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
@@ -26,20 +28,22 @@ public class WorldRenderer {
 
     private final SolidsShader solidsShader;
     private final TransparencyShader transparencyShader;
+    private final SelectorShader selectorShader;
 
     private final Vector2i playerPosition;
 
-    private final List<Chunk> chunksToRender;
+    private final RaycastRenderer raycastRenderer;
 
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
         this.solidsShader = new SolidsShader();
         this.transparencyShader = new TransparencyShader();
+        this.selectorShader = new SelectorShader();
 
         this.tester = new FrustumCullingTester();
         this.playerPosition = new Vector2i();
 
-        this.chunksToRender = new ArrayList<>();
+        this.raycastRenderer = new RaycastRenderer();
     }
 
     public void render(World world, Camera camera) {
@@ -149,6 +153,18 @@ public class WorldRenderer {
         GL30.glDisableVertexAttribArray(1);
         GL30.glEnableVertexAttribArray(2);
         GL30.glBindVertexArray(0);
+
+        selectorShader.start();
+        selectorShader.loadProjectionMatrix(projectionMatrix);
+        selectorShader.loadViewMatrix(camera);
+
+        Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
+        if (hitPosition != null) {
+            selectorShader.loadTransformationMatrix(Maths.createTransformationMatrix(hitPosition, 0));
+            raycastRenderer.render();
+        }
+
+        selectorShader.stop();
 
         System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + chunksToRender.size() + " chunks)");
 
