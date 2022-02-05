@@ -169,6 +169,13 @@ public class WorldRenderer {
         selectorShader.stop();
 
         System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + chunksToRender.size() + " chunks)");
+
+        // TODO: 05/02/2022 Make a proper crosshair
+        GL30.glPointSize(5);
+        GL30.glBegin(GL30.GL_POINTS);
+        GL30.glVertex2f(0, 0);
+        GL30.glEnd();
+        GL30.glPointSize(1);
     }
 
     public void updateFrustum(Camera camera) {
