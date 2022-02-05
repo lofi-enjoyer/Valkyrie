@@ -11,6 +11,7 @@ import me.aurgiyalgo.nublada.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
@@ -132,6 +133,7 @@ public class WorldRenderer {
         transparencyShader.start();
         transparencyShader.loadProjectionMatrix(projectionMatrix);
         transparencyShader.loadViewMatrix(camera);
+        transparencyShader.loadTime((float) GLFW.glfwGetTime());
 
         chunksToRender.forEach(chunk -> {
             transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
@@ -167,7 +169,6 @@ public class WorldRenderer {
         selectorShader.stop();
 
         System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + chunksToRender.size() + " chunks)");
-
     }
 
     public void updateFrustum(Camera camera) {

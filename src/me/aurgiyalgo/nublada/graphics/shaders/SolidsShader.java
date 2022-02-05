@@ -15,7 +15,6 @@ public class SolidsShader extends ShaderProgram{
     private int locationTransformationMatrix;
     private int locationProjectionMatrix;
     private int locationViewMatrix;
-    private int locationTranslation;
 
     public SolidsShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -26,7 +25,6 @@ public class SolidsShader extends ShaderProgram{
         locationTransformationMatrix = super.getUniformLocation("transformationMatrix");
         locationProjectionMatrix = super.getUniformLocation("projectionMatrix");
         locationViewMatrix = super.getUniformLocation("viewMatrix");
-        locationTranslation = super.getUniformLocation("translation");
     }
 
     @Override
@@ -46,10 +44,6 @@ public class SolidsShader extends ShaderProgram{
 
     public void loadViewMatrix(Camera camera) {
         super.loadMatrix(locationViewMatrix, Maths.createViewMatrix(camera));
-    }
-
-    public void loadTranslation(Vector2i position) {
-        super.loadVector(locationTranslation, new Vector2f(position).mul(32));
     }
 
 }

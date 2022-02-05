@@ -14,7 +14,7 @@ public class TransparencyShader extends ShaderProgram{
     private int locationTransformationMatrix;
     private int locationProjectionMatrix;
     private int locationViewMatrix;
-    private int locationTranslation;
+    private int locationTime;
 
     public TransparencyShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -25,7 +25,7 @@ public class TransparencyShader extends ShaderProgram{
         locationTransformationMatrix = super.getUniformLocation("transformationMatrix");
         locationProjectionMatrix = super.getUniformLocation("projectionMatrix");
         locationViewMatrix = super.getUniformLocation("viewMatrix");
-        locationTranslation = super.getUniformLocation("translation");
+        locationTime = super.getUniformLocation("time");
     }
 
     @Override
@@ -47,8 +47,8 @@ public class TransparencyShader extends ShaderProgram{
         super.loadMatrix(locationViewMatrix, Maths.createViewMatrix(camera));
     }
 
-    public void loadTranslation(Vector2i position) {
-        super.loadVector(locationTranslation, new Vector2f(position).mul(32));
+    public void loadTime(float time) {
+        super.loadFloat(locationTime, time);
     }
 
 }
