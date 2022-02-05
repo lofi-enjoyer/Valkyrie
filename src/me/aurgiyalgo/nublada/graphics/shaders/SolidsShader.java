@@ -7,7 +7,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
-public class SolidsShader extends ShaderProgram{
+public class SolidsShader extends ShaderProgram {
 
     private static final String VERTEX_FILE = "res/shaders/vertex.glsl";
     private static final String FRAGMENT_FILE = "res/shaders/fragment.glsl";
@@ -15,6 +15,8 @@ public class SolidsShader extends ShaderProgram{
     private int locationTransformationMatrix;
     private int locationProjectionMatrix;
     private int locationViewMatrix;
+    private int locationCameraPosition;
+    private int locationViewDistance;
 
     public SolidsShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -25,6 +27,8 @@ public class SolidsShader extends ShaderProgram{
         locationTransformationMatrix = super.getUniformLocation("transformationMatrix");
         locationProjectionMatrix = super.getUniformLocation("projectionMatrix");
         locationViewMatrix = super.getUniformLocation("viewMatrix");
+        locationCameraPosition = super.getUniformLocation("cameraPosition");
+        locationViewDistance = super.getUniformLocation("viewDistance");
     }
 
     @Override
@@ -44,6 +48,11 @@ public class SolidsShader extends ShaderProgram{
 
     public void loadViewMatrix(Camera camera) {
         super.loadMatrix(locationViewMatrix, Maths.createViewMatrix(camera));
+        super.loadVector(locationCameraPosition, camera.getPosition());
+    }
+
+    public void loadViewDistance(float viewDistance) {
+        super.loadFloat(locationViewDistance, viewDistance);
     }
 
 }

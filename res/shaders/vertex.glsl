@@ -10,7 +10,8 @@ out vec3 passLight;
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform vec3 translation;
+uniform vec3 cameraPosition;
+uniform float viewDistance;
 
 const vec3[6] normalVectors = vec3[6](
     vec3( 1,  0,  0),
@@ -31,11 +32,9 @@ const float[6] lights = float[6](
 );
 
 out vec3 toLightVector;
-out float visibility;
+out float distance;
 out float faceLight;
-
-const float fogDensity = 0.002;
-const float fogGradient = 50;
+out float passViewDistance;
 
 void main() {
 
@@ -46,11 +45,10 @@ void main() {
     passColor = color;
     passLight = normalVectors[int(light)];
 
-    toLightVector = vec3(0, 400, 0) - (position + translation);
+    toLightVector = vec3(0, 400, 0) - (position);
 
-    float distance = length(positionRelativeToCam.xyz);
-    visibility = exp(-pow((distance * fogDensity), fogGradient));
-    visibility = clamp(visibility, 0.0, 1.0);
+    distance = length(cameraPosition.xz - worldPosition.xz);
 
     faceLight = lights[int(light)];
+    passViewDistance = viewDistance;
 }

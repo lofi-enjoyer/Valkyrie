@@ -47,8 +47,8 @@ public abstract class ShaderProgram {
         GL30.glUniform1f(location, value);
     }
 
-    protected void loadVector(int location, Vector2f vector) {
-        GL30.glUniform3f(location, vector.x, 0, vector.y);
+    protected void loadVector(int location, Vector3f vector) {
+        GL30.glUniform3f(location, vector.x, vector.y, vector.z);
     }
 
     protected void loadBoolean(int location, boolean value) {
