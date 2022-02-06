@@ -25,20 +25,21 @@ public class Nublada {
 
         // FIXME: 09/01/2022 Make this customizable
         this.window = new Window(640, 360, "Nublada");
-
-        GL.createCapabilities();
     }
 
     public void init() {
+        GL.createCapabilities();
 
         BlockRegistry.setup();
 
         window.setClearColor(0.45f, 0.71f, 1.00f, 1f);
 
+        window.show();
+    }
+
+    public void loop() {
         long timer = System.nanoTime();
         float delta = 1f;
-
-        window.show();
 
         while (window.keepOpen()) {
             window.clearBuffers();

@@ -83,7 +83,7 @@ public class World {
                 try {
                     initializeChunk(future.get());
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    Nublada.LOG.severe(e.getMessage());
                 }
             }
         }
@@ -167,8 +167,10 @@ public class World {
 
     public void setBlock(int voxel, int x, int y, int z) {
         Vector2i position = getChunkPositionAt(x, z);
-        if (!chunks.containsKey(position))
-            throw new RuntimeException("Chunk does not exist");
+        if (!chunks.containsKey(position)) {
+            Nublada.LOG.warning("Tried to set a block on a non-loaded chunk (" + x + ", " + y + ", " + z + ")");
+            return;
+        }
 
         chunks.get(position).setBlock(voxel, Math.abs(position.x * CHUNK_WIDTH - x), y, Math.abs(position.y * CHUNK_WIDTH - z));
     }

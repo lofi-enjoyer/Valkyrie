@@ -70,7 +70,10 @@ public class Window {
             );
         }
 
+        Nublada.LOG.info("Window succesfully created");
+
         glfwMakeContextCurrent(id);
+        Nublada.LOG.info("OpenGL Context set");
         glfwSwapInterval(1);
     }
 

@@ -18,6 +18,9 @@ public class BlockRegistry {
     private static List<String> texturesList;
 
     public static void setup() {
+        Nublada.LOG.info("Setting up block registry...");
+        long timer = System.nanoTime();
+
         BLOCKS = new ArrayList<>();
         texturesList = new ArrayList<>();
 
@@ -72,6 +75,8 @@ public class BlockRegistry {
         BLOCKS.sort(Comparator.comparingInt(Block::getId));
 
         TEXTURE_ARRAY_ID = Nublada.LOADER.loadTextureArray(texturesList.toArray(new String[0]));
+
+        Nublada.LOG.info("Block registry has been setup (" + ((System.nanoTime() - timer) / 1000000f) + "ms)");
     }
 
     public static Block getBLock(int id) {

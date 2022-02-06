@@ -1,5 +1,6 @@
 package me.aurgiyalgo.nublada.graphics.render;
 
+import me.aurgiyalgo.nublada.Nublada;
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.graphics.shaders.SelectorShader;
 import me.aurgiyalgo.nublada.graphics.shaders.SolidsShader;
@@ -22,7 +23,7 @@ import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 
 public class WorldRenderer {
 
-    private static final int VIEW_DISTANCE = 4;
+    private static final int VIEW_DISTANCE = 10;
 
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
@@ -45,6 +46,8 @@ public class WorldRenderer {
         this.playerPosition = new Vector2i();
 
         this.raycastRenderer = new RaycastRenderer();
+
+        Nublada.LOG.info("World renderer has been setup");
     }
 
     public void render(World world, Camera camera) {
@@ -113,7 +116,7 @@ public class WorldRenderer {
         solidsShader.start();
         solidsShader.loadProjectionMatrix(projectionMatrix);
         solidsShader.loadViewMatrix(camera);
-        solidsShader.loadViewDistance(VIEW_DISTANCE * 32);
+        solidsShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
 
         chunksToRender.forEach(chunk -> {
             solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
@@ -135,7 +138,7 @@ public class WorldRenderer {
         transparencyShader.loadProjectionMatrix(projectionMatrix);
         transparencyShader.loadViewMatrix(camera);
         transparencyShader.loadTime((float) GLFW.glfwGetTime());
-        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32);
+        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
 
         chunksToRender.forEach(chunk -> {
             transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
@@ -171,7 +174,7 @@ public class WorldRenderer {
 
         selectorShader.stop();
 
-        System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + chunksToRender.size() + " chunks)");
+//        System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + chunksToRender.size() + " chunks)");
 
         // TODO: 05/02/2022 Make a proper crosshair
         GL30.glPointSize(5);
