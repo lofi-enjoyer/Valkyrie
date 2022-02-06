@@ -184,7 +184,7 @@ public class DynamicMesher {
             uvs.addAll(List.of(0f, 1f, (float) block.getNorthTexture()));
 
             for (int i = 0; i < 4; i++) {
-                light.add(3f);
+                light.add(5f);
             }
         }
 
@@ -211,7 +211,7 @@ public class DynamicMesher {
             uvs.addAll(List.of(0f, 1f, (float) block.getSouthTexture()));
 
             for (int i = 0; i < 4; i++) {
-                light.add(2f);
+                light.add(4f);
             }
         }
 
@@ -238,7 +238,7 @@ public class DynamicMesher {
             uvs.addAll(List.of(0f, 1f, (float) block.getTopTexture()));
 
             for (int i = 0; i < 4; i++) {
-                light.add(4f);
+                light.add(2f);
             }
         }
 
@@ -265,7 +265,7 @@ public class DynamicMesher {
             uvs.addAll(List.of(0f, 1f, (float) block.getBottomTexture()));
 
             for (int i = 0; i < 4; i++) {
-                light.add(5f);
+                light.add(3f);
             }
         }
     }

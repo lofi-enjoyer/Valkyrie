@@ -64,28 +64,39 @@ public class Chunk {
 
         this.voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
+        int chunkX = position.x * CHUNK_WIDTH;
+        int chunkZ = position.y * CHUNK_WIDTH;
+        Vector2i worldCenter = new Vector2i();
+
         byte voxel;
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
 
-                double maxHeight = (noise.noise(x + position.x * CHUNK_WIDTH, z + position.y * CHUNK_WIDTH) + 1) / 2f * 250 + 4;
+                double noiseValue = (noise.noise(x + chunkX, z + chunkZ) + 1) / 2f;
+                double maxHeight = noiseValue * noiseValue * 250;
+                double distance = worldCenter.distance(x + chunkX, z + chunkZ) - 256;
+                distance = Math.max(distance, 0);
+                double gradient = (1 - (distance / 256f)) * 0.5f;
+                maxHeight = gradient > 0 ? maxHeight * gradient + 4 : 4;
 
-                for (int y = 0; y < CHUNK_HEIGHT; y++) {
-                    if (maxHeight >= y) {
-                        if ((int) (maxHeight) == y)
-                            voxel = 1;
-                        else voxel = 2;
-                    } else {
-                        voxel = 0;
+                for (int y = 0; y < maxHeight; y++) {
+                    voxel = 2;
+                    if ((int) (maxHeight) == y) {
+                        voxel = 1;
                     }
                     voxels[x | y << 5 | z << 13] = voxel;
                 }
 
+                for (int y = 0; y < 20; y++) {
+                    if (voxels[x | y << 5 | z << 13] == 0)
+                        voxels[x | y << 5 | z << 13] = 7;
+                }
             }
         }
 
-        Random random = new Random(position.x | (long) position.y << 16);
-        for (int i = 0; i < random.nextInt(16); i++) {
+        Random random = new Random();
+        int treeAmount = random.nextInt(16) + 8;
+        for (int i = 0; i < treeAmount; i++) {
             int treeX = random.nextInt(CHUNK_WIDTH - 4) + 2;
             int treeZ = random.nextInt(CHUNK_WIDTH - 4) + 2;
 

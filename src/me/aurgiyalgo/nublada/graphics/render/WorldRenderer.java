@@ -23,7 +23,7 @@ import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 
 public class WorldRenderer {
 
-    private static final int VIEW_DISTANCE = 10;
+    private static final int VIEW_DISTANCE = 4;
 
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;

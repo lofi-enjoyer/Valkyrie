@@ -1,5 +1,7 @@
 #version 400 core
 
+#define PI 3.14159265359
+
 in vec3 position;
 in vec3 color;
 in float light;
@@ -36,6 +38,11 @@ void main() {
         newPosition.x += sin(position.y + time) / leavesMovement;
         newPosition.z += cos(position.x + time + 2) / leavesMovement;
         newPosition.y += sin(position.z + time + 5) / leavesMovement;
+    }
+
+    if (color.z == 11 && light == 2) {
+        newPosition.y -= 0.1875f;
+        newPosition.y += (sin((position.x / 32.0) * PI * 2)) * cos(time * 2) * sin((position.z / 32.0) * PI * 2) * 0.0625f;
     }
 
     vec4 worldPosition = transformationMatrix * vec4(newPosition, 1.0);
