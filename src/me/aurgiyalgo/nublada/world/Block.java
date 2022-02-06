@@ -1,5 +1,8 @@
 package me.aurgiyalgo.nublada.world;
 
+import me.aurgiyalgo.nublada.Nublada;
+import me.aurgiyalgo.nublada.graphics.mesh.Mesh;
+
 public class Block {
 
     private final int id;
@@ -10,6 +13,8 @@ public class Block {
     private int southTexture;
     private int eastTexture;
     private int westTexture;
+
+    private Mesh mesh;
 
     private boolean isTransparent;
 
@@ -31,6 +36,55 @@ public class Block {
         this.southTexture = southTexture;
         this.eastTexture = eastTexture;
         this.westTexture = westTexture;
+    }
+
+    public void setupMesh() {
+        float[] positions = {
+                0, 0, 0,
+                0, 1, 0,
+                0, 1, 1,
+                0, 0, 1,
+
+                1, 0, 1,
+                1, 1, 1,
+                0, 1, 1,
+                0, 0, 1,
+
+                0, 1, 0,
+                1, 1, 0,
+                1, 1, 1,
+                0, 1, 1
+        };
+
+        float[] uvs = {
+                0, 1, southTexture,
+                0, 0, southTexture,
+                1, 0, southTexture,
+                1, 1, southTexture,
+
+                0, 1, eastTexture,
+                0, 0, eastTexture,
+                1, 0, eastTexture,
+                1, 1, eastTexture,
+
+                1, 1, topTexture,
+                1, 0, topTexture,
+                0, 0, topTexture,
+                0, 1, topTexture
+        };
+
+        int[] indices = {
+                2, 1, 0,
+                0, 3, 2,
+
+                4, 5, 6,
+                6, 7, 4,
+
+                10, 9, 8,
+                8, 11, 10
+        };
+
+        this.mesh = Nublada.LOADER.loadToVAO(positions, indices, uvs);
     }
 
     public void setTopTexture(int topTexture) {
@@ -87,6 +141,10 @@ public class Block {
 
     public void setTransparent(boolean transparent) {
         isTransparent = transparent;
+    }
+
+    public Mesh getMesh() {
+        return mesh;
     }
 
     public int getId() {

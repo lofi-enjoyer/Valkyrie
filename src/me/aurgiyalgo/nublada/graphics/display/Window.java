@@ -1,6 +1,7 @@
 package me.aurgiyalgo.nublada.graphics.display;
 
 import me.aurgiyalgo.nublada.Nublada;
+import me.aurgiyalgo.nublada.graphics.render.WorldRenderer;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
@@ -48,6 +49,12 @@ public class Window {
             if (key == GLFW_KEY_R && action == GLFW_RELEASE) {
                 wireframe = !wireframe;
                 GL30.glPolygonMode(GL30.GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+            }
+            if (key == GLFW_KEY_T && action == GLFW_RELEASE) {
+                WorldRenderer.VIEW_DISTANCE--;
+            }
+            if (key == GLFW_KEY_Y && action == GLFW_RELEASE) {
+                WorldRenderer.VIEW_DISTANCE++;
             }
         });
 

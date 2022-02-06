@@ -10,7 +10,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera {
 
-    private static final float SPEED = 16f;
+    private static final float SPEED = 8f;
 
     private final Vector3f position;
     private float rotationY, rotationX, roll;
@@ -28,10 +28,8 @@ public class Camera {
     private final Vector3f direction;
 
     public Camera() {
-        this.position = new Vector3f(50, 32, 0);
+        this.position = new Vector3f(0, 256, 0);
         this.direction = new Vector3f();
-        rotationX = 180;
-        rotationY = 30;
         updateDirection();
     }
 

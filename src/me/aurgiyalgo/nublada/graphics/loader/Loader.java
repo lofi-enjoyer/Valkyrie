@@ -38,6 +38,15 @@ public class Loader {
         return new Mesh(vao, indices.length);
     }
 
+    public Mesh loadToVAO(float[] positions, int[] indices, float[] uvs) {
+        int vao = createVAO();
+        storeDataInAttributeList(0, 3, positions);
+        storeDataInAttributeList(1, 3, uvs);
+        bindIndicesBuffer(indices);
+        unbindVAO();
+        return new Mesh(vao, indices.length);
+    }
+
     public Mesh loadToVAO(float[] positions, int[] indices) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);

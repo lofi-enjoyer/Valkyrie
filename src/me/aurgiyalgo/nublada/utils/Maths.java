@@ -2,6 +2,7 @@ package me.aurgiyalgo.nublada.utils;
 
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
@@ -13,6 +14,15 @@ public class Maths {
         Matrix4f matrix = new Matrix4f();
         matrix.identity();
         matrix.translate(position.x * CHUNK_WIDTH, 0, position.y * CHUNK_WIDTH);
+        return matrix;
+    }
+
+    public static Matrix4f createTransformationMatrix(Vector2f position, Vector3f rotation) {
+        Matrix4f matrix = new Matrix4f();
+        matrix.identity();
+        matrix.rotate((float) Math.toRadians(rotation.x), new Vector3f(1, 0, 0));
+        matrix.rotate((float) Math.toRadians(rotation.y), new Vector3f(0, 1, 0));
+        matrix.translate(position.x, position.y, 0);
         return matrix;
     }
 

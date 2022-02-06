@@ -18,6 +18,8 @@ public class Nublada {
 
     private final Window window;
 
+    public static long WINDOW_ID;
+
     private IScene currentScene;
 
     public Nublada() {
@@ -25,6 +27,8 @@ public class Nublada {
 
         // FIXME: 09/01/2022 Make this customizable
         this.window = new Window(640, 360, "Nublada");
+
+        WINDOW_ID = window.getId();
     }
 
     public void init() {

@@ -32,7 +32,8 @@ public class World {
     public World() {
         this.chunks = new HashMap<>();
 
-        this.noise = new PerlinNoise(40595);
+        this.noise = new PerlinNoise();
+        Nublada.LOG.info("World generation seed set to " + noise.getSeed());
         this.chunkGenerationFutures = new ArrayList<>();
     }
 

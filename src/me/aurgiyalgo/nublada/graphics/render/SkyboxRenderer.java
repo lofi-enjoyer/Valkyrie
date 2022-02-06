@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL30;
 
 public class SkyboxRenderer {
 
-    private static final float SIZE = 100f;
+    private static final float SIZE = 10f;
 
     private static final float[] VERTICES = {
             -SIZE,  SIZE, -SIZE,

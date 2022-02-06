@@ -1,22 +1,19 @@
-package me.aurgiyalgo.nublada.graphics.shaders;
+package me.aurgiyalgo.nublada.graphics.shaders.gui;
 
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
+import me.aurgiyalgo.nublada.graphics.shaders.ShaderProgram;
 import me.aurgiyalgo.nublada.utils.Maths;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
 
-public class SelectorShader extends ShaderProgram{
+public class SelectedBlockShader extends ShaderProgram {
 
-    private static final String VERTEX_FILE = "res/shaders/selector_vertex.glsl";
-    private static final String FRAGMENT_FILE = "res/shaders/selector_fragment.glsl";
+    private static final String VERTEX_FILE = "res/shaders/selectedblock_vertex.glsl";
+    private static final String FRAGMENT_FILE = "res/shaders/selectedblock_fragment.glsl";
 
     private int locationTransformationMatrix;
     private int locationProjectionMatrix;
-    private int locationViewMatrix;
-    private int locationTime;
 
-    public SelectorShader() {
+    public SelectedBlockShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
     }
 
@@ -24,8 +21,6 @@ public class SelectorShader extends ShaderProgram{
     protected void getAllUniformLocations() {
         locationTransformationMatrix = super.getUniformLocation("transformationMatrix");
         locationProjectionMatrix = super.getUniformLocation("projectionMatrix");
-        locationViewMatrix = super.getUniformLocation("viewMatrix");
-        locationTime = super.getUniformLocation("time");
     }
 
     @Override
@@ -40,14 +35,6 @@ public class SelectorShader extends ShaderProgram{
 
     public void loadProjectionMatrix(Matrix4f matrix) {
         super.loadMatrix(locationProjectionMatrix, matrix);
-    }
-
-    public void loadViewMatrix(Camera camera) {
-        super.loadMatrix(locationViewMatrix, Maths.createViewMatrix(camera));
-    }
-
-    public void loadTime(float time) {
-        super.loadFloat(locationTime, time);
     }
 
 }

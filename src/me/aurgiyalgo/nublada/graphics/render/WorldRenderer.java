@@ -23,7 +23,7 @@ import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 
 public class WorldRenderer {
 
-    private static final int VIEW_DISTANCE = 4;
+    public static int VIEW_DISTANCE = 8;
 
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
@@ -116,7 +116,7 @@ public class WorldRenderer {
         solidsShader.start();
         solidsShader.loadProjectionMatrix(projectionMatrix);
         solidsShader.loadViewMatrix(camera);
-        solidsShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
+        solidsShader.loadViewDistance(VIEW_DISTANCE * 32 * 2);
 
         chunksToRender.forEach(chunk -> {
             solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
@@ -138,7 +138,7 @@ public class WorldRenderer {
         transparencyShader.loadProjectionMatrix(projectionMatrix);
         transparencyShader.loadViewMatrix(camera);
         transparencyShader.loadTime((float) GLFW.glfwGetTime());
-        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
+        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32 * 2);
 
         chunksToRender.forEach(chunk -> {
             transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));

@@ -7,7 +7,7 @@ uniform samplerCube cubeMap;
 uniform vec3 fogColor;
 
 const float lowerLimit = 0;
-const float upperLimit = 15;
+const float upperLimit = 5;
 
 void main() {
 

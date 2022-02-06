@@ -15,8 +15,7 @@ public class PerlinNoise {
     }
 
     public PerlinNoise() {
-        this.seed = new Random().nextGaussian() * 255;
-        init();
+        this(new Random().nextGaussian() * 255);
     }
 
     private void init() {

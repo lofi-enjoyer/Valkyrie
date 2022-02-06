@@ -76,6 +76,8 @@ public class BlockRegistry {
 
         TEXTURE_ARRAY_ID = Nublada.LOADER.loadTextureArray(texturesList.toArray(new String[0]));
 
+        BLOCKS.forEach(Block::setupMesh);
+
         Nublada.LOG.info("Block registry has been setup (" + ((System.nanoTime() - timer) / 1000000f) + "ms)");
     }
 
@@ -92,6 +94,10 @@ public class BlockRegistry {
         }
 
         return textureId;
+    }
+
+    public static int getBlockCount() {
+        return BLOCKS.size();
     }
 
 }

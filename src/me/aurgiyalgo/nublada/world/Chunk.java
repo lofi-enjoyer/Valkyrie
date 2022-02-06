@@ -81,7 +81,7 @@ public class Chunk {
 
                 for (int y = 0; y < maxHeight; y++) {
                     voxel = 2;
-                    if ((int) (maxHeight) == y) {
+                    if ((int) (maxHeight) == y || gradient < 0) {
                         voxel = 1;
                     }
                     voxels[x | y << 5 | z << 13] = voxel;

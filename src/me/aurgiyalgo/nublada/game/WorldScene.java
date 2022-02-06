@@ -1,10 +1,13 @@
 package me.aurgiyalgo.nublada.game;
 
+import me.aurgiyalgo.nublada.Nublada;
 import me.aurgiyalgo.nublada.engine.scene.IScene;
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.graphics.display.Window;
 import me.aurgiyalgo.nublada.graphics.render.SkyboxRenderer;
 import me.aurgiyalgo.nublada.graphics.render.WorldRenderer;
+import me.aurgiyalgo.nublada.graphics.render.gui.SelectedBlockRenderer;
+import me.aurgiyalgo.nublada.world.BlockRegistry;
 import me.aurgiyalgo.nublada.world.World;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -15,6 +18,7 @@ public class WorldScene implements IScene {
     private World world;
     private WorldRenderer renderer;
     private SkyboxRenderer skyboxRenderer;
+    private SelectedBlockRenderer selectedBlockRenderer;
 
     @Override
     public void init() {
@@ -24,9 +28,21 @@ public class WorldScene implements IScene {
         renderer.setupProjectionMatrix(640, 360);
         this.skyboxRenderer = new SkyboxRenderer();
         skyboxRenderer.setupProjectionMatrix(640, 360);
+        this.selectedBlockRenderer = new SelectedBlockRenderer();
+
+        GLFW.glfwSetScrollCallback(Nublada.WINDOW_ID, (id, xOffset, yOffset) -> {
+            selectedBlock += yOffset;
+            if (selectedBlock > BlockRegistry.getBlockCount() - 1) {
+                selectedBlock = 0;
+                return;
+            } else if (selectedBlock < 0) {
+                selectedBlock = BlockRegistry.getBlockCount() - 1;
+            }
+        });
     }
 
     int mouse = 0;
+    int selectedBlock = 0;
 
     @Override
     public void render(float delta) {
@@ -36,6 +52,8 @@ public class WorldScene implements IScene {
         skyboxRenderer.render(camera);
 
         renderer.render(world, camera);
+
+        selectedBlockRenderer.render(selectedBlock + 1);
 
         if (GLFW.glfwGetMouseButton(Window.id, 0) == 0 &&
                 GLFW.glfwGetMouseButton(Window.id, 1) == 0) mouse = 0;
@@ -51,7 +69,7 @@ public class WorldScene implements IScene {
             mouse = 1;
             Vector3f position = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
             if (position != null)
-                world.setBlock(5, position);
+                world.setBlock(selectedBlock + 1, position);
         }
     }
 
