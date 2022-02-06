@@ -14,6 +14,7 @@ public class SelectorShader extends ShaderProgram{
     private int locationTransformationMatrix;
     private int locationProjectionMatrix;
     private int locationViewMatrix;
+    private int locationTime;
 
     public SelectorShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -24,6 +25,7 @@ public class SelectorShader extends ShaderProgram{
         locationTransformationMatrix = super.getUniformLocation("transformationMatrix");
         locationProjectionMatrix = super.getUniformLocation("projectionMatrix");
         locationViewMatrix = super.getUniformLocation("viewMatrix");
+        locationTime = super.getUniformLocation("time");
     }
 
     @Override
@@ -43,6 +45,10 @@ public class SelectorShader extends ShaderProgram{
 
     public void loadViewMatrix(Camera camera) {
         super.loadMatrix(locationViewMatrix, Maths.createViewMatrix(camera));
+    }
+
+    public void loadTime(float time) {
+        super.loadFloat(locationTime, time);
     }
 
 }

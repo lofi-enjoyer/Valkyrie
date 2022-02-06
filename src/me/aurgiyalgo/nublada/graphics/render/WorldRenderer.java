@@ -161,6 +161,7 @@ public class WorldRenderer {
         selectorShader.start();
         selectorShader.loadProjectionMatrix(projectionMatrix);
         selectorShader.loadViewMatrix(camera);
+        selectorShader.loadTime((float) GLFW.glfwGetTime());
 
         Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
         if (hitPosition != null) {
