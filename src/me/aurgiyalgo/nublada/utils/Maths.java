@@ -34,6 +34,14 @@ public class Maths {
         return matrix;
     }
 
+    public static Matrix4f createStaticViewMatrix(Camera camera) {
+        Matrix4f matrix = new Matrix4f();
+        matrix.identity();
+        matrix.rotate((float) Math.toRadians(camera.getRotationY()), new Vector3f(1, 0, 0));
+        matrix.rotate((float) Math.toRadians(camera.getRotationX()), new Vector3f(0, 1, 0));
+        return matrix;
+    }
+
     public static float intbound(float a, float b) {
         if (b < 0) {
             return intbound(-a, -b);

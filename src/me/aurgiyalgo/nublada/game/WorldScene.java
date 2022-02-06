@@ -3,6 +3,7 @@ package me.aurgiyalgo.nublada.game;
 import me.aurgiyalgo.nublada.engine.scene.IScene;
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.graphics.display.Window;
+import me.aurgiyalgo.nublada.graphics.render.SkyboxRenderer;
 import me.aurgiyalgo.nublada.graphics.render.WorldRenderer;
 import me.aurgiyalgo.nublada.world.World;
 import org.joml.Vector3f;
@@ -13,6 +14,7 @@ public class WorldScene implements IScene {
     private Camera camera;
     private World world;
     private WorldRenderer renderer;
+    private SkyboxRenderer skyboxRenderer;
 
     @Override
     public void init() {
@@ -20,6 +22,8 @@ public class WorldScene implements IScene {
         this.world = new World();
         this.renderer = new WorldRenderer();
         renderer.setupProjectionMatrix(640, 360);
+        this.skyboxRenderer = new SkyboxRenderer();
+        skyboxRenderer.setupProjectionMatrix(640, 360);
     }
 
     int mouse = 0;
@@ -28,6 +32,8 @@ public class WorldScene implements IScene {
     public void render(float delta) {
         camera.update(Window.id, delta);
         renderer.updateFrustum(camera);
+
+        skyboxRenderer.render(camera);
 
         renderer.render(world, camera);
 
