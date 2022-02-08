@@ -27,38 +27,34 @@ public class Loader {
         this.textureList = new ArrayList<>();
     }
 
-    public Mesh loadToVAO(float[] positions, int[] indices, float[] uvs, float[] normals) {
+    public int loadToVAO(float[] positions, int[] indices, float[] uvs, float[] normals) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);
         storeDataInAttributeList(1, 3, uvs);
         storeDataInAttributeList(2, 1, normals);
         bindIndicesBuffer(indices);
-        unbindVAO();
-        return new Mesh(vao, indices.length);
+        return vao;
     }
 
-    public Mesh loadToVAO(float[] positions, int[] indices, float[] uvs) {
+    public int loadToVAO(float[] positions, int[] indices, float[] uvs) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);
         storeDataInAttributeList(1, 3, uvs);
         bindIndicesBuffer(indices);
-        unbindVAO();
-        return new Mesh(vao, indices.length);
+        return vao;
     }
 
-    public Mesh loadToVAO(float[] positions, int[] indices) {
+    public int loadToVAO(float[] positions, int[] indices) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);
         bindIndicesBuffer(indices);
-        unbindVAO();
-        return new Mesh(vao, indices.length);
+        return vao;
     }
 
-    public Mesh loadToVAO(float[] positions) {
+    public int loadToVAO(float[] positions) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);
-        unbindVAO();
-        return new Mesh(vao, positions.length / 3);
+        return vao;
     }
 
     private int createVAO() {
@@ -152,10 +148,6 @@ public class Loader {
         vboList.add(vboId);
         GL30.glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, vboId);
         GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, indices, GL30.GL_STATIC_DRAW);
-    }
-
-    private void unbindVAO() {
-        GL30.glBindVertexArray(0);
     }
 
     public void dispose() {

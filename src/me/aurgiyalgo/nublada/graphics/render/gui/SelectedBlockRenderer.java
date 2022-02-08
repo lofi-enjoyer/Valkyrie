@@ -50,7 +50,7 @@ public class SelectedBlockRenderer {
                 6, 7, 3
         };
 
-        this.mesh = Nublada.LOADER.loadToVAO(positions, indices);
+        this.mesh = new Mesh(positions, indices);
         this.shader = new SelectedBlockShader();
         this.transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 45, 0));
 
@@ -70,7 +70,7 @@ public class SelectedBlockRenderer {
 
         shader.start();
 
-        GL30.glBindVertexArray(block.getMesh().getVao());
+        GL30.glBindVertexArray(block.getMesh().getVaoId());
         GL30.glEnableVertexAttribArray(0);
         GL30.glEnableVertexAttribArray(1);
 

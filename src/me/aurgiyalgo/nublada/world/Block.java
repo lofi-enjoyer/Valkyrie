@@ -84,7 +84,7 @@ public class Block {
                 8, 11, 10
         };
 
-        this.mesh = Nublada.LOADER.loadToVAO(positions, indices, uvs);
+        this.mesh = new Mesh(positions, indices, uvs);
     }
 
     public void setTopTexture(int topTexture) {

@@ -1,13 +1,31 @@
 package me.aurgiyalgo.nublada.graphics.mesh;
 
+import me.aurgiyalgo.nublada.Nublada;
+
 public class Mesh {
 
-    private final int vao;
+    private final int vaoId;
     private final int vertexCount;
     private int textureId;
 
-    public Mesh(int vao, int vertexCount) {
-        this.vao = vao;
+    public Mesh(float[] positions, int[] indices, float[] uvs, float[] normals) {
+        this(Nublada.LOADER.loadToVAO(positions, indices, uvs, normals), indices.length);
+    }
+
+    public Mesh(float[] positions, int[] indices, float[] uvs) {
+        this(Nublada.LOADER.loadToVAO(positions, indices, uvs), indices.length);
+    }
+
+    public Mesh(float[] positions, int[] indices) {
+        this(Nublada.LOADER.loadToVAO(positions, indices), indices.length);
+    }
+
+    public Mesh(float[] positions) {
+        this(Nublada.LOADER.loadToVAO(positions), positions.length / 3);
+    }
+
+    private Mesh(int vaoId, int vertexCount) {
+        this.vaoId = vaoId;
         this.vertexCount = vertexCount;
     }
 
@@ -15,8 +33,8 @@ public class Mesh {
         this.textureId = textureId;
     }
 
-    public int getVao() {
-        return vao;
+    public int getVaoId() {
+        return vaoId;
     }
 
     public int getVertexCount() {

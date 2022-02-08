@@ -40,7 +40,7 @@ public class RaycastRenderer {
                 6, 7, 3
         };
 
-        this.mesh = Nublada.LOADER.loadToVAO(positions, indices);
+        this.mesh = new Mesh(positions, indices);
     }
 
     public void render() {
@@ -49,7 +49,7 @@ public class RaycastRenderer {
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glDisable(GL30.GL_CULL_FACE);
 
-        GL30.glBindVertexArray(mesh.getVao());
+        GL30.glBindVertexArray(mesh.getVaoId());
         GL30.glEnableVertexAttribArray(0);
 
         GL30.glDrawElements(GL30.GL_TRIANGLES, mesh.getVertexCount(), GL30.GL_UNSIGNED_INT, 0);

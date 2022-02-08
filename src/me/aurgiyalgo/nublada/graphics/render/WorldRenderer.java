@@ -128,7 +128,7 @@ public class WorldRenderer {
         chunksToRender.forEach(chunk -> {
             solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
 
-            GL30.glBindVertexArray(chunk.getModel().getSolidMesh().getVao());
+            GL30.glBindVertexArray(chunk.getModel().getSolidMesh().getVaoId());
             GL30.glEnableVertexAttribArray(0);
             GL30.glEnableVertexAttribArray(1);
             GL30.glEnableVertexAttribArray(2);
@@ -148,7 +148,7 @@ public class WorldRenderer {
         chunksToRender.forEach(chunk -> {
             transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
 
-            GL30.glBindVertexArray(chunk.getModel().getTransparentMesh().getVao());
+            GL30.glBindVertexArray(chunk.getModel().getTransparentMesh().getVaoId());
             GL30.glEnableVertexAttribArray(0);
             GL30.glEnableVertexAttribArray(1);
             GL30.glEnableVertexAttribArray(2);

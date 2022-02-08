@@ -65,7 +65,7 @@ public class SkyboxRenderer {
     private Matrix4f projectionMatrix;
 
     public SkyboxRenderer() {
-        this.mesh = Nublada.LOADER.loadToVAO(VERTICES);
+        this.mesh = new Mesh(VERTICES);
         this.texture = Nublada.LOADER.loadCubeMap(TEXTURE_FILES);
         this.shader = new SkyboxShader();
         setupProjectionMatrix(640, 360);
@@ -83,7 +83,7 @@ public class SkyboxRenderer {
         GL30.glActiveTexture(GL13.GL_TEXTURE0);
         GL30.glBindTexture(GL30.GL_TEXTURE_CUBE_MAP, texture);
 
-        GL30.glBindVertexArray(mesh.getVao());
+        GL30.glBindVertexArray(mesh.getVaoId());
         GL30.glEnableVertexAttribArray(0);
         GL30.glDrawArrays(GL30.GL_TRIANGLES, 0, mesh.getVertexCount());
 
