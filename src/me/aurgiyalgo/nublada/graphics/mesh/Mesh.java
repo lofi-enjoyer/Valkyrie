@@ -2,8 +2,8 @@ package me.aurgiyalgo.nublada.graphics.mesh;
 
 public class Mesh {
 
-    private int vao;
-    private int vertexCount;
+    private final int vao;
+    private final int vertexCount;
     private int textureId;
 
     public Mesh(int vao, int vertexCount) {

@@ -3,9 +3,6 @@ package me.aurgiyalgo.nublada.graphics.shaders;
 import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.utils.Maths;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
 
 public class SolidsShader extends ShaderProgram {
 

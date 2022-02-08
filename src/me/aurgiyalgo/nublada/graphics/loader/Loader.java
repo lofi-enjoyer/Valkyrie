@@ -4,7 +4,6 @@ import me.aurgiyalgo.nublada.Nublada;
 import me.aurgiyalgo.nublada.graphics.mesh.Mesh;
 import me.aurgiyalgo.nublada.graphics.texture.Texture;
 import me.aurgiyalgo.nublada.graphics.texture.TextureArray;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 

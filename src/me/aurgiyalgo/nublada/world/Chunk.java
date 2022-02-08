@@ -1,11 +1,7 @@
 package me.aurgiyalgo.nublada.world;
 
-import me.aurgiyalgo.nublada.graphics.mesh.DynamicMesher;
-import me.aurgiyalgo.nublada.graphics.mesh.Mesh;
-import me.aurgiyalgo.nublada.graphics.mesh.GreedyMesher;
 import me.aurgiyalgo.nublada.graphics.mesh.MeshBundle;
 import me.aurgiyalgo.nublada.utils.PerlinNoise;
-import org.joml.Vector2f;
 import org.joml.Vector2i;
 
 import java.util.Random;

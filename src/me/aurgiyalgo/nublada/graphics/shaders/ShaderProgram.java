@@ -1,27 +1,25 @@
 package me.aurgiyalgo.nublada.graphics.shaders;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
+import me.aurgiyalgo.nublada.Nublada;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.system.MemoryStack;
 
 public abstract class ShaderProgram {
 
-    private int programID;
-    private int vertexShaderID;
-    private int fragmentShaderID;
+    private final int programID;
+    private final int vertexShaderID;
+    private final int fragmentShaderID;
 
-    private FloatBuffer buffer;
+    private final FloatBuffer buffer;
 
     public ShaderProgram(String vertexFile,String fragmentFile){
         buffer = BufferUtils.createFloatBuffer(16);
@@ -63,46 +61,39 @@ public abstract class ShaderProgram {
         GL20.glUseProgram(programID);
     }
 
-    public void stop(){
-        GL20.glUseProgram(0);
-    }
-
     public void cleanUp(){
-        stop();
-        GL20.glDetachShader(programID, vertexShaderID);
-        GL20.glDetachShader(programID, fragmentShaderID);
-        GL20.glDeleteShader(vertexShaderID);
-        GL20.glDeleteShader(fragmentShaderID);
-        GL20.glDeleteProgram(programID);
+        GL30.glUseProgram(0);
+        GL30.glDetachShader(programID, vertexShaderID);
+        GL30.glDetachShader(programID, fragmentShaderID);
+        GL30.glDeleteShader(vertexShaderID);
+        GL30.glDeleteShader(fragmentShaderID);
+        GL30.glDeleteProgram(programID);
     }
 
     protected abstract void bindAttributes();
 
     protected void bindAttribute(int attribute, String variableName){
-        GL20.glBindAttribLocation(programID, attribute, variableName);
+        GL30.glBindAttribLocation(programID, attribute, variableName);
     }
 
-    private static int loadShader(String file, int type){
-        StringBuilder shaderSource = new StringBuilder();
-        try{
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            while((line = reader.readLine())!=null){
-                shaderSource.append(line).append("//\n");
-            }
-            reader.close();
-        }catch(IOException e){
-            e.printStackTrace();
+    private static int loadShader(String file, int type) {
+        String source;
+        try {
+            source = Files.readString(Paths.get(file));
+        } catch (IOException e) {
+            Nublada.LOG.severe(e.getMessage());
+            return 0;
+        }
+
+        int shaderID = GL30.glCreateShader(type);
+        GL30.glShaderSource(shaderID, source);
+        GL30.glCompileShader(shaderID);
+
+        if(GL30.glGetShaderi(shaderID, GL30.GL_COMPILE_STATUS )== GL11.GL_FALSE){
+            Nublada.LOG.severe("Shader " + file + " could not be compiled: " + GL30.glGetShaderInfoLog(shaderID, 500));
             System.exit(-1);
         }
-        int shaderID = GL20.glCreateShader(type);
-        GL20.glShaderSource(shaderID, shaderSource);
-        GL20.glCompileShader(shaderID);
-        if(GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS )== GL11.GL_FALSE){
-            System.out.println(GL20.glGetShaderInfoLog(shaderID, 500));
-            System.err.println("Could not compile shader!");
-            System.exit(-1);
-        }
+
         return shaderID;
     }
 

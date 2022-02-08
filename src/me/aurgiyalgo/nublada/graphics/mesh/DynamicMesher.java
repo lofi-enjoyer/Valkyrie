@@ -4,7 +4,6 @@ import me.aurgiyalgo.nublada.Nublada;
 import me.aurgiyalgo.nublada.world.Block;
 import me.aurgiyalgo.nublada.world.BlockRegistry;
 import me.aurgiyalgo.nublada.world.Chunk;
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,22 +12,6 @@ import static me.aurgiyalgo.nublada.world.World.CHUNK_WIDTH;
 import static me.aurgiyalgo.nublada.world.World.CHUNK_HEIGHT;
 
 public class DynamicMesher {
-
-    private static final int SOUTH      = 0;
-    private static final int NORTH      = 1;
-    private static final int EAST       = 2;
-    private static final int WEST       = 3;
-    private static final int TOP        = 4;
-    private static final int BOTTOM     = 5;
-
-    private static final Vector3i[] RELATIVE_VECTORS = {
-            new Vector3i(0, 0, 1),
-            new Vector3i(0, 0, -1),
-            new Vector3i(-1, 0, 0),
-            new Vector3i(1, 0, 0),
-            new Vector3i(0, 1, 0),
-            new Vector3i(0, -1, 0)
-    };
 
     private final Chunk chunk;
 

@@ -8,7 +8,6 @@ import me.aurgiyalgo.nublada.world.Block;
 import me.aurgiyalgo.nublada.world.BlockRegistry;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL30;
 
@@ -60,7 +59,6 @@ public class SelectedBlockRenderer {
         shader.start();
         shader.loadProjectionMatrix(projectionMatrix);
         shader.loadTransformationMatrix(transformationMatrix);
-        shader.stop();
     }
 
     public void render(int id) {
@@ -79,10 +77,6 @@ public class SelectedBlockRenderer {
         GL30.glDrawElements(GL30.GL_TRIANGLES, mesh.getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
 
         GL30.glBindVertexArray(0);
-
-        shader.stop();
-
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, 0);
 
         GL30.glDisable(GL30.GL_BLEND);
     }

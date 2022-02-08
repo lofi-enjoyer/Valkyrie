@@ -136,8 +136,6 @@ public class WorldRenderer {
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMesh().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
 
-        solidsShader.stop();
-
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -158,14 +156,9 @@ public class WorldRenderer {
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMesh().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
 
-        transparencyShader.stop();
-
         GL30.glDisable(GL30.GL_BLEND);
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, 0);
-        GL30.glDisableVertexAttribArray(0);
-        GL30.glDisableVertexAttribArray(1);
-        GL30.glEnableVertexAttribArray(2);
         GL30.glBindVertexArray(0);
 
         selectorShader.start();
@@ -178,8 +171,6 @@ public class WorldRenderer {
             selectorShader.loadTransformationMatrix(Maths.createTransformationMatrix(hitPosition, 0));
             raycastRenderer.render();
         }
-
-        selectorShader.stop();
 
 //        System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + chunksToRender.size() + " chunks)");
 

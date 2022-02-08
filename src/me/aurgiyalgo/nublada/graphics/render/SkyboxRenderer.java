@@ -72,7 +72,6 @@ public class SkyboxRenderer {
         shader.start();
         shader.loadProjectionMatrix(projectionMatrix);
         shader.loadFogColor(new Vector3f(0.45f, 0.71f, 1.00f));
-        shader.stop();
     }
 
     public void render(Camera camera) {
@@ -80,14 +79,15 @@ public class SkyboxRenderer {
 
         shader.start();
         shader.loadViewMatrix(camera);
-        GL30.glBindVertexArray(mesh.getVao());
-        GL30.glEnableVertexAttribArray(0);
+
         GL30.glActiveTexture(GL13.GL_TEXTURE0);
         GL30.glBindTexture(GL30.GL_TEXTURE_CUBE_MAP, texture);
+
+        GL30.glBindVertexArray(mesh.getVao());
+        GL30.glEnableVertexAttribArray(0);
         GL30.glDrawArrays(GL30.GL_TRIANGLES, 0, mesh.getVertexCount());
-        GL30.glDisableVertexAttribArray(0);
+
         GL30.glBindVertexArray(0);
-        shader.stop();
 
         GL30.glEnable(GL30.GL_DEPTH_TEST);
     }

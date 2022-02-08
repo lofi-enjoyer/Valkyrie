@@ -1,8 +1,6 @@
 package me.aurgiyalgo.nublada.graphics.shaders.gui;
 
-import me.aurgiyalgo.nublada.graphics.camera.Camera;
 import me.aurgiyalgo.nublada.graphics.shaders.ShaderProgram;
-import me.aurgiyalgo.nublada.utils.Maths;
 import org.joml.Matrix4f;
 
 public class SelectedBlockShader extends ShaderProgram {
