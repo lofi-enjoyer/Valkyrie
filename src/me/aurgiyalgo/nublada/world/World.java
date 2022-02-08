@@ -31,10 +31,10 @@ public class World {
 
     public World() {
         this.chunks = new HashMap<>();
+        this.chunkGenerationFutures = new ArrayList<>();
 
         this.noise = new PerlinNoise();
         Nublada.LOG.info("World generation seed set to " + noise.getSeed());
-        this.chunkGenerationFutures = new ArrayList<>();
     }
 
     public void addChunk(int x, int z) {
