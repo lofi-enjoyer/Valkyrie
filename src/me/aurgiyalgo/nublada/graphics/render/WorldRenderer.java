@@ -56,6 +56,8 @@ public class WorldRenderer {
 
         long timer = System.nanoTime();
 
+        boolean needsSorting = false;
+
         int playerX = (int) Math.floor(camera.getPosition().x / (float) CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) CHUNK_WIDTH);
 
@@ -69,6 +71,7 @@ public class WorldRenderer {
                 if(distance < VIEW_DISTANCE * VIEW_DISTANCE){
                     if (world.getChunk(chunkX, chunkZ) == null) {
                         world.addChunk(chunkX, chunkZ);
+                        needsSorting = true;
                     }
                 }
 
@@ -101,11 +104,15 @@ public class WorldRenderer {
             world.getChunks().remove(chunk.getPosition());
         });
 
+        if (chunksToUnload.size() > 0)
+            needsSorting = true;
+
         playerPosition.x = playerX;
         playerPosition.y = playerZ;
 
         // TODO: 03/02/2022 Sort only when player moves between chunks
-        chunksToRender.sort(new SortByDistance());
+        if (needsSorting)
+            chunksToRender.sort(new SortByDistance());
 
         GL30.glEnable(GL30.GL_DEPTH_TEST);
         GL30.glEnable(GL30.GL_CULL_FACE);
