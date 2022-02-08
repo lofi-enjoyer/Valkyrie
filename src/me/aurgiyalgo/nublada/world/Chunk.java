@@ -162,7 +162,6 @@ public class Chunk {
         }
     }
 
-    // TODO: 24/01/2022 Cache neighbor chunks
     public int getBlock(int x, int y, int z) {
         if (voxels == null) return 0;
         if (y < 0 || y > CHUNK_HEIGHT - 1) return 0;
