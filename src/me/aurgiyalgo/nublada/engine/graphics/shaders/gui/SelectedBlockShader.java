@@ -1,0 +1,38 @@
+package me.aurgiyalgo.nublada.engine.graphics.shaders.gui;
+
+import me.aurgiyalgo.nublada.engine.graphics.shaders.ShaderProgram;
+import org.joml.Matrix4f;
+
+public class SelectedBlockShader extends ShaderProgram {
+
+    private static final String VERTEX_FILE = "res/shaders/selectedblock_vertex.glsl";
+    private static final String FRAGMENT_FILE = "res/shaders/selectedblock_fragment.glsl";
+
+    private int locationTransformationMatrix;
+    private int locationProjectionMatrix;
+
+    public SelectedBlockShader() {
+        super(VERTEX_FILE, FRAGMENT_FILE);
+    }
+
+    @Override
+    protected void getAllUniformLocations() {
+        locationTransformationMatrix = super.getUniformLocation("transformationMatrix");
+        locationProjectionMatrix = super.getUniformLocation("projectionMatrix");
+    }
+
+    @Override
+    protected void bindAttributes() {
+        super.bindAttribute(0, "position");
+        super.bindAttribute(1, "color");
+    }
+
+    public void loadTransformationMatrix(Matrix4f matrix) {
+        super.loadMatrix(locationTransformationMatrix, matrix);
+    }
+
+    public void loadProjectionMatrix(Matrix4f matrix) {
+        super.loadMatrix(locationProjectionMatrix, matrix);
+    }
+
+}

@@ -1,10 +1,10 @@
 package me.aurgiyalgo.nublada;
 
 import me.aurgiyalgo.nublada.engine.scene.IScene;
-import me.aurgiyalgo.nublada.graphics.display.Window;
-import me.aurgiyalgo.nublada.graphics.loader.Loader;
-import me.aurgiyalgo.nublada.log.NubladaLogHandler;
-import me.aurgiyalgo.nublada.world.BlockRegistry;
+import me.aurgiyalgo.nublada.engine.graphics.display.Window;
+import me.aurgiyalgo.nublada.engine.graphics.loader.Loader;
+import me.aurgiyalgo.nublada.engine.log.NubladaLogHandler;
+import me.aurgiyalgo.nublada.engine.world.BlockRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 

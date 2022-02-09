@@ -2,13 +2,13 @@ package me.aurgiyalgo.nublada.game;
 
 import me.aurgiyalgo.nublada.Nublada;
 import me.aurgiyalgo.nublada.engine.scene.IScene;
-import me.aurgiyalgo.nublada.graphics.camera.Camera;
-import me.aurgiyalgo.nublada.graphics.display.Window;
-import me.aurgiyalgo.nublada.graphics.render.SkyboxRenderer;
-import me.aurgiyalgo.nublada.graphics.render.WorldRenderer;
-import me.aurgiyalgo.nublada.graphics.render.gui.SelectedBlockRenderer;
-import me.aurgiyalgo.nublada.world.BlockRegistry;
-import me.aurgiyalgo.nublada.world.World;
+import me.aurgiyalgo.nublada.engine.graphics.camera.Camera;
+import me.aurgiyalgo.nublada.engine.graphics.display.Window;
+import me.aurgiyalgo.nublada.engine.graphics.render.SkyboxRenderer;
+import me.aurgiyalgo.nublada.engine.graphics.render.WorldRenderer;
+import me.aurgiyalgo.nublada.engine.graphics.render.gui.SelectedBlockRenderer;
+import me.aurgiyalgo.nublada.engine.world.BlockRegistry;
+import me.aurgiyalgo.nublada.engine.world.World;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
