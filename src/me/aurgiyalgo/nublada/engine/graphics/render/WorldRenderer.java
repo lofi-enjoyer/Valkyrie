@@ -6,6 +6,7 @@ import me.aurgiyalgo.nublada.engine.graphics.shaders.SelectorShader;
 import me.aurgiyalgo.nublada.engine.graphics.shaders.SolidsShader;
 import me.aurgiyalgo.nublada.engine.graphics.shaders.TransparencyShader;
 import me.aurgiyalgo.nublada.engine.utils.Maths;
+import me.aurgiyalgo.nublada.engine.utils.Timings;
 import me.aurgiyalgo.nublada.engine.world.BlockRegistry;
 import me.aurgiyalgo.nublada.engine.world.Chunk;
 import me.aurgiyalgo.nublada.engine.world.World;
@@ -52,9 +53,9 @@ public class WorldRenderer {
 
     public void render(World world, Camera camera) {
 
-        world.checkGeneratingChunks();
+        Timings.startTiming("World Render");
 
-        long timer = System.nanoTime();
+        world.checkGeneratingChunks();
 
         boolean needsSorting = false;
 
@@ -119,6 +120,7 @@ public class WorldRenderer {
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
 
+        Timings.startTiming("Solid Mesh Render");
         solidsShader.start();
         solidsShader.loadProjectionMatrix(projectionMatrix);
         solidsShader.loadViewMatrix(camera);
@@ -134,7 +136,9 @@ public class WorldRenderer {
 
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMesh().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
+        Timings.stopTiming("Solid Mesh Render");
 
+        Timings.startTiming("Transparent Mesh Render");
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -154,11 +158,8 @@ public class WorldRenderer {
 
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMesh().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
-
         GL30.glDisable(GL30.GL_BLEND);
-
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, 0);
-        GL30.glBindVertexArray(0);
+        Timings.stopTiming("Transparent Mesh Render");
 
         selectorShader.start();
         selectorShader.loadProjectionMatrix(projectionMatrix);
@@ -171,14 +172,14 @@ public class WorldRenderer {
             raycastRenderer.render();
         }
 
-//        System.out.println("World render: " + ((System.nanoTime() - timer) / 1000000f) + "ms (" + chunksToRender.size() + " chunks)");
-
         // TODO: 05/02/2022 Make a proper crosshair
         GL30.glPointSize(5);
         GL30.glBegin(GL30.GL_POINTS);
         GL30.glVertex2f(0, 0);
         GL30.glEnd();
         GL30.glPointSize(1);
+
+        Timings.stopTiming("World Render");
     }
 
     public void updateFrustum(Camera camera) {

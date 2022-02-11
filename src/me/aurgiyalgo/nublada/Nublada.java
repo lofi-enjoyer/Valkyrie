@@ -4,6 +4,7 @@ import me.aurgiyalgo.nublada.engine.scene.IScene;
 import me.aurgiyalgo.nublada.engine.graphics.display.Window;
 import me.aurgiyalgo.nublada.engine.graphics.loader.Loader;
 import me.aurgiyalgo.nublada.engine.log.NubladaLogHandler;
+import me.aurgiyalgo.nublada.engine.utils.Timings;
 import me.aurgiyalgo.nublada.engine.world.BlockRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
@@ -17,7 +18,6 @@ public class Nublada {
     public static final Loader LOADER = new Loader();
 
     private final Window window;
-
     public static long WINDOW_ID;
 
     private IScene currentScene;
@@ -57,6 +57,8 @@ public class Nublada {
             timer = System.nanoTime();
 
             GLFW.glfwSetWindowTitle(window.getId(), "Nublada | FPS: " + (int) (1f / delta) + " (delta: " + delta + "s)");
+
+            Timings.flushTimings();
         }
     }
 

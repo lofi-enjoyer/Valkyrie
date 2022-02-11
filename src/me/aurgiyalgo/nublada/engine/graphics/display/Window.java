@@ -26,6 +26,7 @@ public class Window {
     private boolean wireframe;
     private boolean faceCulling;
 
+    // TODO: 09/02/2022 Make this a singleton
     public Window(int width, int height, String title) {
         this.width = width;
         this.height = height;
