@@ -122,7 +122,6 @@ public class WorldRenderer {
 
         Timings.startTiming("Solid Mesh Render");
         solidsShader.start();
-        solidsShader.loadProjectionMatrix(projectionMatrix);
         solidsShader.loadViewMatrix(camera);
         solidsShader.loadViewDistance(VIEW_DISTANCE * 32);
 
@@ -143,7 +142,6 @@ public class WorldRenderer {
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
 
         transparencyShader.start();
-        transparencyShader.loadProjectionMatrix(projectionMatrix);
         transparencyShader.loadViewMatrix(camera);
         transparencyShader.loadTime((float) GLFW.glfwGetTime());
         transparencyShader.loadViewDistance(VIEW_DISTANCE * 32);
@@ -162,7 +160,6 @@ public class WorldRenderer {
         Timings.stopTiming("Transparent Mesh Render");
 
         selectorShader.start();
-        selectorShader.loadProjectionMatrix(projectionMatrix);
         selectorShader.loadViewMatrix(camera);
         selectorShader.loadTime((float) GLFW.glfwGetTime());
 
@@ -189,6 +186,13 @@ public class WorldRenderer {
     public void setupProjectionMatrix(int width, int height) {
         this.projectionMatrix = new Matrix4f();
         this.projectionMatrix.perspective(70, width / (float)height, 0.01f, 5000f);
+
+        solidsShader.start();
+        solidsShader.loadProjectionMatrix(projectionMatrix);
+        transparencyShader.start();
+        transparencyShader.loadProjectionMatrix(projectionMatrix);
+        selectorShader.start();
+        selectorShader.loadProjectionMatrix(projectionMatrix);
     }
 
     class SortByDistance implements Comparator<Chunk> {

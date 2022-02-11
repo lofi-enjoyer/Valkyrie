@@ -16,7 +16,7 @@ public class WorldScene implements IScene {
 
     private Camera camera;
     private World world;
-    private WorldRenderer renderer;
+    private WorldRenderer worldRenderer;
     private SkyboxRenderer skyboxRenderer;
     private SelectedBlockRenderer selectedBlockRenderer;
 
@@ -24,17 +24,17 @@ public class WorldScene implements IScene {
     public void init() {
         this.camera = new Camera();
         this.world = new World();
-        this.renderer = new WorldRenderer();
-        renderer.setupProjectionMatrix(640, 360);
+        this.worldRenderer = new WorldRenderer();
+        worldRenderer.setupProjectionMatrix(640, 360);
         this.skyboxRenderer = new SkyboxRenderer();
         skyboxRenderer.setupProjectionMatrix(640, 360);
         this.selectedBlockRenderer = new SelectedBlockRenderer();
+        selectedBlockRenderer.setupProjectionMatrix(640, 360);
 
         GLFW.glfwSetScrollCallback(Nublada.WINDOW_ID, (id, xOffset, yOffset) -> {
             selectedBlock += yOffset;
             if (selectedBlock > BlockRegistry.getBlockCount() - 1) {
                 selectedBlock = 0;
-                return;
             } else if (selectedBlock < 0) {
                 selectedBlock = BlockRegistry.getBlockCount() - 1;
             }
@@ -47,11 +47,11 @@ public class WorldScene implements IScene {
     @Override
     public void render(float delta) {
         camera.update(Window.id, delta);
-        renderer.updateFrustum(camera);
+        worldRenderer.updateFrustum(camera);
 
         skyboxRenderer.render(camera);
 
-        renderer.render(world, camera);
+        worldRenderer.render(world, camera);
 
         selectedBlockRenderer.render(selectedBlock + 1);
 
@@ -75,7 +75,9 @@ public class WorldScene implements IScene {
 
     @Override
     public void onResize(int width, int height) {
-        renderer.setupProjectionMatrix(width, height);
+        worldRenderer.setupProjectionMatrix(width, height);
+        skyboxRenderer.setupProjectionMatrix(width, height);
+        selectedBlockRenderer.setupProjectionMatrix(width, height);
     }
 
     @Override

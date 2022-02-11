@@ -52,12 +52,6 @@ public class SelectedBlockRenderer {
         this.mesh = new Mesh(positions, indices);
         this.shader = new SelectedBlockShader();
         this.transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 45, 0));
-
-        setupProjectionMatrix(16, 9);
-
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.loadTransformationMatrix(transformationMatrix);
     }
 
     public void render(int id) {
@@ -80,9 +74,15 @@ public class SelectedBlockRenderer {
         GL30.glDisable(GL30.GL_BLEND);
     }
 
-    private void setupProjectionMatrix(int width, int height) {
+    public void setupProjectionMatrix(int width, int height) {
+        float relation = width / (float)height;
+
         this.projectionMatrix = new Matrix4f();
-        this.projectionMatrix.ortho(0, width, 0, height, -50, 50);
+        this.projectionMatrix.ortho(0, 9 * relation, 0, 9, -50, 50);
+
+        shader.start();
+        shader.loadProjectionMatrix(projectionMatrix);
+        shader.loadTransformationMatrix(transformationMatrix);
     }
 
 }
