@@ -8,6 +8,7 @@ import me.aurgiyalgo.nublada.engine.graphics.render.SkyboxRenderer;
 import me.aurgiyalgo.nublada.engine.graphics.render.WorldRenderer;
 import me.aurgiyalgo.nublada.engine.graphics.render.gui.SelectedBlockRenderer;
 import me.aurgiyalgo.nublada.engine.world.BlockRegistry;
+import me.aurgiyalgo.nublada.engine.world.Player;
 import me.aurgiyalgo.nublada.engine.world.World;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -19,6 +20,7 @@ public class WorldScene implements IScene {
     private WorldRenderer worldRenderer;
     private SkyboxRenderer skyboxRenderer;
     private SelectedBlockRenderer selectedBlockRenderer;
+    private Player player;
 
     @Override
     public void init() {
@@ -30,6 +32,10 @@ public class WorldScene implements IScene {
         skyboxRenderer.setupProjectionMatrix(640, 360);
         this.selectedBlockRenderer = new SelectedBlockRenderer();
         selectedBlockRenderer.setupProjectionMatrix(640, 360);
+
+        this.player = new Player();
+        player.camera = camera;
+        player.world = world;
 
         GLFW.glfwSetScrollCallback(Nublada.WINDOW_ID, (id, xOffset, yOffset) -> {
             selectedBlock += yOffset;
@@ -46,6 +52,7 @@ public class WorldScene implements IScene {
 
     @Override
     public void render(float delta) {
+        player.update(delta);
         camera.update(Window.id, delta);
         worldRenderer.updateFrustum(camera);
 

@@ -170,6 +170,7 @@ public class WorldRenderer {
         }
 
         // TODO: 05/02/2022 Make a proper crosshair
+        GL30.glUseProgram(0);
         GL30.glPointSize(5);
         GL30.glBegin(GL30.GL_POINTS);
         GL30.glVertex2f(0, 0);
