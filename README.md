@@ -22,7 +22,7 @@
 
 Nublada is a personal project I'm working on with the objective of learning more about Java, OpenGL, graphics rendering and the technologies needed to put together a basic Minecraft-like game engine.
 
-<img src="https://i.imgur.com/9XlPz0U.png" width="640" height="360">
+<img src="https://i.imgur.com/sEH1oHx.png" width="640" height="336">
 
 > Screenshot showing a render distance of 16 chunks (32 Minecraft chunks / ~512 meters) around the camera
 
