@@ -33,11 +33,12 @@ Nublada is a personal project I'm working on with the objective of learning more
 - [Greedy Meshing](https://0fps.net/2012/07/07/meshing-minecraft-part-2/)
 - Chunk-based world loading
 - Procedurally generated environment using [Perlin Noise](https://en.wikipedia.org/wiki/Perlin_noise)
-- Transparent textures support, using depth sorting
+- Transparent textures support using depth sorting
 - Dynamic data loading with YAML, allowing to add new blocks and textures easily
-- Fog effect
-- Frustum culling
 - Multithreaded mesh building and world generation
+- Frustum culling
+- Skybox
+- Fog effect
 
 <div id="building"></div>
 
