@@ -13,6 +13,13 @@ import me.aurgiyalgo.nublada.engine.world.World;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
 public class WorldScene implements IScene {
 
     private Camera camera;
@@ -21,6 +28,9 @@ public class WorldScene implements IScene {
     private SkyboxRenderer skyboxRenderer;
     private SelectedBlockRenderer selectedBlockRenderer;
     private Player player;
+
+    private ScriptEngine scriptEngine;
+    private Invocable script;
 
     @Override
     public void init() {
@@ -45,6 +55,18 @@ public class WorldScene implements IScene {
                 selectedBlock = BlockRegistry.getBlockCount() - 1;
             }
         });
+
+        Nublada.LOG.info("Starting script loading...");
+        this.scriptEngine = new ScriptEngineManager().getEngineByName("Nashorn");
+        try {
+            scriptEngine.eval(new FileReader("res/scripts/" + getClass().getSimpleName().toLowerCase() + ".js"));
+            script = (Invocable) scriptEngine;
+        } catch (ScriptException | FileNotFoundException e) {
+            Nublada.LOG.warning("Script loading failed!");
+            e.printStackTrace();
+            return;
+        }
+        Nublada.LOG.info("Script loaded succesfully!");
     }
 
     int mouse = 0;
@@ -67,16 +89,22 @@ public class WorldScene implements IScene {
 
         if (mouse != 1 && GLFW.glfwGetMouseButton(Window.id, 0) != 0) {
             mouse = 1;
-            Vector3f position = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
-            if (position != null)
-                world.setBlock(0, position);
+//            Vector3f position = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
+//            if (position != null)
+//                world.setBlock(0, position);
+            try {
+                script.invokeFunction("onBreak", world, camera);
+            } catch (ScriptException | NoSuchMethodException e) {}
         }
 
         if (mouse != 1 && GLFW.glfwGetMouseButton(Window.id, 1) != 0) {
             mouse = 1;
-            Vector3f position = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
-            if (position != null)
-                world.setBlock(selectedBlock + 1, position);
+//            Vector3f position = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
+//            if (position != null)
+//                world.setBlock(selectedBlock + 1, position);
+            try {
+                script.invokeFunction("onPlace", world, camera, selectedBlock + 1);
+            } catch (ScriptException | NoSuchMethodException e) {}
         }
     }
 
