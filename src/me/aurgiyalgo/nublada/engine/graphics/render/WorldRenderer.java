@@ -48,6 +48,10 @@ public class WorldRenderer {
 
         this.raycastRenderer = new RaycastRenderer();
 
+        transparencyShader.start();
+        transparencyShader.loadLeavesId(BlockRegistry.getBLock(6).getTopTexture());
+        transparencyShader.loadWaterId(BlockRegistry.getBLock(7).getTopTexture());
+
         Nublada.LOG.info("World renderer has been setup");
     }
 

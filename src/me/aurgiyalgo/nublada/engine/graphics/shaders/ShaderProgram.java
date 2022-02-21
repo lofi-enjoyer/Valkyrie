@@ -57,6 +57,10 @@ public abstract class ShaderProgram {
         GL30.glUniformMatrix4fv(location, false, matrix.get(buffer));
     }
 
+    protected void loadInt(int location, int value) {
+        GL30.glUniform1i(location, value);
+    }
+
     public void start() {
         GL20.glUseProgram(programID);
     }
