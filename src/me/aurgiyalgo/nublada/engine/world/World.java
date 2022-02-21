@@ -12,6 +12,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+/**
+ * Handles the render and data for a world
+ */
 public class World {
 
     public static final int CHUNK_WIDTH = 32;
@@ -37,6 +40,11 @@ public class World {
         Nublada.LOG.info("World generation seed set to " + noise.getSeed());
     }
 
+    /**
+     * Adds a chunk to the world and schedules it for generation
+     * @param x Chunk X coordinate
+     * @param z Chunk Z coordinate
+     */
     public void addChunk(int x, int z) {
         Vector2i position = new Vector2i(x, z);
         if (chunks.containsKey(position))
@@ -54,6 +62,10 @@ public class World {
         chunkGenerationFutures.add(future);
     }
 
+    /**
+     * Queues the chunk to mesh and flags its neighbors as not-updated
+     * @param chunk Chunk to mesh
+     */
     private void initializeChunk(Chunk chunk) {
         chunk.generateMesh();
 
@@ -72,6 +84,9 @@ public class World {
         }
     }
 
+    /**
+     * Checks the chunks in the generation queue and adds those which finished
+     */
     public void checkGeneratingChunks() {
         Iterator<Future<Chunk>> iterator = chunkGenerationFutures.iterator();
 

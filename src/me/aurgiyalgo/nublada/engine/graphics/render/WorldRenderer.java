@@ -57,11 +57,15 @@ public class WorldRenderer {
 
         world.checkGeneratingChunks();
 
+        // If true, chunks will be sorted to render them
+        // based on their distance to the player
         boolean needsSorting = false;
 
         int playerX = (int) Math.floor(camera.getPosition().x / (float) CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) CHUNK_WIDTH);
 
+        // Checks all the chunks within the view distance,
+        // and loads those which are not loaded
         for(int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; x++){
             for(int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; z++){
                 int chunkX = playerX + x;
@@ -82,6 +86,7 @@ public class WorldRenderer {
         List<Chunk> chunksToRender = new ArrayList<>();
         List<Chunk> chunksToUnload = new ArrayList<>();
 
+        // Checks all loaded chunks, and if any is outside the view area unloads it
         world.getChunks().forEach((position, chunk) -> {
             chunk.prepare();
 
@@ -105,6 +110,7 @@ public class WorldRenderer {
             world.getChunks().remove(chunk.getPosition());
         });
 
+        // If a chunk was unloaded, sort the chunks
         if (chunksToUnload.size() > 0)
             needsSorting = true;
 
@@ -120,6 +126,7 @@ public class WorldRenderer {
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
 
+        // Renders the solid mesh for all chunks
         Timings.startTiming("Solid Mesh Render");
         solidsShader.start();
         solidsShader.loadViewMatrix(camera);
@@ -137,6 +144,7 @@ public class WorldRenderer {
         });
         Timings.stopTiming("Solid Mesh Render");
 
+        // Renders the transparent mesh for all chunks
         Timings.startTiming("Transparent Mesh Render");
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
@@ -159,6 +167,7 @@ public class WorldRenderer {
         GL30.glDisable(GL30.GL_BLEND);
         Timings.stopTiming("Transparent Mesh Render");
 
+        // Highlights the voxel the player is looking at
         selectorShader.start();
         selectorShader.loadViewMatrix(camera);
         selectorShader.loadTime((float) GLFW.glfwGetTime());
@@ -170,6 +179,7 @@ public class WorldRenderer {
         }
 
         // TODO: 05/02/2022 Make a proper crosshair
+        // Renders a point in the middle of the screen
         GL30.glUseProgram(0);
         GL30.glPointSize(5);
         GL30.glBegin(GL30.GL_POINTS);
@@ -184,6 +194,11 @@ public class WorldRenderer {
         tester.updateFrustum(projectionMatrix, Maths.createViewMatrix(camera));
     }
 
+    /**
+     * Updates the projection matrix based on the screen resolution
+     * @param width Screen width
+     * @param height Screen height
+     */
     public void setupProjectionMatrix(int width, int height) {
         this.projectionMatrix = new Matrix4f();
         this.projectionMatrix.perspective(70, width / (float)height, 0.01f, 5000f);

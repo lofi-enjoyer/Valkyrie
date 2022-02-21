@@ -2,6 +2,9 @@ package me.aurgiyalgo.nublada.engine.graphics.mesh;
 
 import me.aurgiyalgo.nublada.engine.world.Chunk;
 
+/**
+ * Contains the solid and transparent meshes of a chunk
+ */
 public class MeshBundle {
 
     private Mesh solidMesh;

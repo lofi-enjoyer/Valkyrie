@@ -10,6 +10,9 @@ import java.util.List;
 import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_WIDTH;
 import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_HEIGHT;
 
+/**
+ * Generates the transparent mesh of a chunk
+ */
 public class DynamicMesher {
 
     private final Chunk chunk;

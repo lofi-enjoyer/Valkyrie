@@ -13,6 +13,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_WIDTH;
 import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_HEIGHT;
 
+/**
+ * Handles the data and meshing tasks of a single chunk
+ */
 public class Chunk {
 
     private static final int NORTH = 0;
@@ -55,6 +58,7 @@ public class Chunk {
     }
 
     // TODO: 24/01/2022 Implement generators for World Generation
+    // Temporary generation code
     public void populateChunk(PerlinNoise noise) {
         if (this.voxels != null) return;
 
@@ -125,6 +129,10 @@ public class Chunk {
         }
     }
 
+    /**
+     * Queries the chunk to mesh if it is not updated, and loads
+     * the mesh data to the GPU when meshing is finished
+     */
     public void prepare() {
         if (!updated) {
             updated = true;
@@ -142,6 +150,9 @@ public class Chunk {
         }
     }
 
+    /**
+     * Queues a task to mesh the chunk
+     */
     public void generateMesh() {
         if (mesherFuture != null) {
             mesherFuture.cancel(true);
