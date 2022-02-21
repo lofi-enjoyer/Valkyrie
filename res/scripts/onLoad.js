@@ -1,0 +1,1 @@
+print('Scripting load succesfully!');

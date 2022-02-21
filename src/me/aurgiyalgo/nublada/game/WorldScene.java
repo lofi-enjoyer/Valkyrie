@@ -7,6 +7,7 @@ import me.aurgiyalgo.nublada.engine.graphics.display.Window;
 import me.aurgiyalgo.nublada.engine.graphics.render.SkyboxRenderer;
 import me.aurgiyalgo.nublada.engine.graphics.render.WorldRenderer;
 import me.aurgiyalgo.nublada.engine.graphics.render.gui.SelectedBlockRenderer;
+import me.aurgiyalgo.nublada.engine.scripting.Script;
 import me.aurgiyalgo.nublada.engine.world.BlockRegistry;
 import me.aurgiyalgo.nublada.engine.world.Player;
 import me.aurgiyalgo.nublada.engine.world.World;
@@ -29,8 +30,7 @@ public class WorldScene implements IScene {
     private SelectedBlockRenderer selectedBlockRenderer;
     private Player player;
 
-    private ScriptEngine scriptEngine;
-    private Invocable script;
+    private Script script;
 
     @Override
     public void init() {
@@ -57,15 +57,7 @@ public class WorldScene implements IScene {
         });
 
         Nublada.LOG.info("Starting script loading...");
-        this.scriptEngine = new ScriptEngineManager().getEngineByName("Nashorn");
-        try {
-            scriptEngine.eval(new FileReader("res/scripts/" + getClass().getSimpleName().toLowerCase() + ".js"));
-            script = (Invocable) scriptEngine;
-        } catch (ScriptException | FileNotFoundException e) {
-            Nublada.LOG.warning("Script loading failed!");
-            e.printStackTrace();
-            return;
-        }
+        this.script = new Script("res/scripts");
         Nublada.LOG.info("Script loaded succesfully!");
     }
 
@@ -89,22 +81,12 @@ public class WorldScene implements IScene {
 
         if (mouse != 1 && GLFW.glfwGetMouseButton(Window.id, 0) != 0) {
             mouse = 1;
-//            Vector3f position = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
-//            if (position != null)
-//                world.setBlock(0, position);
-            try {
-                script.invokeFunction("onBreak", world, camera);
-            } catch (ScriptException | NoSuchMethodException e) {}
+            script.callFunction("onBreak", world, camera);
         }
 
         if (mouse != 1 && GLFW.glfwGetMouseButton(Window.id, 1) != 0) {
             mouse = 1;
-//            Vector3f position = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
-//            if (position != null)
-//                world.setBlock(selectedBlock + 1, position);
-            try {
-                script.invokeFunction("onPlace", world, camera, selectedBlock + 1);
-            } catch (ScriptException | NoSuchMethodException e) {}
+            script.callFunction("onPlace", world, camera, selectedBlock + 1);
         }
     }
 

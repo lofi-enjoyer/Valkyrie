@@ -11,3 +11,5 @@ var onPlace = function(world, camera, id) {
         world.setBlock(id, position);
     }
 }
+
+print('Blocks script loaded!');
