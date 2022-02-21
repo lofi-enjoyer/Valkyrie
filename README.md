@@ -34,6 +34,7 @@ Nublada is a personal project I'm working on with the objective of learning more
 - Chunk-based world loading
 - Procedurally generated environment using [Perlin Noise](https://en.wikipedia.org/wiki/Perlin_noise)
 - Transparent textures support using depth sorting
+- Allows scripting using JavaScript
 - Dynamic data loading with YAML, allowing to add new blocks and textures easily
 - Multithreaded mesh building and world generation
 - Frustum culling
