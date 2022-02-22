@@ -1,4 +1,3 @@
 id: 6
-topTexture: 'leaves'
-sideTexture: 'leaves'
+texture: 'leaves'
 transparent: true

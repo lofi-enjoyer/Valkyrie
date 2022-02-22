@@ -1,3 +1,4 @@
 id: 1
 topTexture: 'grass_top'
-sideTexture: 'grass_side'
+bottomTexture: 'dirt'
+texture: 'grass_side'

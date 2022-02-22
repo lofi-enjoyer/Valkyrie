@@ -43,10 +43,9 @@ public class BlockRegistry {
             }
 
             int id = (int) data.get("id");
-            String topTexture = (String) data.get("topTexture");
-            String sideTexture = (String) data.get("sideTexture");
+            String texture = (String) data.get("texture");
 
-            Block block = new Block(id, getTextureId(topTexture), getTextureId(sideTexture));
+            Block block = new Block(id, getTextureId(texture), getTextureId(texture));
 
             String northTexture = (String) data.get("northTexture");
             if (northTexture != null)
@@ -63,6 +62,14 @@ public class BlockRegistry {
             String eastTexture = (String) data.get("eastTexture");
             if (eastTexture != null)
                 block.setEastTexture(getTextureId(eastTexture));
+
+            String topTexture = (String) data.get("topTexture");
+            if (topTexture != null)
+                block.setTopTexture(getTextureId(topTexture));
+
+            String bottomTexture = (String) data.get("bottomTexture");
+            if (bottomTexture != null)
+                block.setBottomTexture(getTextureId(bottomTexture));
 
             Boolean isTransparent = (Boolean) data.get("transparent");
             if (isTransparent != null) {

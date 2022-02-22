@@ -1,4 +1,3 @@
 id: 7
-topTexture: 'water'
-sideTexture: 'water'
+texture: 'water'
 transparent: true

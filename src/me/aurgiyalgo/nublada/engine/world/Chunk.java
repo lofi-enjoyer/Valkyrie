@@ -87,9 +87,13 @@ public class Chunk {
                     voxels[x | y << 5 | z << 13] = voxel;
                 }
 
-                for (int y = 0; y < 20; y++) {
-                    if (voxels[x | y << 5 | z << 13] == 0)
-                        voxels[x | y << 5 | z << 13] = 7;
+                if (maxHeight < 20) {
+                    for (int y = 0; y < 20; y++) {
+                        if (voxels[x | y << 5 | z << 13] == 0)
+                            voxels[x | y << 5 | z << 13] = 7;
+                        else if (voxels[x | y << 5 | z << 13] == 1)
+                            voxels[x | y << 5 | z << 13] = 11;
+                    }
                 }
             }
         }

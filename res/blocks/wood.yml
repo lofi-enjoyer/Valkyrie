@@ -1,3 +1,4 @@
 id: 3
 topTexture: 'log_top'
-sideTexture: 'log_oak'
+bottomTexture: 'log_top'
+texture: 'log_side'

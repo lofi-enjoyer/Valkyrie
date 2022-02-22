@@ -1,6 +1,6 @@
 id: 4
 topTexture: 'machine_top'
-sideTexture: 'machine_side'
+texture: 'machine_side'
 bottomTexture: 'machine_bottom'
 northTexture: 'machine_north'
 southTexture: 'machine_south'

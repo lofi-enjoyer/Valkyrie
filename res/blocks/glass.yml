@@ -1,4 +1,3 @@
 id: 5
-sideTexture: 'glass'
-topTexture: 'glass'
+texture: 'glass'
 transparent: true

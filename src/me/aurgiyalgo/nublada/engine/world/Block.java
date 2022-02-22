@@ -27,6 +27,16 @@ public class Block {
         this.westTexture = sideTexture;
     }
 
+    public Block(int id, int texture) {
+        this.id = id;
+        this.topTexture = texture;
+        this.bottomTexture = texture;
+        this.northTexture = texture;
+        this.southTexture = texture;
+        this.eastTexture = texture;
+        this.westTexture = texture;
+    }
+
     public Block(int id, int topTexture, int bottomTexture, int northTexture, int southTexture, int eastTexture, int westTexture) {
         this.id = id;
         this.topTexture = topTexture;
