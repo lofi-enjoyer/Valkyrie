@@ -22,9 +22,9 @@
 
 Nublada is a personal project I'm working on with the objective of learning more about Java, OpenGL, graphics rendering and the technologies needed to put together a basic Minecraft-like game engine.
 
-<img src="https://i.imgur.com/sEH1oHx.png" width="640" height="336">
+![2022-02-21 15-52-14 (5)](https://user-images.githubusercontent.com/25750692/155811531-ac8be712-774b-420f-b6e2-2bbdf0e50922.gif)
 
-> Screenshot showing a render distance of 16 chunks (32 Minecraft chunks / ~512 meters) around the camera
+> Render distance of 8 chunks (8 Minecraft chunks / ~256 meters) using around 500MB of memory, though the engine is capable of view distances up to 1 kilometer with a memory usage of about 4GB
 
 <div id="features"></div>
 
@@ -34,7 +34,7 @@ Nublada is a personal project I'm working on with the objective of learning more
 - Chunk-based world loading
 - Procedurally generated environment using [Perlin Noise](https://en.wikipedia.org/wiki/Perlin_noise)
 - Transparent textures support using depth sorting
-- Allows scripting using JavaScript
+- [Scripting using JavaScript](https://docs.oracle.com/en/java/javase/12/nashorn/introduction.html)
 - Dynamic data loading with YAML, allowing to add new blocks and textures easily
 - Multithreaded mesh building and world generation
 - Frustum culling
