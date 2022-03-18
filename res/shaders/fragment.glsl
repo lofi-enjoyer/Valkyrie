@@ -6,6 +6,7 @@ in vec3 toLightVector;
 in float distance;
 in float faceLight;
 in float passViewDistance;
+in float passInWater;
 
 out vec4 outColor;
 
@@ -21,6 +22,10 @@ void main() {
     if (distance > passViewDistance - 64) {
         visibility = (distance - passViewDistance + 32) / 32.0;
         visibility = clamp(1 - visibility, 0.0, 1.0);
+    }
+
+    if (passInWater != 0) {
+        textureColour *= vec4(0.5f, 0.5f, 1f, 1f);
     }
 
     outColor = textureColour * faceLight;

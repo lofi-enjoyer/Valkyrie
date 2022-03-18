@@ -14,6 +14,7 @@ public class SolidsShader extends ShaderProgram {
     private int locationViewMatrix;
     private int locationCameraPosition;
     private int locationViewDistance;
+    private int locationInWater;
 
     public SolidsShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -26,6 +27,7 @@ public class SolidsShader extends ShaderProgram {
         locationViewMatrix = super.getUniformLocation("viewMatrix");
         locationCameraPosition = super.getUniformLocation("cameraPosition");
         locationViewDistance = super.getUniformLocation("viewDistance");
+        locationInWater = super.getUniformLocation("inWater");
     }
 
     @Override
@@ -50,6 +52,10 @@ public class SolidsShader extends ShaderProgram {
 
     public void loadViewDistance(float viewDistance) {
         super.loadFloat(locationViewDistance, viewDistance);
+    }
+
+    public void setInWater(boolean inWater) {
+        super.loadBoolean(locationInWater, inWater);
     }
 
 }

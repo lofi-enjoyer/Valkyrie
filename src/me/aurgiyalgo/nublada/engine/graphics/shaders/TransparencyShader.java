@@ -17,6 +17,7 @@ public class TransparencyShader extends ShaderProgram{
     private int locationViewDistance;
     private int locationLeavesId;
     private int locationWaterId;
+    private int locationInWater;
 
     public TransparencyShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -32,6 +33,7 @@ public class TransparencyShader extends ShaderProgram{
         locationViewDistance = super.getUniformLocation("viewDistance");
         locationLeavesId = super.getUniformLocation("leavesId");
         locationWaterId = super.getUniformLocation("waterId");
+        locationInWater = super.getUniformLocation("inWater");
     }
 
     @Override
@@ -68,6 +70,10 @@ public class TransparencyShader extends ShaderProgram{
 
     public void loadWaterId(int id) {
         super.loadInt(locationWaterId, id);
+    }
+
+    public void setInWater(boolean inWater) {
+        super.loadBoolean(locationInWater, inWater);
     }
 
 }

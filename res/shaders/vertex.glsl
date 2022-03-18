@@ -6,12 +6,14 @@ in float light;
 
 out vec3 passColor;
 out vec3 passLight;
+out float passInWater;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform vec3 cameraPosition;
 uniform float viewDistance;
+uniform float inWater;
 
 const vec3[6] normalVectors = vec3[6](
     vec3( 1,  0,  0),
@@ -51,4 +53,5 @@ void main() {
 
     faceLight = lights[int(light)];
     passViewDistance = viewDistance;
+    passInWater = inWater;
 }

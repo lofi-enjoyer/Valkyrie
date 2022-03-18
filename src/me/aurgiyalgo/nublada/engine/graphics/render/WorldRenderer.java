@@ -7,6 +7,7 @@ import me.aurgiyalgo.nublada.engine.graphics.shaders.SolidsShader;
 import me.aurgiyalgo.nublada.engine.graphics.shaders.TransparencyShader;
 import me.aurgiyalgo.nublada.engine.utils.Maths;
 import me.aurgiyalgo.nublada.engine.utils.Timings;
+import me.aurgiyalgo.nublada.engine.world.Block;
 import me.aurgiyalgo.nublada.engine.world.BlockRegistry;
 import me.aurgiyalgo.nublada.engine.world.Chunk;
 import me.aurgiyalgo.nublada.engine.world.World;
@@ -114,6 +115,8 @@ public class WorldRenderer {
             world.getChunks().remove(chunk.getPosition());
         });
 
+        int headBlock = world.getBlock(camera.getPosition());
+
         // If a chunk was unloaded, sort the chunks
         if (chunksToUnload.size() > 0)
             needsSorting = true;
@@ -135,6 +138,7 @@ public class WorldRenderer {
         solidsShader.start();
         solidsShader.loadViewMatrix(camera);
         solidsShader.loadViewDistance(VIEW_DISTANCE * 32);
+        solidsShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
             solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
@@ -157,6 +161,7 @@ public class WorldRenderer {
         transparencyShader.loadViewMatrix(camera);
         transparencyShader.loadTime((float) GLFW.glfwGetTime());
         transparencyShader.loadViewDistance(VIEW_DISTANCE * 32);
+        transparencyShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
             transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));

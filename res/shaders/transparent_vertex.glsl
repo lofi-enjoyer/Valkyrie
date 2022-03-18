@@ -8,6 +8,7 @@ in float light;
 
 out vec3 passColor;
 out vec3 passLight;
+out float passInWater;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
@@ -17,6 +18,7 @@ uniform float time;
 uniform float viewDistance;
 uniform int leavesId;
 uniform int waterId;
+uniform float inWater;
 
 const vec3[6] normalVectors = vec3[6](
     vec3( 1,  0,  0),
@@ -59,4 +61,5 @@ void main() {
 
     distance = length(cameraPosition.xz - worldPosition.xz);
     passViewDistance = viewDistance;
+    passInWater = inWater;
 }
