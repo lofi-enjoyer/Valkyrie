@@ -23,19 +23,21 @@ public class Player {
     public void update(float delta) {
         position.x = camera.getPosition().x;
         position.z = camera.getPosition().z;
-        if (world.getBlock((int)(Math.floor(position.x)), (int)(position.y + 0.5f), (int)(Math.floor(position.z))) != 0) {
+        int currentBlock = world.getBlock((int)(Math.floor(position.x)), (int)(position.y + 0.5f), (int)(Math.floor(position.z)));
+        int blockUnder = world.getBlock((int)(Math.floor(position.x)), (int)(position.y - 0.5f), (int)(Math.floor(position.z)));
+        if (currentBlock != 0 && currentBlock != 7) {
             position.y++;
         }
         if (!isColliding(delta)) {
-            verticalSpeed += -0.75f * delta;
+            verticalSpeed += -0.75f * delta * (currentBlock == 7 ? 0.25f : 1f);
             contact = false;
         } else {
             verticalSpeed = 0.0f;
             contact = true;
         }
-        if (contact) {
+        if (contact || currentBlock == 7) {
             if (GLFW.glfwGetKey(Window.id, GLFW.GLFW_KEY_SPACE) == GLFW.GLFW_PRESS) {
-                verticalSpeed = 0.18f;
+                verticalSpeed = currentBlock != 7 ? 0.18f : 0.055f;
             }
         }
 
@@ -45,13 +47,18 @@ public class Player {
     }
 
     private boolean isColliding(float delta) {
-        if (world.getBlock((int)(Math.floor(position.x - WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z - WIDTH / 2f))) != 0) {
+        int[] blocks = new int[4];
+        blocks[0] = world.getBlock((int)(Math.floor(position.x - WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z - WIDTH / 2f)));
+        blocks[1] = world.getBlock((int)(Math.floor(position.x + WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z - WIDTH / 2f)));
+        blocks[2] = world.getBlock((int)(Math.floor(position.x - WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z + WIDTH / 2f)));
+        blocks[3] = world.getBlock((int)(Math.floor(position.x + WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z + WIDTH / 2f)));
+        if (blocks[0] != 0 && blocks[0] != 7) {
             return true;
-        } else if (world.getBlock((int)(Math.floor(position.x + WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z - WIDTH / 2f))) != 0) {
+        } else if (blocks[1] != 0 && blocks[1] != 7) {
             return true;
-        } else if (world.getBlock((int)(Math.floor(position.x - WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z + WIDTH / 2f))) != 0) {
+        } else if (blocks[2] != 0 && blocks[2] != 7) {
             return true;
-        } else if (world.getBlock((int)(Math.floor(position.x + WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z + WIDTH / 2f))) != 0) {
+        } else if (blocks[3] != 0 && blocks[3] != 7) {
             return true;
         }
         return false;

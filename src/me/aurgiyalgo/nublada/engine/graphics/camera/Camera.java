@@ -72,14 +72,6 @@ public class Camera {
             this.position.z += Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
         }
 
-        if (GLFW.glfwGetKey(window, GLFW_KEY_SPACE) == 1) {
-            this.position.y += 1 * SPEED * delta;
-        }
-
-        if (GLFW.glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == 1) {
-            this.position.y -= 1 * SPEED * delta;
-        }
-
         if (GLFW.glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
             GLFW.glfwSetCursorPos(window, 320, 180);
             GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
