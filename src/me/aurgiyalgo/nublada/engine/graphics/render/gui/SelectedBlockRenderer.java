@@ -55,9 +55,10 @@ public class SelectedBlockRenderer {
     }
 
     public void render(int id) {
-        GL30.glEnable(GL30.GL_BLEND);
-
         Block block = BlockRegistry.getBLock(id);
+        if (block == null) return;
+
+        GL30.glEnable(GL30.GL_BLEND);
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
 

@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class BlockRegistry {
 
-    private static List<Block> BLOCKS;
+    private static Block[] BLOCKS;
     public static int TEXTURE_ARRAY_ID;
     private static List<String> texturesList;
 
@@ -21,7 +21,7 @@ public class BlockRegistry {
         Nublada.LOG.info("Setting up block registry...");
         long timer = System.nanoTime();
 
-        BLOCKS = new ArrayList<>();
+        List<Block> blocksToLoad = new ArrayList<>();
         texturesList = new ArrayList<>();
 
         File blocksFolder = new File("res/blocks");
@@ -30,6 +30,7 @@ public class BlockRegistry {
         }
 
         Yaml yaml = new Yaml();
+        int maxId = 0;
 
         for (File blockFile : blocksFolder.listFiles()) {
             if (!blockFile.getName().endsWith(".yml")) continue;
@@ -43,6 +44,8 @@ public class BlockRegistry {
             }
 
             int id = (int) data.get("id");
+            if (maxId < id) maxId = id;
+
             String texture = (String) data.get("texture");
 
             Block block = new Block(id, getTextureId(texture), getTextureId(texture));
@@ -76,20 +79,25 @@ public class BlockRegistry {
                 block.setTransparent(isTransparent);
             }
 
-            BLOCKS.add(block);
+            blocksToLoad.add(block);
         }
 
-        BLOCKS.sort(Comparator.comparingInt(Block::getId));
+        blocksToLoad.sort(Comparator.comparingInt(Block::getId));
 
         TEXTURE_ARRAY_ID = Nublada.LOADER.loadTextureArray(texturesList.toArray(new String[0]));
 
-        BLOCKS.forEach(Block::setupMesh);
+        blocksToLoad.forEach(Block::setupMesh);
+
+        BLOCKS = new Block[maxId + 1];
+        for (Block block : blocksToLoad) {
+            BLOCKS[block.getId()] = block;
+        }
 
         Nublada.LOG.info("Block registry has been setup (" + ((System.nanoTime() - timer) / 1000000f) + "ms)");
     }
 
     public static Block getBLock(int id) {
-        return BLOCKS.get(id - 1);
+        return BLOCKS[id];
     }
 
     private static int getTextureId(String textureName) {
@@ -104,7 +112,7 @@ public class BlockRegistry {
     }
 
     public static int getBlockCount() {
-        return BLOCKS.size();
+        return BLOCKS.length;
     }
 
 }

@@ -74,7 +74,8 @@ public class WorldScene implements IScene {
 
         worldRenderer.render(world, camera);
 
-        selectedBlockRenderer.render(selectedBlock + 1);
+//        if (selectedBlock != 0)
+        selectedBlockRenderer.render(selectedBlock);
 
         if (GLFW.glfwGetMouseButton(Window.id, 0) == 0 &&
                 GLFW.glfwGetMouseButton(Window.id, 1) == 0) mouse = 0;
@@ -86,7 +87,7 @@ public class WorldScene implements IScene {
 
         if (mouse != 1 && GLFW.glfwGetMouseButton(Window.id, 1) != 0) {
             mouse = 1;
-            script.callFunction("onPlace", world, camera, selectedBlock + 1);
+            script.callFunction("onPlace", world, camera, selectedBlock);
         }
     }
 
