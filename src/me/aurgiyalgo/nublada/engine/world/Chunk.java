@@ -42,6 +42,8 @@ public class Chunk {
     private final Vector2i position;
     private MeshBundle mesh;
 
+    private int currentLodLevel;
+
     private final World world;
 
     private final Chunk[] neighbors;
@@ -224,5 +226,13 @@ public class Chunk {
 
     public MeshBundle getModel() {
         return mesh;
+    }
+
+    public int getCurrentLodLevel() {
+        return currentLodLevel;
+    }
+
+    public void setCurrentLodLevel(int lodLevel) {
+        this.currentLodLevel = lodLevel;
     }
 }

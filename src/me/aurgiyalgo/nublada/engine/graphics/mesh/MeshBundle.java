@@ -8,19 +8,25 @@ import me.aurgiyalgo.nublada.engine.world.Chunk;
 public class MeshBundle {
 
     private Mesh solidMesh;
-    private Mesh transparentMesh;
+    private Mesh[] transparentMesh;
 
     private GreedyMesher greedyMesher;
-    private DynamicMesher dynamicMesher;
+    private DynamicMesher[] dynamicMesher;
 
     public MeshBundle(Chunk chunk) {
         this.greedyMesher = new GreedyMesher(chunk);
-        this.dynamicMesher = new DynamicMesher(chunk);
+
+        this.dynamicMesher = new DynamicMesher[2];
+        this.dynamicMesher[0] = new DynamicMesher(chunk, 1);
+        this.dynamicMesher[1] = new DynamicMesher(chunk, 2);
     }
 
     public MeshBundle loadMeshToGpu() {
         solidMesh = greedyMesher.loadMeshToGpu();
-        transparentMesh = dynamicMesher.loadMeshToGpu();
+
+        transparentMesh = new Mesh[2];
+        transparentMesh[0] = dynamicMesher[0].loadMeshToGpu();
+        transparentMesh[1] = dynamicMesher[1].loadMeshToGpu();
 
         greedyMesher = null;
         dynamicMesher = null;
@@ -31,7 +37,7 @@ public class MeshBundle {
         return solidMesh;
     }
 
-    public Mesh getTransparentMesh() {
+    public Mesh[] getTransparentMeshes() {
         return transparentMesh;
     }
 }

@@ -101,6 +101,8 @@ public class WorldRenderer {
                 return;
             }
 
+            chunk.setCurrentLodLevel(distance > VIEW_DISTANCE ? 1 : 0);
+
             if (chunk.getModel() == null)
                 return;
 
@@ -164,14 +166,14 @@ public class WorldRenderer {
         transparencyShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
-            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), 2));
+            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
 
-            GL30.glBindVertexArray(chunk.getModel().getTransparentMesh().getVaoId());
+            GL30.glBindVertexArray(chunk.getModel().getTransparentMeshes()[chunk.getCurrentLodLevel()].getVaoId());
             GL30.glEnableVertexAttribArray(0);
             GL30.glEnableVertexAttribArray(1);
             GL30.glEnableVertexAttribArray(2);
 
-            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMesh().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
+            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMeshes()[chunk.getCurrentLodLevel()].getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
         GL30.glDisable(GL30.GL_BLEND);
         Timings.stopTiming("Transparent Mesh Render");
