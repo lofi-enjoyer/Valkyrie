@@ -200,7 +200,7 @@ public class Chunk {
     public void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
         if (x < 0 || y < 0 || z < 0) return;
         if (x > CHUNK_WIDTH - 1 || y > CHUNK_HEIGHT - 1 || z > CHUNK_WIDTH - 1) return;
-        voxels[x | y << 5 | z << 13] = (short) voxel;
+            voxels[x | y << 5 | z << 13] = (short) voxel;
 
         if (!updateChunk) return;
 

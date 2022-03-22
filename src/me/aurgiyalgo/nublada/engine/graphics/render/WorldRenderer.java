@@ -101,7 +101,7 @@ public class WorldRenderer {
                 return;
             }
 
-            chunk.setCurrentLodLevel(distance > VIEW_DISTANCE ? 1 : 0);
+            chunk.setCurrentLodLevel(distance > 5 * 5 ? 1 : 0);
 
             if (chunk.getModel() == null)
                 return;
@@ -143,14 +143,14 @@ public class WorldRenderer {
         solidsShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
-            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
+            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
 
-            GL30.glBindVertexArray(chunk.getModel().getSolidMesh().getVaoId());
+            GL30.glBindVertexArray(chunk.getModel().getSolidMeshes()[chunk.getCurrentLodLevel()].getVaoId());
             GL30.glEnableVertexAttribArray(0);
             GL30.glEnableVertexAttribArray(1);
             GL30.glEnableVertexAttribArray(2);
 
-            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMesh().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
+            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMeshes()[chunk.getCurrentLodLevel()].getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
         Timings.stopTiming("Solid Mesh Render");
 

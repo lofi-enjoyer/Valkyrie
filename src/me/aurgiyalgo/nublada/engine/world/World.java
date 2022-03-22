@@ -18,7 +18,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 public class World {
 
     public static final int CHUNK_WIDTH = 32;
-    public static final int CHUNK_HEIGHT = 256;
+    public static final int CHUNK_HEIGHT = 128;
 
     private static final ScheduledExecutorService generationService = new ScheduledThreadPoolExecutor(1, r -> {
        Thread thread = new Thread(r, "Generation Thread");

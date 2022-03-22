@@ -26,7 +26,7 @@ public class Nublada {
         LOG.setLevel(Level.INFO);
 
         // FIXME: 09/01/2022 Make this customizable
-        this.window = new Window(640, 360, "Nublada");
+        this.window = new Window(320, 180, "Nublada");
 
         WINDOW_ID = window.getId();
     }
