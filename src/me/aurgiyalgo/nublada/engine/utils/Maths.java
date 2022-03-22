@@ -17,6 +17,14 @@ public class Maths {
         return matrix;
     }
 
+    public static Matrix4f createTransformationMatrix(Vector2i position, int scale) {
+        Matrix4f matrix = new Matrix4f();
+        matrix.identity();
+        matrix.translate(position.x * CHUNK_WIDTH, 0, position.y * CHUNK_WIDTH);
+        matrix.scale(scale);
+        return matrix;
+    }
+
     public static Matrix4f createTransformationMatrix(Vector2f position, Vector3f rotation) {
         Matrix4f matrix = new Matrix4f();
         matrix.identity();

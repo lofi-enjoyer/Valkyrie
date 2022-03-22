@@ -77,13 +77,13 @@ public class DynamicMesher {
 
     private void computeMesh() {
         int currentVoxel;
-        for (int x = 0; x < CHUNK_WIDTH; x++) {
-            for (int y = 0; y < CHUNK_HEIGHT; y++) {
-                for (int z = 0; z < CHUNK_WIDTH; z++) {
+        for (int x = 0; x < CHUNK_WIDTH; x += 2) {
+            for (int y = 0; y < CHUNK_HEIGHT; y += 2) {
+                for (int z = 0; z < CHUNK_WIDTH; z += 2) {
                     currentVoxel = chunk.getBlock(x, y, z);
                     if (currentVoxel == 0 || !BlockRegistry.getBLock(currentVoxel).isTransparent()) continue;
 
-                    meshBlock(x, y, z, BlockRegistry.getBLock(currentVoxel));
+                    meshBlock(x / 2, y / 2, z / 2, BlockRegistry.getBLock(currentVoxel));
                 }
             }
         }
@@ -92,7 +92,7 @@ public class DynamicMesher {
     int passes = 0;
 
     private void meshBlock(int x, int y, int z, Block block) {
-        int westBlock = chunk.getBlock(x + 1, y, z);
+        int westBlock = chunk.getBlock(x*2 + 1*2, y*2, z*2);
         if (westBlock == 0 || (block.getId() != westBlock && BlockRegistry.getBLock(westBlock).isTransparent())) {
             positions.addAll(List.of(x + 1f, y + 0f, z + 0f));
             positions.addAll(List.of(x + 1f, y + 1f, z + 0f));
@@ -119,7 +119,7 @@ public class DynamicMesher {
             }
         }
 
-        int eastBlock = chunk.getBlock(x - 1, y, z);
+        int eastBlock = chunk.getBlock(x*2 - 1*2, y*2, z*2);
         if (eastBlock == 0 || (block.getId() != eastBlock && BlockRegistry.getBLock(eastBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 0f, z + 0f));
             positions.addAll(List.of(x + 0f, y + 1f, z + 0f));
@@ -146,7 +146,7 @@ public class DynamicMesher {
             }
         }
 
-        int northBlock = chunk.getBlock(x, y, z - 1);
+        int northBlock = chunk.getBlock(x*2, y*2, z*2 - 1*2);
         if (northBlock == 0 || (block.getId() != northBlock && BlockRegistry.getBLock(northBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 0f, z + 0f));
             positions.addAll(List.of(x + 0f, y + 1f, z + 0f));
@@ -173,7 +173,7 @@ public class DynamicMesher {
             }
         }
 
-        int southBlock = chunk.getBlock(x, y, z + 1);
+        int southBlock = chunk.getBlock(x*2, y*2, z*2 + 1*2);
         if (southBlock == 0 || (block.getId() != southBlock && BlockRegistry.getBLock(southBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 0f, z + 1f));
             positions.addAll(List.of(x + 0f, y + 1f, z + 1f));
@@ -200,7 +200,7 @@ public class DynamicMesher {
             }
         }
 
-        int upBlock = chunk.getBlock(x, y + 1, z);
+        int upBlock = chunk.getBlock(x*2, y*2 + 1*2, z*2);
         if (upBlock == 0 || (block.getId() != upBlock && BlockRegistry.getBLock(upBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 1f, z + 0f));
             positions.addAll(List.of(x + 0f, y + 1f, z + 1f));
@@ -227,7 +227,7 @@ public class DynamicMesher {
             }
         }
 
-        int bottomBlock = chunk.getBlock(x, y - 1, z);
+        int bottomBlock = chunk.getBlock(x*2, y*2 - 1*2, z*2);
         if (bottomBlock == 0 || (block.getId() != bottomBlock && BlockRegistry.getBLock(bottomBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 0f, z + 0f));
             positions.addAll(List.of(x + 0f, y + 0f, z + 1f));

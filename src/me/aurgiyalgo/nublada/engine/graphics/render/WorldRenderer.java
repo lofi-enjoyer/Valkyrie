@@ -164,7 +164,7 @@ public class WorldRenderer {
         transparencyShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
-            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
+            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), 2));
 
             GL30.glBindVertexArray(chunk.getModel().getTransparentMesh().getVaoId());
             GL30.glEnableVertexAttribArray(0);
