@@ -25,6 +25,7 @@ public class Window {
 
     private boolean wireframe;
     private boolean faceCulling;
+    private boolean vsync = true;
 
     // TODO: 09/02/2022 Make this a singleton
     public Window(int width, int height, String title) {
@@ -57,6 +58,10 @@ public class Window {
             if (key == GLFW_KEY_Y && action == GLFW_RELEASE) {
                 WorldRenderer.VIEW_DISTANCE++;
             }
+            if (key == GLFW_KEY_H && action == GLFW_RELEASE) {
+                vsync = !vsync;
+                glfwSwapInterval(vsync ? 1 : 0);
+            }
         });
 
         glfwSetWindowSizeCallback(id, (window, newwidth, newheight) -> {
@@ -82,7 +87,7 @@ public class Window {
 
         glfwMakeContextCurrent(id);
         Nublada.LOG.info("OpenGL Context set");
-        glfwSwapInterval(1);
+        glfwSwapInterval(vsync ? 1 : 0);
     }
 
     public void show() {

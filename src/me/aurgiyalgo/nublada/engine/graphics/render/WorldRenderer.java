@@ -25,7 +25,7 @@ import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_WIDTH;
 
 public class WorldRenderer {
 
-    public static int VIEW_DISTANCE = 8;
+    public static int VIEW_DISTANCE = 24;
 
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
@@ -101,7 +101,7 @@ public class WorldRenderer {
                 return;
             }
 
-            chunk.setCurrentLodLevel(distance > 5 * 5 ? 1 : 0);
+            chunk.setCurrentLodLevel(distance > 8 * 8 ? 1 : 0);
 
             if (chunk.getModel() == null)
                 return;
@@ -129,6 +129,7 @@ public class WorldRenderer {
         if (needsSorting)
             chunksToRender.sort(new SortByDistance());
 
+        long timer = System.nanoTime();
         GL30.glEnable(GL30.GL_DEPTH_TEST);
         GL30.glEnable(GL30.GL_CULL_FACE);
         GL30.glCullFace(GL30.GL_BACK);
@@ -177,6 +178,8 @@ public class WorldRenderer {
         });
         GL30.glDisable(GL30.GL_BLEND);
         Timings.stopTiming("Transparent Mesh Render");
+
+        System.out.println(world.getChunks().size() + " chunks - " + (System.nanoTime() - timer) / 1000000f);
 
         // Highlights the voxel the player is looking at
         selectorShader.start();

@@ -30,12 +30,13 @@ public class Chunk {
             new Vector2i( 1,  0),
     };
 
+    // TODO: 24/03/2022 Make the core count customizable
     private static final ScheduledExecutorService meshService =
-            new ScheduledThreadPoolExecutor(3, r -> {
-       Thread thread = new Thread(r, "Meshing Thread");
-       thread.setDaemon(true);
+            new ScheduledThreadPoolExecutor(2, r -> {
+        Thread thread = new Thread(r, "Meshing Thread");
+        thread.setDaemon(true);
 
-       return thread;
+        return thread;
     });
 
     private short[] voxels;

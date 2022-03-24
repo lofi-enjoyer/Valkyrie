@@ -18,12 +18,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 public class World {
 
     public static final int CHUNK_WIDTH = 32;
-    public static final int CHUNK_HEIGHT = 128;
+    public static final int CHUNK_HEIGHT = 256;
 
     private static final ScheduledExecutorService generationService = new ScheduledThreadPoolExecutor(1, r -> {
-       Thread thread = new Thread(r, "Generation Thread");
-       thread.setDaemon(true);
-       return thread;
+        Thread thread = new Thread(r, "Generation Thread");
+        thread.setDaemon(true);
+        return thread;
     });
 
     private final Map<Vector2i, Chunk> chunks;
