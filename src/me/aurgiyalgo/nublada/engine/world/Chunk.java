@@ -2,8 +2,10 @@ package me.aurgiyalgo.nublada.engine.world;
 
 import me.aurgiyalgo.nublada.engine.graphics.mesh.MeshBundle;
 import me.aurgiyalgo.nublada.engine.utils.PerlinNoise;
+import me.aurgiyalgo.nublada.engine.world.populator.Populator;
 import org.joml.Vector2i;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -62,77 +64,11 @@ public class Chunk {
 
     // TODO: 24/01/2022 Implement generators for World Generation
     // Temporary generation code
-    public void populateChunk(PerlinNoise noise) {
-        if (this.voxels != null) return;
+    public void populateChunk(List<Populator> populators) {
+        voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
-        this.voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
-
-        int chunkX = position.x * CHUNK_WIDTH;
-        int chunkZ = position.y * CHUNK_WIDTH;
-        Vector2i worldCenter = new Vector2i();
-
-        byte voxel;
-        for (int x = 0; x < CHUNK_WIDTH; x++) {
-            for (int z = 0; z < CHUNK_WIDTH; z++) {
-
-                double noiseValue = (noise.noise(x + chunkX, z + chunkZ) + 1) / 2f;
-                double maxHeight = noiseValue * noiseValue * 250;
-                double distance = worldCenter.distance(x + chunkX, z + chunkZ) - 256;
-                distance = Math.max(distance, 0);
-                double gradient = (1 - (distance / 256f)) * 0.5f;
-                maxHeight = gradient > 0 ? maxHeight * gradient + 4 : 4;
-
-                for (int y = 0; y < maxHeight; y++) {
-                    voxel = 2;
-                    if ((int) (maxHeight) == y || gradient < 0) {
-                        voxel = 1;
-                    }
-                    voxels[x | y << 5 | z << 13] = voxel;
-                }
-
-                if (maxHeight < 20) {
-                    for (int y = 0; y < 20; y++) {
-                        if (voxels[x | y << 5 | z << 13] == 0)
-                            voxels[x | y << 5 | z << 13] = 7;
-                        else if (voxels[x | y << 5 | z << 13] == 1)
-                            voxels[x | y << 5 | z << 13] = 11;
-                    }
-                }
-            }
-        }
-
-        Random random = new Random();
-        int treeAmount = random.nextInt(16) + 8;
-        for (int i = 0; i < treeAmount; i++) {
-            int treeX = random.nextInt(CHUNK_WIDTH - 4) + 2;
-            int treeZ = random.nextInt(CHUNK_WIDTH - 4) + 2;
-
-            int height = random.nextInt(8) + 3;
-
-            int treeY = 0;
-            for (int y = 1; y < CHUNK_HEIGHT - 15; y++) {
-                if (getBlock(treeX, y, treeZ) == 0 && getBlock(treeX, y - 1, treeZ) == 1) {
-                    treeY = y;
-                    break;
-                }
-            }
-
-            if (treeY == 0) continue;
-
-            for (int x = 0; x < 5; x++) {
-                for (int y = 0; y < 3; y++) {
-                    for (int z = 0; z < 5; z++) {
-                        if (getBlock(x + treeX - 2, y + treeY + height, z + treeZ - 2) == 0)
-                            setBlock(6, x + treeX - 2, y + treeY + height, z + treeZ - 2, false);
-                    }
-                }
-            }
-
-            setBlock(6, treeX, treeY + height + 3, treeZ, false);
-
-            for (int y = 0; y < height + 2; y++) {
-                setBlock(3, treeX, y + treeY, treeZ, false);
-            }
+        for (Populator populator : populators) {
+            populator.populate(this);
         }
     }
 
