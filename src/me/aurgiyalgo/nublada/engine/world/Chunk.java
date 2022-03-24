@@ -5,12 +5,18 @@ import me.aurgiyalgo.nublada.engine.utils.PerlinNoise;
 import me.aurgiyalgo.nublada.engine.world.populator.Populator;
 import org.joml.Vector2i;
 
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_WIDTH;
 import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_HEIGHT;
@@ -64,11 +70,66 @@ public class Chunk {
 
     // TODO: 24/01/2022 Implement generators for World Generation
     // Temporary generation code
-    public void populateChunk(List<Populator> populators) {
+    public void loadChunk(World world) {
         voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
-        for (Populator populator : populators) {
+        if (loadFromFile())
+            return;
+
+        for (Populator populator : world.getPopulators()) {
             populator.populate(this);
+        }
+    }
+
+    private boolean loadFromFile() {
+        try {
+            long timer = System.nanoTime();
+            File file = new File("world//" + position.x + "_" + position.y + ".dat");
+            if (!file.exists())
+                return false;
+
+            DataInputStream input = new DataInputStream(new FileInputStream(file));
+            InflaterInputStream iis = new InflaterInputStream(input);
+
+            byte[] data = iis.readAllBytes();
+
+            for (int i = 0; i < voxels.length; i++) {
+                voxels[i] = (short) ((data[i * 2 + 1] << 4) | data[i * 2]);
+            }
+
+            input.close();
+
+            System.out.println((System.nanoTime() - timer) / 1000000f + "ms");
+        } catch (IOException exception) {
+            exception.printStackTrace();
+            voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
+            return false;
+        }
+        return true;
+    }
+
+    public void saveToFile() {
+        try {
+            if (voxels == null)
+                return;
+
+            File file = new File("world//" + position.x + "_" + position.y + ".dat");
+
+            DataOutputStream output = new DataOutputStream(new FileOutputStream(file));
+            DeflaterOutputStream dos = new DeflaterOutputStream(output);
+            byte[] data = new byte[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH * 2];
+            for (int i = 0; i < voxels.length; i++) {
+                data[i * 2] = (byte) (voxels[i] & 0xff);
+                data[i * 2 + 1] = (byte) ((voxels[i] >> 8) & 0xff);
+            }
+
+            dos.write(data);
+            dos.flush();
+            dos.close();
+
+            output.close();
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
     }
 

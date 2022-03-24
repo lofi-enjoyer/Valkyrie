@@ -99,6 +99,11 @@ public class WorldScene implements IScene {
     }
 
     @Override
+    public void onClose() {
+        world.saveWorld();
+    }
+
+    @Override
     public void dispose() {
 
     }

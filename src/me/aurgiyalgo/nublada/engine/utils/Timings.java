@@ -36,7 +36,7 @@ public class Timings {
             Nublada.LOG.warning("Active timings not being stopped: " + INSTANCE.activeTimings);
             INSTANCE.activeTimings.clear();
         }
-        printTimings();
+//        printTimings();
         INSTANCE.finalizedTimings.clear();
     }
 

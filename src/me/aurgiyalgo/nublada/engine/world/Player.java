@@ -5,6 +5,8 @@ import me.aurgiyalgo.nublada.engine.graphics.display.Window;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
+import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_WIDTH;
+
 // TODO: 11/02/2022 Temporary class to test collisions
 public class Player {
 
@@ -21,6 +23,9 @@ public class Player {
     }
 
     public void update(float delta) {
+        if (world.getChunk((int) Math.floor(position.x / CHUNK_WIDTH), (int) Math.floor(position.z / CHUNK_WIDTH)) == null)
+            return;
+
         position.x = camera.getPosition().x;
         position.z = camera.getPosition().z;
         int currentBlock = world.getBlock((int)(Math.floor(position.x)), (int)(position.y + 0.5f), (int)(Math.floor(position.z)));

@@ -8,7 +8,9 @@ import me.aurgiyalgo.nublada.engine.world.populator.TerrainPopulator;
 import me.aurgiyalgo.nublada.engine.world.populator.TreePopulator;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -34,6 +36,7 @@ public class World {
     private final Map<Vector2i, Chunk> chunks;
 
     private final PerlinNoise noise;
+    private double seed;
 
     private final List<Future<Chunk>> chunkGenerationFutures;
 
@@ -41,7 +44,32 @@ public class World {
         this.chunks = new HashMap<>();
         this.chunkGenerationFutures = new ArrayList<>();
 
-        this.noise = new PerlinNoise();
+        Yaml yaml = new Yaml();
+        File worldFolder = new File("world");
+        Map<String, Object> data = new HashMap<>();
+        try {
+            if (!worldFolder.exists()) {
+                System.out.println("Ejem");
+                worldFolder.mkdir();
+                this.seed = new Random().nextGaussian() * 255;
+                data.put("seed", seed);
+
+                FileWriter writer = new FileWriter("world/world.yml");
+                yaml.dump(data, writer);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            data = yaml.load(new FileInputStream("world/world.yml"));
+            this.seed = (double) data.get("seed");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        this.noise = new PerlinNoise(seed, 500);
 
         this.populators = new ArrayList<>();
         populators.add(new TerrainPopulator(noise));
@@ -65,7 +93,7 @@ public class World {
         chunks.put(position, chunk);
 
         Future<Chunk> future = generationService.submit(() -> {
-            chunk.populateChunk(populators);
+            chunk.loadChunk(this);
             return chunk;
         });
 
@@ -112,6 +140,12 @@ public class World {
                     Nublada.LOG.severe(e.getMessage());
                 }
             }
+        }
+    }
+
+    public void saveWorld() {
+        for (Chunk chunk : chunks.values()) {
+            chunk.saveToFile();
         }
     }
 
@@ -212,4 +246,9 @@ public class World {
     public Map<Vector2i, Chunk> getChunks() {
         return chunks;
     }
+
+    public List<Populator> getPopulators() {
+        return populators;
+    }
+
 }

@@ -60,6 +60,8 @@ public class Nublada {
 
             Timings.flushTimings();
         }
+
+        currentScene.onClose();
     }
 
     public void setCurrentScene(IScene scene) {
