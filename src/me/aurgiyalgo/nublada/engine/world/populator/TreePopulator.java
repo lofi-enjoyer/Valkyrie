@@ -17,7 +17,7 @@ public class TreePopulator extends Populator {
     @Override
     public void populate(Chunk chunk) {
         Random random = new Random();
-        int treeAmount = random.nextInt(16) + 8;
+        int treeAmount = random.nextInt((int) ((noise.noise(chunk.getPosition().x * 8, chunk.getPosition().y * 8) + 1) / 2f * 32));
         for (int i = 0; i < treeAmount; i++) {
             int treeX = random.nextInt(CHUNK_WIDTH - 4) + 2;
             int treeZ = random.nextInt(CHUNK_WIDTH - 4) + 2;
@@ -48,6 +48,8 @@ public class TreePopulator extends Populator {
             for (int y = 0; y < height + 2; y++) {
                 chunk.setBlock(3, treeX, y + treeY, treeZ, false);
             }
+
+            chunk.setBlock(8, treeX, treeY - 1, treeZ, false);
         }
     }
 
