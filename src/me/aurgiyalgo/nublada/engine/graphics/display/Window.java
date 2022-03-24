@@ -19,8 +19,8 @@ public class Window {
 
     public static long id;
 
-    private final int width;
-    private final int height;
+    private int width;
+    private int height;
     private final String title;
 
     private boolean wireframe;
@@ -105,7 +105,8 @@ public class Window {
 
     public void setResizeCallback(BiConsumer<Integer, Integer> action) {
         glfwSetWindowSizeCallback(id, (window, newWidth, newHeight) -> {
-            glViewport(0, 0, newWidth, newHeight);
+            this.width = newWidth;
+            this.height = newHeight;
             action.accept(newWidth, newHeight);
         });
     }
@@ -120,6 +121,14 @@ public class Window {
 
     public boolean keepOpen() {
         return !glfwWindowShouldClose(id);
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public long getId() {
