@@ -17,7 +17,7 @@ import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_HEIGHT;
  */
 public class GreedyMesher {
 
-    private static final int[] dims = { CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH };
+    private final int[] dims;
 
     private final Chunk chunk;
 
@@ -40,8 +40,17 @@ public class GreedyMesher {
     private float[] uvsArray;
     private float[] lightArray;
 
+    private final int detailLevel;
+
     public GreedyMesher(Chunk chunk) {
+        this(chunk, 1);
+    }
+
+    public GreedyMesher(Chunk chunk, int detailLevel) {
         this.chunk = chunk;
+        this.detailLevel = detailLevel;
+
+        this.dims = new int[] {CHUNK_WIDTH / detailLevel, CHUNK_HEIGHT / detailLevel, CHUNK_WIDTH / detailLevel};
 
         compute();
     }
@@ -130,8 +139,8 @@ public class GreedyMesher {
 
                         for(x[u] = 0; x[u] < dims[u]; x[u]++) {
 
-                            voxelFace  = chunk.getBlock(x[0], x[1], x[2]);
-                            voxelFace1 = chunk.getBlock(x[0] + q[0], x[1] + q[1], x[2] + q[2]);
+                            voxelFace  = chunk.getBlock(x[0] * detailLevel, x[1] * detailLevel, x[2] * detailLevel);
+                            voxelFace1 = chunk.getBlock((x[0] + q[0]) * detailLevel, (x[1] + q[1]) * detailLevel, (x[2] + q[2]) * detailLevel);
 
                             if (voxelFace != 0 && BlockRegistry.getBLock(voxelFace).isTransparent()) {
                                 voxelFace = 0;

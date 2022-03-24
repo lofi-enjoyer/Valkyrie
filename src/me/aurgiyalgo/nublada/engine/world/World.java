@@ -3,6 +3,9 @@ package me.aurgiyalgo.nublada.engine.world;
 import me.aurgiyalgo.nublada.Nublada;
 import me.aurgiyalgo.nublada.engine.utils.Maths;
 import me.aurgiyalgo.nublada.engine.utils.PerlinNoise;
+import me.aurgiyalgo.nublada.engine.world.populator.Populator;
+import me.aurgiyalgo.nublada.engine.world.populator.TerrainPopulator;
+import me.aurgiyalgo.nublada.engine.world.populator.TreePopulator;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
@@ -20,10 +23,12 @@ public class World {
     public static final int CHUNK_WIDTH = 32;
     public static final int CHUNK_HEIGHT = 256;
 
+    private final List<Populator> populators;
+
     private static final ScheduledExecutorService generationService = new ScheduledThreadPoolExecutor(1, r -> {
-       Thread thread = new Thread(r, "Generation Thread");
-       thread.setDaemon(true);
-       return thread;
+        Thread thread = new Thread(r, "Generation Thread");
+        thread.setDaemon(true);
+        return thread;
     });
 
     private final Map<Vector2i, Chunk> chunks;
@@ -37,6 +42,11 @@ public class World {
         this.chunkGenerationFutures = new ArrayList<>();
 
         this.noise = new PerlinNoise();
+
+        this.populators = new ArrayList<>();
+        populators.add(new TerrainPopulator(noise));
+        populators.add(new TreePopulator(noise));
+
         Nublada.LOG.info("World generation seed set to " + noise.getSeed());
     }
 
@@ -55,7 +65,7 @@ public class World {
         chunks.put(position, chunk);
 
         Future<Chunk> future = generationService.submit(() -> {
-            chunk.populateChunk(noise);
+            chunk.populateChunk(populators);
             return chunk;
         });
 
