@@ -8,8 +8,6 @@ in float faceLight;
 in float passViewDistance;
 in float passInWater;
 
-out vec4 outColor;
-
 uniform sampler2DArray textureSampler;
 
 const vec3 skyColor = vec3(0.45, 0.71, 1.00);
@@ -28,7 +26,7 @@ void main() {
         textureColour *= vec4(0.5f, 0.5f, 1f, 1f);
     }
 
-    outColor = textureColour * faceLight;
-    outColor = mix(vec4(skyColor, 1.0), outColor, visibility);
+    gl_FragColor = textureColour * faceLight;
+    gl_FragColor = mix(vec4(skyColor, 1.0), gl_FragColor, visibility);
 
 }

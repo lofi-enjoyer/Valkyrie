@@ -7,14 +7,10 @@ uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform float time;
 
-out float passTime;
-
 void main() {
 
     vec4 worldPosition = transformationMatrix * vec4(position, 1.0);
     vec4 positionRelativeToCam = viewMatrix * worldPosition;
 
     gl_Position = projectionMatrix * positionRelativeToCam;
-
-    passTime = time;
 }
