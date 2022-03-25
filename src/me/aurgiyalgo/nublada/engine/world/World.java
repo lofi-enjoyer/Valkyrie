@@ -3,6 +3,7 @@ package me.aurgiyalgo.nublada.engine.world;
 import me.aurgiyalgo.nublada.Nublada;
 import me.aurgiyalgo.nublada.engine.utils.Maths;
 import me.aurgiyalgo.nublada.engine.utils.PerlinNoise;
+import me.aurgiyalgo.nublada.engine.world.populator.CastlePopulator;
 import me.aurgiyalgo.nublada.engine.world.populator.Populator;
 import me.aurgiyalgo.nublada.engine.world.populator.TerrainPopulator;
 import me.aurgiyalgo.nublada.engine.world.populator.TreePopulator;
@@ -34,6 +35,7 @@ public class World {
     });
 
     private final Map<Vector2i, Chunk> chunks;
+    private final Map<Vector2i, FutureChunk> futureChunks;
 
     private final PerlinNoise noise;
     private double seed;
@@ -42,6 +44,7 @@ public class World {
 
     public World() {
         this.chunks = new HashMap<>();
+        this.futureChunks = new HashMap<>();
         this.chunkGenerationFutures = new ArrayList<>();
 
         Yaml yaml = new Yaml();
@@ -74,6 +77,7 @@ public class World {
         this.populators = new ArrayList<>();
         populators.add(new TerrainPopulator(noise));
         populators.add(new TreePopulator(noise));
+        populators.add(new CastlePopulator(noise));
 
         Nublada.LOG.info("World generation seed set to " + noise.getSeed());
     }
@@ -92,8 +96,10 @@ public class World {
 
         chunks.put(position, chunk);
 
+        FutureChunk futureChunk = futureChunks.remove(position);
+
         Future<Chunk> future = generationService.submit(() -> {
-            chunk.loadChunk(this);
+            chunk.loadChunk(this, futureChunk);
             return chunk;
         });
 
@@ -228,7 +234,12 @@ public class World {
     public void setBlock(int voxel, int x, int y, int z) {
         Vector2i position = getChunkPositionAt(x, z);
         if (!chunks.containsKey(position)) {
-            Nublada.LOG.warning("Tried to set a block on a non-loaded chunk (" + x + ", " + y + ", " + z + ")");
+            FutureChunk futureChunk = futureChunks.get(position);
+            if (futureChunk == null) {
+                futureChunk = futureChunks.put(position, new FutureChunk(position));
+            }
+            futureChunk.addBlock((short) voxel, x, y, z);
+//            Nublada.LOG.warning("Tried to set a block on a non-loaded chunk (" + x + ", " + y + ", " + z + ")");
             return;
         }
 

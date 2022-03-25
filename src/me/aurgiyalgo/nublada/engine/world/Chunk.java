@@ -70,7 +70,7 @@ public class Chunk {
 
     // TODO: 24/01/2022 Implement generators for World Generation
     // Temporary generation code
-    public void loadChunk(World world) {
+    public void loadChunk(World world, FutureChunk futureChunk) {
         voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
         if (loadFromFile())
@@ -79,6 +79,9 @@ public class Chunk {
         for (Populator populator : world.getPopulators()) {
             populator.populate(this);
         }
+
+        if (futureChunk != null)
+            futureChunk.setBlocksInChunk(this);
     }
 
     private boolean loadFromFile() {
