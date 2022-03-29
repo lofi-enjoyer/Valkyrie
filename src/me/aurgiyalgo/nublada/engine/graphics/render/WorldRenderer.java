@@ -20,6 +20,7 @@ import org.lwjgl.opengl.GL30;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static me.aurgiyalgo.nublada.engine.world.World.CHUNK_WIDTH;
 
@@ -34,9 +35,11 @@ public class WorldRenderer {
     private final TransparencyShader transparencyShader;
     private final SelectorShader selectorShader;
 
+    private final List<Chunk> chunksToRender = new ArrayList<>();
     private final Vector2i playerPosition;
 
     private final RaycastRenderer raycastRenderer;
+    private final AtomicBoolean needsSorting;
 
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
@@ -48,6 +51,8 @@ public class WorldRenderer {
         this.playerPosition = new Vector2i();
 
         this.raycastRenderer = new RaycastRenderer();
+
+        this.needsSorting = new AtomicBoolean(true);
 
         transparencyShader.start();
         transparencyShader.loadLeavesId(BlockRegistry.getBLock(6).getTopTexture());
@@ -62,12 +67,16 @@ public class WorldRenderer {
 
         world.checkGeneratingChunks();
 
-        // If true, chunks will be sorted to render them
-        // based on their distance to the player
-        boolean needsSorting = false;
-
         int playerX = (int) Math.floor(camera.getPosition().x / (float) CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) CHUNK_WIDTH);
+
+        if (!playerPosition.equals(new Vector2i(playerX, playerZ)))
+            needsSorting.set(true);
+
+        playerPosition.x = playerX;
+        playerPosition.y = playerZ;
+
+        System.out.println(playerPosition);
 
         // Checks all the chunks within the view distance,
         // and loads those which are not loaded
@@ -81,15 +90,17 @@ public class WorldRenderer {
                 if(distance < VIEW_DISTANCE * VIEW_DISTANCE){
                     if (world.getChunk(chunkX, chunkZ) == null) {
                         world.addChunk(chunkX, chunkZ);
-                        needsSorting = true;
+                        needsSorting.set(true);
                     }
                 }
 
             }
         }
 
-        List<Chunk> chunksToRender = new ArrayList<>();
         List<Chunk> chunksToUnload = new ArrayList<>();
+
+        if (needsSorting.get())
+            chunksToRender.clear();
 
         // Checks all loaded chunks, and if any is outside the view area unloads it
         world.getChunks().forEach((position, chunk) -> {
@@ -101,13 +112,13 @@ public class WorldRenderer {
                 return;
             }
 
-            chunk.setCurrentLodLevel(distance > 8 * 8 ? 1 : 0);
+            if (!needsSorting.get())
+                return;
 
             if (chunk.getModel() == null)
                 return;
 
-            if (!tester.isChunkInside(chunk, camera.getPosition().y))
-                return;
+            chunk.setCurrentLodLevel(distance > 8 * 8 ? 1 : 0);
 
             chunksToRender.add(chunk);
         });
@@ -119,15 +130,10 @@ public class WorldRenderer {
 
         int headBlock = world.getBlock(camera.getPosition());
 
-        // If a chunk was unloaded, sort the chunks
-        if (chunksToUnload.size() > 0)
-            needsSorting = true;
-
-        playerPosition.x = playerX;
-        playerPosition.y = playerZ;
-
-        if (needsSorting)
+        if (needsSorting.get()) {
             chunksToRender.sort(new SortByDistance());
+            needsSorting.set(false);
+        }
 
         GL30.glEnable(GL30.GL_DEPTH_TEST);
         GL30.glEnable(GL30.GL_CULL_FACE);
@@ -143,6 +149,9 @@ public class WorldRenderer {
         solidsShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
+            if (!tester.isChunkInside(chunk, camera.getPosition().y))
+                return;
+
             solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
 
             GL30.glBindVertexArray(chunk.getModel().getSolidMeshes()[chunk.getCurrentLodLevel()].getVaoId());
@@ -226,7 +235,7 @@ public class WorldRenderer {
 
         @Override
         public int compare(Chunk chunk1, Chunk chunk2) {
-            return (int) (chunk2.getPosition().distanceSquared(playerPosition.x, playerPosition.y) - chunk1.getPosition().distanceSquared(playerPosition.x, playerPosition.y));
+            return (int) Math.floor(chunk2.getPosition().distanceSquared(playerPosition.x, playerPosition.y) - chunk1.getPosition().distanceSquared(playerPosition.x, playerPosition.y));
         }
 
     }
