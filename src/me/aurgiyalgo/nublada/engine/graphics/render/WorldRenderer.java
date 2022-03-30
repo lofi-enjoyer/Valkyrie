@@ -76,8 +76,6 @@ public class WorldRenderer {
         playerPosition.x = playerX;
         playerPosition.y = playerZ;
 
-        System.out.println(playerPosition);
-
         // Checks all the chunks within the view distance,
         // and loads those which are not loaded
         for(int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; x++){
@@ -115,9 +113,6 @@ public class WorldRenderer {
             if (!needsSorting.get())
                 return;
 
-            if (chunk.getModel() == null)
-                return;
-
             chunk.setCurrentLodLevel(distance > 8 * 8 ? 1 : 0);
 
             chunksToRender.add(chunk);
@@ -149,7 +144,7 @@ public class WorldRenderer {
         solidsShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
-            if (!tester.isChunkInside(chunk, camera.getPosition().y))
+            if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
                 return;
 
             solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
@@ -175,6 +170,8 @@ public class WorldRenderer {
         transparencyShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
+            if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
+                return;
             transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
 
             GL30.glBindVertexArray(chunk.getModel().getTransparentMeshes()[chunk.getCurrentLodLevel()].getVaoId());

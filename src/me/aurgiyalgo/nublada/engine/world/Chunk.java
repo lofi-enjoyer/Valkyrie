@@ -86,7 +86,6 @@ public class Chunk {
 
     private boolean loadFromFile() {
         try {
-            long timer = System.nanoTime();
             File file = new File("world//" + position.x + "_" + position.y + ".dat");
             if (!file.exists())
                 return false;
@@ -102,7 +101,6 @@ public class Chunk {
 
             input.close();
 
-            System.out.println((System.nanoTime() - timer) / 1000000f + "ms");
         } catch (IOException exception) {
             exception.printStackTrace();
             voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
