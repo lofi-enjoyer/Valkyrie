@@ -24,7 +24,7 @@ void main() {
     }
 
     if (inWater != 0) {
-        textureColour *= vec4(0.5f, 0.5f, 1f, 1f);
+        textureColour *= vec4(0.5, 0.5, 1, 1);
     }
 
     outColor = textureColour;
