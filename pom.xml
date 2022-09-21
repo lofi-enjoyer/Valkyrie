@@ -73,7 +73,7 @@
                     <finalName>Nublada_${project.version}_${maven.build.timestamp}</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>me.aurgiyalgo.nublada.game.Application</mainClass>
+                            <mainClass>me.lofienjoyer.nublada.game.Application</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
