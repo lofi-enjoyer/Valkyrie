@@ -15,7 +15,7 @@ import static me.lofienjoyer.nublada.engine.world.World.CHUNK_HEIGHT;
  * Based on roboleary's algorithm, but improved to support non-cubic chunks
  * @see <a href="https://github.com/roboleary/GreedyMesh">GreedyMesh</a>
  */
-public class GreedyMesher {
+public class GreedyMesher implements Mesher {
 
     private final int[] dims;
 
@@ -51,11 +51,10 @@ public class GreedyMesher {
         this.detailLevel = detailLevel;
 
         this.dims = new int[] {CHUNK_WIDTH / detailLevel, CHUNK_HEIGHT / detailLevel, CHUNK_WIDTH / detailLevel};
-
-        compute();
     }
 
-    public void compute() {
+    @Override
+    public Mesher compute() {
         this.positions = new ArrayList<>(10000);
         this.indices = new ArrayList<>(6000);
         this.uvs = new ArrayList<>(10000);
@@ -86,9 +85,12 @@ public class GreedyMesher {
             lightArray[i] = light.get(i);
         }
         light = null;
+
+        return this;
     }
 
-    public Mesh loadMeshToGpu() {
+    @Override
+    public Mesh loadToGpu() {
         Mesh mesh = new Mesh(positionsArray, indicesArray, uvsArray, lightArray);
         positionsArray = null;
         indicesArray = null;
@@ -97,7 +99,7 @@ public class GreedyMesher {
         return mesh;
     }
 
-    void computeMesh() {
+    private void computeMesh() {
         int i, j, k, l, w, h, u, v, n, side = 0;
 
         final int[] x = new int []{0,0,0};

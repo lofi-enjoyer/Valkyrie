@@ -13,7 +13,7 @@ import static me.lofienjoyer.nublada.engine.world.World.CHUNK_HEIGHT;
 /**
  * Generates the transparent mesh of a chunk
  */
-public class DynamicMesher {
+public class DynamicMesher implements Mesher {
 
     private final Chunk chunk;
 
@@ -36,11 +36,10 @@ public class DynamicMesher {
     public DynamicMesher(Chunk chunk, int detailLevel) {
         this.chunk = chunk;
         this.detailLevel = detailLevel;
-
-        compute();
     }
 
-    private void compute() {
+    @Override
+    public Mesher compute() {
         this.positions = new ArrayList<>(10000);
         this.indices = new ArrayList<>(6000);
         this.uvs = new ArrayList<>(10000);
@@ -71,9 +70,12 @@ public class DynamicMesher {
             lightArray[i] = light.get(i);
         }
         light = null;
+
+        return this;
     }
 
-    public Mesh loadMeshToGpu() {
+    @Override
+    public Mesh loadToGpu() {
         Mesh mesh = new Mesh(positionsArray, indicesArray, uvsArray, lightArray);
         positionsArray = null;
         indicesArray = null;

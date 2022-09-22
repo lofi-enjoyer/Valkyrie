@@ -10,27 +10,27 @@ public class MeshBundle {
     private Mesh[] solidMesh;
     private Mesh[] transparentMesh;
 
-    private GreedyMesher[] greedyMesher;
-    private DynamicMesher[] dynamicMesher;
+    private Mesher[] greedyMesher;
+    private Mesher[] dynamicMesher;
 
     public MeshBundle(Chunk chunk) {
         this.greedyMesher = new GreedyMesher[2];
-        this.greedyMesher[0] = new GreedyMesher(chunk, 1);
-        this.greedyMesher[1] = new GreedyMesher(chunk, 2);
+        this.greedyMesher[0] = new GreedyMesher(chunk, 1).compute();
+        this.greedyMesher[1] = new GreedyMesher(chunk, 2).compute();
 
         this.dynamicMesher = new DynamicMesher[2];
-        this.dynamicMesher[0] = new DynamicMesher(chunk, 1);
-        this.dynamicMesher[1] = new DynamicMesher(chunk, 2);
+        this.dynamicMesher[0] = new DynamicMesher(chunk, 1).compute();
+        this.dynamicMesher[1] = new DynamicMesher(chunk, 2).compute();
     }
 
     public MeshBundle loadMeshToGpu() {
         solidMesh = new Mesh[2];
-        solidMesh[0] = greedyMesher[0].loadMeshToGpu();
-        solidMesh[1] = greedyMesher[1].loadMeshToGpu();
+        solidMesh[0] = greedyMesher[0].loadToGpu();
+        solidMesh[1] = greedyMesher[1].loadToGpu();
 
         transparentMesh = new Mesh[2];
-        transparentMesh[0] = dynamicMesher[0].loadMeshToGpu();
-        transparentMesh[1] = dynamicMesher[1].loadMeshToGpu();
+        transparentMesh[0] = dynamicMesher[0].loadToGpu();
+        transparentMesh[1] = dynamicMesher[1].loadToGpu();
 
         greedyMesher = null;
         dynamicMesher = null;
