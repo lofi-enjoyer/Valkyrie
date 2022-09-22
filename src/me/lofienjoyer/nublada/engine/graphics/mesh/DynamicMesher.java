@@ -27,15 +27,8 @@ public class DynamicMesher implements Mesher {
     private float[] uvsArray;
     private float[] lightArray;
 
-    private int detailLevel;
-
     public DynamicMesher(Chunk chunk) {
-        this(chunk, 1);
-    }
-
-    public DynamicMesher(Chunk chunk, int detailLevel) {
         this.chunk = chunk;
-        this.detailLevel = detailLevel;
     }
 
     @Override
@@ -86,13 +79,13 @@ public class DynamicMesher implements Mesher {
 
     private void computeMesh() {
         int currentVoxel;
-        for (int x = 0; x < CHUNK_WIDTH; x += detailLevel) {
-            for (int y = 0; y < CHUNK_HEIGHT; y += detailLevel) {
-                for (int z = 0; z < CHUNK_WIDTH; z += detailLevel) {
+        for (int x = 0; x < CHUNK_WIDTH; x++) {
+            for (int y = 0; y < CHUNK_HEIGHT; y++) {
+                for (int z = 0; z < CHUNK_WIDTH; z++) {
                     currentVoxel = chunk.getBlock(x, y, z);
                     if (currentVoxel == 0 || !BlockRegistry.getBLock(currentVoxel).isTransparent()) continue;
 
-                    meshBlock(x / detailLevel, y / detailLevel, z / detailLevel, BlockRegistry.getBLock(currentVoxel));
+                    meshBlock(x, y, z, BlockRegistry.getBLock(currentVoxel));
                 }
             }
         }
@@ -101,7 +94,7 @@ public class DynamicMesher implements Mesher {
     int passes = 0;
 
     private void meshBlock(int x, int y, int z, Block block) {
-        int westBlock = chunk.getBlock(x*detailLevel + 1*detailLevel, y*detailLevel, z*detailLevel);
+        int westBlock = chunk.getBlock(x + 1, y, z);
         if (westBlock == 0 || (block.getId() != westBlock && BlockRegistry.getBLock(westBlock).isTransparent())) {
             positions.addAll(List.of(x + 1f, y + 0f, z + 0f));
             positions.addAll(List.of(x + 1f, y + 1f, z + 0f));
@@ -128,7 +121,7 @@ public class DynamicMesher implements Mesher {
             }
         }
 
-        int eastBlock = chunk.getBlock(x*detailLevel - 1*detailLevel, y*detailLevel, z*detailLevel);
+        int eastBlock = chunk.getBlock(x - 1, y, z);
         if (eastBlock == 0 || (block.getId() != eastBlock && BlockRegistry.getBLock(eastBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 0f, z + 0f));
             positions.addAll(List.of(x + 0f, y + 1f, z + 0f));
@@ -155,7 +148,7 @@ public class DynamicMesher implements Mesher {
             }
         }
 
-        int northBlock = chunk.getBlock(x*detailLevel, y*detailLevel, z*detailLevel - 1*detailLevel);
+        int northBlock = chunk.getBlock(x, y, z - 1);
         if (northBlock == 0 || (block.getId() != northBlock && BlockRegistry.getBLock(northBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 0f, z + 0f));
             positions.addAll(List.of(x + 0f, y + 1f, z + 0f));
@@ -182,7 +175,7 @@ public class DynamicMesher implements Mesher {
             }
         }
 
-        int southBlock = chunk.getBlock(x*detailLevel, y*detailLevel, z*detailLevel + 1*detailLevel);
+        int southBlock = chunk.getBlock(x, y, z + 1);
         if (southBlock == 0 || (block.getId() != southBlock && BlockRegistry.getBLock(southBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 0f, z + 1f));
             positions.addAll(List.of(x + 0f, y + 1f, z + 1f));
@@ -209,7 +202,7 @@ public class DynamicMesher implements Mesher {
             }
         }
 
-        int upBlock = chunk.getBlock(x*detailLevel, y*detailLevel + 1*detailLevel, z*detailLevel);
+        int upBlock = chunk.getBlock(x, y + 1, z);
         if (upBlock == 0 || (block.getId() != upBlock && BlockRegistry.getBLock(upBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 1f, z + 0f));
             positions.addAll(List.of(x + 0f, y + 1f, z + 1f));
@@ -236,7 +229,7 @@ public class DynamicMesher implements Mesher {
             }
         }
 
-        int bottomBlock = chunk.getBlock(x*detailLevel, y*detailLevel - 1*detailLevel, z*detailLevel);
+        int bottomBlock = chunk.getBlock(x, y - 1, z);
         if (bottomBlock == 0 || (block.getId() != bottomBlock && BlockRegistry.getBLock(bottomBlock).isTransparent())) {
             positions.addAll(List.of(x + 0f, y + 0f, z + 0f));
             positions.addAll(List.of(x + 0f, y + 0f, z + 1f));

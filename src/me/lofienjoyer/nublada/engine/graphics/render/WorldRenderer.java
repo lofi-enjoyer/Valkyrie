@@ -146,12 +146,12 @@ public class WorldRenderer {
 
             solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
 
-            GL30.glBindVertexArray(chunk.getModel().getSolidMeshes()[chunk.getCurrentLodLevel()].getVaoId());
+            GL30.glBindVertexArray(chunk.getModel().getSolidMeshes().getVaoId());
             GL30.glEnableVertexAttribArray(0);
             GL30.glEnableVertexAttribArray(1);
             GL30.glEnableVertexAttribArray(2);
 
-            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMeshes()[chunk.getCurrentLodLevel()].getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
+            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMeshes().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
         Timings.stopTiming("Solid Mesh Render");
 
@@ -171,12 +171,12 @@ public class WorldRenderer {
                 return;
             transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
 
-            GL30.glBindVertexArray(chunk.getModel().getTransparentMeshes()[chunk.getCurrentLodLevel()].getVaoId());
+            GL30.glBindVertexArray(chunk.getModel().getTransparentMeshes().getVaoId());
             GL30.glEnableVertexAttribArray(0);
             GL30.glEnableVertexAttribArray(1);
             GL30.glEnableVertexAttribArray(2);
 
-            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMeshes()[chunk.getCurrentLodLevel()].getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
+            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMeshes().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
         GL30.glDisable(GL30.GL_BLEND);
         Timings.stopTiming("Transparent Mesh Render");
