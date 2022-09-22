@@ -5,7 +5,6 @@ import me.lofienjoyer.nublada.engine.scene.IScene;
 import me.lofienjoyer.nublada.engine.graphics.display.Window;
 import me.lofienjoyer.nublada.engine.graphics.loader.Loader;
 import me.lofienjoyer.nublada.engine.log.NubladaLogHandler;
-import me.lofienjoyer.nublada.engine.utils.Timings;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
@@ -121,8 +120,6 @@ public class Nublada {
             timer = System.nanoTime();
 
             GLFW.glfwSetWindowTitle(window.getId(), "Nublada | FPS: " + (int) (1f / delta) + " (delta: " + delta + "s)");
-
-            Timings.flushTimings();
         }
 
         currentScene.onClose();

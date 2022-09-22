@@ -6,7 +6,6 @@ import me.lofienjoyer.nublada.engine.graphics.shaders.SelectorShader;
 import me.lofienjoyer.nublada.engine.graphics.shaders.SolidsShader;
 import me.lofienjoyer.nublada.engine.graphics.shaders.TransparencyShader;
 import me.lofienjoyer.nublada.engine.utils.Maths;
-import me.lofienjoyer.nublada.engine.utils.Timings;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import me.lofienjoyer.nublada.engine.world.Chunk;
 import me.lofienjoyer.nublada.engine.world.World;
@@ -59,8 +58,6 @@ public class WorldRenderer {
     }
 
     public void render(World world, Camera camera) {
-
-        Timings.startTiming("World Render");
 
         world.checkGeneratingChunks();
 
@@ -134,7 +131,6 @@ public class WorldRenderer {
         GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
 
         // Renders the solid mesh for all chunks
-        Timings.startTiming("Solid Mesh Render");
         solidsShader.start();
         solidsShader.loadViewMatrix(camera);
         solidsShader.loadViewDistance(VIEW_DISTANCE * 32);
@@ -153,10 +149,8 @@ public class WorldRenderer {
 
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMeshes().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
-        Timings.stopTiming("Solid Mesh Render");
 
         // Renders the transparent mesh for all chunks
-        Timings.startTiming("Transparent Mesh Render");
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -179,7 +173,6 @@ public class WorldRenderer {
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMeshes().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
         GL30.glDisable(GL30.GL_BLEND);
-        Timings.stopTiming("Transparent Mesh Render");
 
         // Highlights the voxel the player is looking at
         selectorShader.start();
@@ -200,8 +193,6 @@ public class WorldRenderer {
         GL30.glVertex2f(0, 0);
         GL30.glEnd();
         GL30.glPointSize(1);
-
-        Timings.stopTiming("World Render");
     }
 
     public void updateFrustum(Camera camera) {
