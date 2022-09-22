@@ -93,7 +93,7 @@ public class GreedyMesher implements Mesher {
     }
 
     private void computeMesh() {
-        int i, j, k, l, w, h, u, v, n, side = 0;
+        int i, j, k, l, w, h, u, v, n;
 
         final int[] x = new int []{0,0,0};
         final int[] q = new int []{0,0,0};
@@ -104,7 +104,7 @@ public class GreedyMesher implements Mesher {
 
         int voxelFace, voxelFace1;
 
-        for (boolean backFace = true, b = false; b != backFace; backFace = backFace && b, b = !b) {
+        for (boolean backFace = true, b = false; b != backFace; backFace = false, b = !b) {
 
             for(int d = 0; d < 3; d++) {
 
@@ -121,10 +121,6 @@ public class GreedyMesher implements Mesher {
                 q[d] = 1;
 
                 mask = new int [(dims[u] + 1) * (dims[v] + 1)];
-
-                if (d == 0)      { side = backFace ? WEST   : EAST;  }
-                else if (d == 1) { side = backFace ? BOTTOM : TOP;   }
-                else { side = backFace ? SOUTH  : NORTH; }
 
                 for(x[d] = -1; x[d] < dims[d];) {
 
@@ -189,10 +185,10 @@ public class GreedyMesher implements Mesher {
                                     dv[2] = 0;
                                     dv[v] = h;
 
-                                    quad(new Vector3f(x[0],                 x[1],                   x[2]),
-                                            new Vector3f(x[0] + du[0],         x[1] + du[1],           x[2] + du[2]),
-                                            new Vector3f(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],   x[2] + du[2] + dv[2]),
-                                            new Vector3f(x[0] + dv[0],         x[1] + dv[1],           x[2] + dv[2]),
+                                    quad(x[0],                 x[1],                   x[2],
+                                            x[0] + du[0],         x[1] + du[1],           x[2] + du[2],
+                                            x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],   x[2] + du[2] + dv[2],
+                                            x[0] + dv[0],         x[1] + dv[1],           x[2] + dv[2],
                                             w,
                                             h,
                                             BlockRegistry.getBLock(mask[n]),
@@ -220,33 +216,37 @@ public class GreedyMesher implements Mesher {
         }
     }
 
-    private void quad(final Vector3f bottomLeft,
-              final Vector3f topLeft,
-              final Vector3f topRight,
-              final Vector3f bottomRight,
-              final int width,
-              final int height,
-              final Block voxel,
-              final boolean backFace, int direction) {
+    private static final int[] indexes1 = new int[] { 2,0,1, 1,3,2 };
+    private static final int[] indexes2 = new int[]{ 2,3,1, 1,0,2 };
 
-        final Vector3f [] vertices = new Vector3f[4];
+    private void quad(
+            float bottomLeftX, float bottomLeftY, float bottomLeftZ,
+            float topLeftX, float topLeftY, float topLeftZ,
+            float topRightX, float topRightY, float topRightZ,
+            float bottomRightX, float bottomRightY, float bottomRightZ,
+            final int width,
+            final int height,
+            final Block voxel,
+            final boolean backFace, int direction)
+    {
 
-        vertices[2] = topLeft;
-        vertices[3] = topRight;
-        vertices[0] = bottomLeft;
-        vertices[1] = bottomRight;
+        int [] indexes = backFace ? indexes1 : indexes2;
 
-        int [] indexes = backFace ? new int[] { 2,0,1, 1,3,2 } : new int[]{ 2,3,1, 1,0,2 };
+        positions.add(bottomLeftX);
+        positions.add(bottomLeftY);
+        positions.add(bottomLeftZ);
 
-        if (direction == 0) {
-            indexes = backFace ? new int[] { 2,0,1, 1,3,2 } : new int[]{ 2,3,1, 1,0,2 };
-        }
+        positions.add(bottomRightX);
+        positions.add(bottomRightY);
+        positions.add(bottomRightZ);
 
-        for (int i = 0; i < 4; i++) {
-            positions.add(vertices[i].x);
-            positions.add(vertices[i].y);
-            positions.add(vertices[i].z);
-        }
+        positions.add(topLeftX);
+        positions.add(topLeftY);
+        positions.add(topLeftZ);
+
+        positions.add(topRightX);
+        positions.add(topRightY);
+        positions.add(topRightZ);
 
         for (int index : indexes) {
             indices.add(index + passes * 4);
