@@ -47,30 +47,31 @@ public class World {
         this.futureChunks = new HashMap<>();
         this.chunkGenerationFutures = new ArrayList<>();
 
-        Yaml yaml = new Yaml();
-        File worldFolder = new File("world");
-        Map<String, Object> data = new HashMap<>();
-        try {
-            if (!worldFolder.exists()) {
-                System.out.println("Ejem");
-                worldFolder.mkdir();
-                this.seed = new Random().nextGaussian() * 255;
-                data.put("seed", seed);
+        // TODO: 22/9/22 Temporary code (replace with proper world loading)
+        this.seed = new Random().nextGaussian() * 255;
 
-                FileWriter writer = new FileWriter("world/world.yml");
-                yaml.dump(data, writer);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        try {
-            data = yaml.load(new FileInputStream("world/world.yml"));
-            this.seed = (double) data.get("seed");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+//        Yaml yaml = new Yaml();
+//        File worldFolder = new File("world");
+//        Map<String, Object> data = new HashMap<>();
+//        try {
+//            if (!worldFolder.exists()) {
+//                worldFolder.mkdir();
+//                this.seed = new Random().nextGaussian() * 255;
+//                data.put("seed", seed);
+//
+//                FileWriter writer = new FileWriter("world/world.yml");
+//                yaml.dump(data, writer);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        try {
+//            data = yaml.load(new FileInputStream("world/world.yml"));
+//            this.seed = (double) data.get("seed");
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
 
         this.noise = new PerlinNoise(seed, 500);
 

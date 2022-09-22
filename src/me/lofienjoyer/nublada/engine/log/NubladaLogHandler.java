@@ -1,9 +1,6 @@
 package me.lofienjoyer.nublada.engine.log;
 
-import java.util.logging.Handler;
-import java.util.logging.LogManager;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public class NubladaLogHandler extends Handler {
 
@@ -20,7 +17,7 @@ public class NubladaLogHandler extends Handler {
     @Override
     public void publish(LogRecord record) {
         String sb = "[" + record.getLevel().getName() + "] ("
-                + record.getSourceClassName() +
+                + parseClass(record) +
                 "#" +
                 record.getSourceMethodName() +
                 ") "
@@ -36,6 +33,16 @@ public class NubladaLogHandler extends Handler {
     @Override
     public void close() throws SecurityException {
 
+    }
+
+    private String parseClass(LogRecord record) {
+        String[] parts = record.getSourceClassName().split("\\.");
+        String parsedClass = "";
+        for (int i = 0; i < parts.length - 1; i++) {
+            parsedClass += parts[i].charAt(0) + ".";
+        }
+        parsedClass += parts[parts.length - 1];
+        return parsedClass;
     }
 
 }
