@@ -107,8 +107,6 @@ public class WorldRenderer {
             if (!needsSorting.get())
                 return;
 
-            chunk.setCurrentLodLevel(distance > 8 * 8 ? 1 : 0);
-
             chunksToRender.add(chunk);
         });
 
@@ -140,7 +138,7 @@ public class WorldRenderer {
             if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
                 return;
 
-            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
+            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
 
             GL30.glBindVertexArray(chunk.getModel().getSolidMeshes().getVaoId());
             GL30.glEnableVertexAttribArray(0);
@@ -163,7 +161,7 @@ public class WorldRenderer {
         chunksToRender.forEach(chunk -> {
             if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
                 return;
-            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition(), chunk.getCurrentLodLevel() + 1));
+            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
 
             GL30.glBindVertexArray(chunk.getModel().getTransparentMeshes().getVaoId());
             GL30.glEnableVertexAttribArray(0);
@@ -179,6 +177,7 @@ public class WorldRenderer {
         selectorShader.loadViewMatrix(camera);
         selectorShader.loadTime((float) GLFW.glfwGetTime());
 
+        // TODO: 24/12/2022 Make this async
         Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
         if (hitPosition != null) {
             selectorShader.loadTransformationMatrix(Maths.createTransformationMatrix(hitPosition, 0));

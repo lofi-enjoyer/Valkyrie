@@ -34,7 +34,7 @@ public class Chunk {
 
     // TODO: 24/03/2022 Make the core count customizable
     private static final ScheduledExecutorService meshService =
-            new ScheduledThreadPoolExecutor(2, r -> {
+            new ScheduledThreadPoolExecutor(4, r -> {
         Thread thread = new Thread(r, "Meshing Thread");
         thread.setDaemon(true);
 
@@ -44,8 +44,7 @@ public class Chunk {
     private short[] voxels;
     private final Vector2i position;
     private MeshBundle mesh;
-
-    private int currentLodLevel;
+    private byte[] compressedData;
 
     private final World world;
 
@@ -80,12 +79,15 @@ public class Chunk {
 
     private boolean loadFromFile() {
         try {
+            // TODO: 24/12/2022 Support multiple worlds
             File file = new File("world//" + position.x + "_" + position.y + ".dat");
             if (!file.exists())
                 return false;
 
             DataInputStream input = new DataInputStream(new FileInputStream(file));
-            InflaterInputStream iis = new InflaterInputStream(input);
+            this.compressedData = input.readAllBytes();
+            input.close();
+            InflaterInputStream iis = new InflaterInputStream(new ByteArrayInputStream(compressedData));
 
             byte[] data = iis.readAllBytes();
 
@@ -192,11 +194,15 @@ public class Chunk {
 
     public void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
         if (x < 0 || y < 0 || z < 0) return;
-        if (x > CHUNK_WIDTH - 1 || y > CHUNK_HEIGHT - 1 || z > CHUNK_WIDTH - 1) return;
-            voxels[x | y << 5 | z << 13] = (short) voxel;
+        if (x > CHUNK_WIDTH - 1 || y > CHUNK_HEIGHT - 1 || z > CHUNK_WIDTH - 1)
+            return;
 
-        if (!updateChunk) return;
+        voxels[x | y << 5 | z << 13] = (short) voxel;
 
+        if (!updateChunk)
+            return;
+
+        // Marks the chunk as not updated and check borders to mark adjacent chunks as not updated
         updated = false;
         if (x == 0) world.getChunk(position.x - 1, position.y).updated = false;
         if (x == CHUNK_WIDTH - 1) world.getChunk(position.x + 1, position.y).updated = false;
@@ -205,9 +211,12 @@ public class Chunk {
     }
 
     public void onDestroy() {
+        // Unbinds the adjacent chunks from itself and marks them to update
         for (int i = 0; i < 4; i++) {
             Chunk neighbor = neighbors[i];
-            if (neighbor == null) continue;
+            if (neighbor == null)
+                continue;
+
             neighbor.neighbors[(i + 2) % 4] = null;
             neighbor.updated = false;
         }
@@ -221,11 +230,4 @@ public class Chunk {
         return mesh;
     }
 
-    public int getCurrentLodLevel() {
-        return currentLodLevel;
-    }
-
-    public void setCurrentLodLevel(int lodLevel) {
-        this.currentLodLevel = lodLevel;
-    }
 }
