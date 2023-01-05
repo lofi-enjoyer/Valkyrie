@@ -30,32 +30,26 @@ public class GreedyMesher implements Mesher {
     private static final int TOP        = 4;
     private static final int BOTTOM     = 5;
 
-    private List<Float> positions;
+    private List<Long> positions;
     private List<Integer> indices;
-    private List<Float> uvs;
-    private List<Float> light;
 
-    private float[] positionsArray;
+    private long[] positionsArray;
     private int[] indicesArray;
-    private float[] uvsArray;
-    private float[] lightArray;
 
     public GreedyMesher(Chunk chunk) {
         this.chunk = chunk;
 
-        this.dims = new int[] {CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH};
+        this.dims = new int[] { CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH };
     }
 
     @Override
     public Mesher compute() {
         this.positions = new ArrayList<>(10000);
         this.indices = new ArrayList<>(6000);
-        this.uvs = new ArrayList<>(10000);
-        this.light = new ArrayList<>(10000);
 
         computeMesh();
 
-        positionsArray = new float[positions.size()];
+        positionsArray = new long[positions.size()];
         for (int i = 0; i < positions.size(); i++) {
             positionsArray[i] = positions.get(i);
         }
@@ -67,28 +61,14 @@ public class GreedyMesher implements Mesher {
         }
         indices = null;
 
-        uvsArray = new float[uvs.size()];
-        for (int i = 0; i < uvs.size(); i++) {
-            uvsArray[i] = uvs.get(i);
-        }
-        uvs = null;
-
-        lightArray = new float[light.size()];
-        for (int i = 0; i < light.size(); i++) {
-            lightArray[i] = light.get(i);
-        }
-        light = null;
-
         return this;
     }
 
     @Override
     public Mesh loadToGpu() {
-        Mesh mesh = new Mesh(positionsArray, indicesArray, uvsArray, lightArray);
+        Mesh mesh = new Mesh(positionsArray, indicesArray);
         positionsArray = null;
         indicesArray = null;
-        uvsArray = null;
-        lightArray = null;
         return mesh;
     }
 
@@ -185,15 +165,112 @@ public class GreedyMesher implements Mesher {
                                     dv[2] = 0;
                                     dv[v] = h;
 
-                                    quad(x[0],                 x[1],                   x[2],
-                                            x[0] + du[0],         x[1] + du[1],           x[2] + du[2],
-                                            x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],   x[2] + du[2] + dv[2],
-                                            x[0] + dv[0],         x[1] + dv[1],           x[2] + dv[2],
-                                            w,
-                                            h,
-                                            BlockRegistry.getBLock(mask[n]),
-                                            backFace,
-                                            d);
+                                    Block block = BlockRegistry.getBLock(mask[n]);
+
+                                    int [] indexes = backFace ? indexes1 : indexes2;
+
+                                    long[] vertices = new long[4];
+
+                                    for (int index : indexes) {
+                                        indices.add(index + passes * 4);
+                                    }
+
+                                    // Texture re-orientation based on the direction
+                                    if (d == 2) {
+                                        if (!backFace) {
+                                            // 2
+                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getNorthTexture());
+
+                                            // 0
+                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getNorthTexture());
+
+                                            // 3
+                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getNorthTexture());
+
+                                            // 1
+                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getNorthTexture());
+                                        } else {
+                                            // 3
+                                            vertices[0] = getVertex(x[0], x[1], x[2], w, h, block.getSouthTexture());
+
+                                            // 1
+                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], w, 0, block.getSouthTexture());
+
+                                            // 2
+                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], 0, h, block.getSouthTexture());
+
+                                            // 0
+                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], 0, 0, block.getSouthTexture());
+                                        }
+                                    } else if (d == 0) {
+                                        if (backFace) {
+                                            // 2
+                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getWestTexture());
+
+                                            // 3
+                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getWestTexture());
+
+                                            // 0
+                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getWestTexture());
+
+                                            // 1
+                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getWestTexture());
+                                        } else {
+                                            // 2
+                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getEastTexture());
+
+                                            // 3
+                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getEastTexture());
+
+                                            // 1
+                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getEastTexture());
+
+                                            // 0
+                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getEastTexture());
+                                        }
+                                    } else {
+                                        if (!backFace) {
+                                            // 0
+                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getTopTexture());
+
+                                            // 1
+                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getTopTexture());
+
+                                            // 2
+                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getTopTexture());
+
+                                            // 3
+                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getTopTexture());
+                                        } else {
+                                            // 1
+                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getBottomTexture());
+
+                                            // 0
+                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getBottomTexture());
+
+                                            // 3
+                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getBottomTexture());
+
+                                            // 2
+                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getBottomTexture());
+                                        }
+                                    }
+
+                                    positions.add(vertices[0]);
+                                    positions.add(vertices[1]);
+                                    positions.add(vertices[2]);
+                                    positions.add(vertices[3]);
+                                    passes++;
+
+//                                    quad(x[0],                 x[1],                   x[2],
+//                                            x[0] + du[0],         x[1] + du[1],           x[2] + du[2],
+//                                            x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],   x[2] + du[2] + dv[2],
+//                                            x[0] + dv[0],         x[1] + dv[1],           x[2] + dv[2],
+//                                            w,
+//                                            h,
+//                                            BlockRegistry.getBLock(mask[n]),
+//                                            backFace,
+//                                            d);
                                 }
 
                                 for(l = 0; l < h; ++l) {
@@ -217,184 +294,10 @@ public class GreedyMesher implements Mesher {
     }
 
     private static final int[] indexes1 = new int[] { 2,0,1, 1,3,2 };
-    private static final int[] indexes2 = new int[]{ 2,3,1, 1,0,2 };
+    private static final int[] indexes2 = new int[] { 2,3,1, 1,0,2 };
 
-    private void quad(
-            float bottomLeftX, float bottomLeftY, float bottomLeftZ,
-            float topLeftX, float topLeftY, float topLeftZ,
-            float topRightX, float topRightY, float topRightZ,
-            float bottomRightX, float bottomRightY, float bottomRightZ,
-            final int width,
-            final int height,
-            final Block voxel,
-            final boolean backFace, int direction)
-    {
-
-        int [] indexes = backFace ? indexes1 : indexes2;
-
-        positions.add(bottomLeftX);
-        positions.add(bottomLeftY);
-        positions.add(bottomLeftZ);
-
-        positions.add(bottomRightX);
-        positions.add(bottomRightY);
-        positions.add(bottomRightZ);
-
-        positions.add(topLeftX);
-        positions.add(topLeftY);
-        positions.add(topLeftZ);
-
-        positions.add(topRightX);
-        positions.add(topRightY);
-        positions.add(topRightZ);
-
-        for (int index : indexes) {
-            indices.add(index + passes * 4);
-        }
-
-        // Texture re-orientation based on the direction
-        if (direction == 2) {
-            if (!backFace) {
-                // 2
-                uvs.add(0f);
-                uvs.add((float) height);
-                uvs.add((float) voxel.getNorthTexture());
-
-                // 0
-                uvs.add(0f);
-                uvs.add(0f);
-                uvs.add((float) voxel.getNorthTexture());
-
-                // 3
-                uvs.add((float) width);
-                uvs.add((float) height);
-                uvs.add((float) voxel.getNorthTexture());
-
-                // 1
-                uvs.add((float) width);
-                uvs.add(0f);
-                uvs.add((float) voxel.getNorthTexture());
-            } else {
-                // 3
-                uvs.add((float) width);
-                uvs.add((float) height);
-                uvs.add((float) voxel.getSouthTexture());
-
-                // 1
-                uvs.add((float) width);
-                uvs.add(0f);
-                uvs.add((float) voxel.getSouthTexture());
-
-                // 2
-                uvs.add(0f);
-                uvs.add((float) height);
-                uvs.add((float) voxel.getSouthTexture());
-
-                // 0
-                uvs.add(0f);
-                uvs.add(0f);
-                uvs.add((float) voxel.getSouthTexture());
-            }
-        } else if (direction == 0) {
-            if (backFace) {
-                // 2
-                uvs.add(0f);
-                uvs.add((float) width);
-                uvs.add((float) voxel.getWestTexture());
-
-                // 3
-                uvs.add((float) height);
-                uvs.add((float) width);
-                uvs.add((float) voxel.getWestTexture());
-                // 0
-                uvs.add(0f);
-                uvs.add(0f);
-                uvs.add((float) voxel.getWestTexture());
-
-                // 1
-                uvs.add((float) height);
-                uvs.add(0f);
-                uvs.add((float) voxel.getWestTexture());
-            } else {
-                // 3
-                uvs.add((float) height);
-                uvs.add((float) width);
-                uvs.add((float) voxel.getEastTexture());
-
-                // 2
-                uvs.add(0f);
-                uvs.add((float) width);
-                uvs.add((float) voxel.getEastTexture());
-
-                // 1
-                uvs.add((float) height);
-                uvs.add(0f);
-                uvs.add((float) voxel.getEastTexture());
-
-                // 0
-                uvs.add(0f);
-                uvs.add(0f);
-                uvs.add((float) voxel.getEastTexture());
-            }
-        } else {
-            if (!backFace) {
-                // 0
-                uvs.add(0f);
-                uvs.add(0f);
-                uvs.add((float) voxel.getTopTexture());
-
-                // 1
-                uvs.add((float) height);
-                uvs.add(0f);
-                uvs.add((float) voxel.getTopTexture());
-
-                // 2
-                uvs.add(0f);
-                uvs.add((float) width);
-                uvs.add((float) voxel.getTopTexture());
-
-                // 3
-                uvs.add((float) height);
-                uvs.add((float) width);
-                uvs.add((float) voxel.getTopTexture());
-            } else {
-
-                // 1
-                uvs.add((float) height);
-                uvs.add(0f);
-                uvs.add((float) voxel.getBottomTexture());
-                // 0
-                uvs.add(0f);
-                uvs.add(0f);
-                uvs.add((float) voxel.getBottomTexture());
-
-                // 3
-                uvs.add((float) height);
-                uvs.add((float) width);
-                uvs.add((float) voxel.getBottomTexture());
-
-                // 2
-                uvs.add(0f);
-                uvs.add((float) width);
-                uvs.add((float) voxel.getBottomTexture());
-            }
-        }
-
-        if (direction == 1) {
-            for (int i = 0; i < 4; i++) {
-                light.add(backFace ? 3f : 2f);
-            }
-        } else if (direction == 0) {
-            for (int i = 0; i < 4; i++) {
-                light.add(backFace ? 1f : 0f);
-            }
-        } else {
-            for (int i = 0; i < 4; i++) {
-                light.add(backFace ? 5f : 4f);
-            }
-        }
-
-        passes++;
+    private long getVertex(int x, int y, int z, int xUv, int yUv, int zUv) {
+        return zUv | yUv << 7 | xUv << 8 | z << 37 | x << 46 | y << 55;
     }
 
 }

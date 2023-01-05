@@ -4,6 +4,9 @@ import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.graphics.texture.Texture;
 import me.lofienjoyer.nublada.engine.graphics.texture.TextureArray;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL41;
+import org.lwjgl.opengl.GL44;
+import org.lwjgl.opengl.GL45;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
@@ -51,6 +54,13 @@ public class Loader {
     }
 
     public int loadToVAO(int[] positions, int[] indices) {
+        int vao = createVAO();
+        storeDataInAttributeList(0, 1, positions);
+        bindIndicesBuffer(indices);
+        return vao;
+    }
+
+    public int loadToVAO(long[] positions, int[] indices) {
         int vao = createVAO();
         storeDataInAttributeList(0, 1, positions);
         bindIndicesBuffer(indices);
@@ -146,6 +156,15 @@ public class Loader {
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
         GL30.glBufferData(GL30.GL_ARRAY_BUFFER, data, GL30.GL_STATIC_DRAW);
         GL30.glVertexAttribIPointer(attributeNumber, size, GL30.GL_UNSIGNED_INT, 0, 0);
+        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
+    }
+
+    private void storeDataInAttributeList(int attributeNumber, int size, long[] data) {
+        int vboId = GL30.glGenBuffers();
+        vboList.add(vboId);
+        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
+        GL30.glBufferData(GL30.GL_ARRAY_BUFFER, data, GL30.GL_STATIC_DRAW);
+        GL41.glVertexAttribLPointer(attributeNumber, size, GL30.GL_DOUBLE, 0, 0);
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
     }
 

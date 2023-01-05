@@ -32,9 +32,7 @@ public class SolidsShader extends ShaderProgram {
 
     @Override
     protected void bindAttributes() {
-        super.bindAttribute(0, "position");
-        super.bindAttribute(1, "color");
-        super.bindAttribute(2, "light");
+        super.bindAttribute(0, "vertex");
     }
 
     public void loadTransformationMatrix(Matrix4f matrix) {

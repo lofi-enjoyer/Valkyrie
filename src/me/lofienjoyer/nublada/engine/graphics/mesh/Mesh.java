@@ -23,6 +23,10 @@ public class Mesh {
         this(Nublada.LOADER.loadToVAO(positions, indices), indices.length);
     }
 
+    public Mesh(long[] positions, int[] indices) {
+        this(Nublada.LOADER.loadToVAO(positions, indices), indices.length);
+    }
+
     public Mesh(float[] positions) {
         this(Nublada.LOADER.loadToVAO(positions), positions.length / 3);
     }
