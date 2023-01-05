@@ -1,6 +1,6 @@
 #version 400 core
 
-in uint vertex;
+in uvec2 vertex;
 
 out vec3 passColor;
 out vec3 passLight;
@@ -37,13 +37,13 @@ out float passViewDistance;
 
 void main() {
 
-    float y = (vertex >> 55u) & 0x1FFu;
-    float x = (vertex >> 46u) & 0x1FFu;
-    float z = (vertex >> 37u) & 0x1FFu;
+    float y = (vertex.x >> 18u) & 0x1FFu;
+    float x = (vertex.x >> 9u) & 0x1FFu;
+    float z = (vertex.x) & 0x1FFu;
 
-    uint xUv = (vertex & 0x100u) >> 8u;
-    uint yUv = (vertex & 0x80u) >> 7u;
-    uint zUv = vertex & 0x7Fu;
+    uint yUv = (vertex.y >> 18u) & 0x1FFu;
+    uint xUv = (vertex.y >> 9u) & 0x1FFu;
+    uint zUv = (vertex.y) & 0x1FFu;
     // FIXME: 02/02/2023 Temporary light value
     int light = 5;
 

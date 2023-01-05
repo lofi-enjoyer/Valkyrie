@@ -60,6 +60,13 @@ public class Loader {
         return vao;
     }
 
+    public int loadToVAO(int[] positions, int[] indices, int size) {
+        int vao = createVAO();
+        storeDataInAttributeList(0, size, positions);
+        bindIndicesBuffer(indices);
+        return vao;
+    }
+
     public int loadToVAO(long[] positions, int[] indices) {
         int vao = createVAO();
         storeDataInAttributeList(0, 1, positions);

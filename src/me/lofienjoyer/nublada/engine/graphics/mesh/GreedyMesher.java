@@ -1,9 +1,9 @@
 package me.lofienjoyer.nublada.engine.graphics.mesh;
 
+import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.world.Block;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import me.lofienjoyer.nublada.engine.world.Chunk;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,10 @@ public class GreedyMesher implements Mesher {
     private static final int TOP        = 4;
     private static final int BOTTOM     = 5;
 
-    private List<Long> positions;
+    private List<Integer> positions;
     private List<Integer> indices;
 
-    private long[] positionsArray;
+    private int[] positionsArray;
     private int[] indicesArray;
 
     public GreedyMesher(Chunk chunk) {
@@ -49,7 +49,7 @@ public class GreedyMesher implements Mesher {
 
         computeMesh();
 
-        positionsArray = new long[positions.size()];
+        positionsArray = new int[positions.size()];
         for (int i = 0; i < positions.size(); i++) {
             positionsArray[i] = positions.get(i);
         }
@@ -66,7 +66,7 @@ public class GreedyMesher implements Mesher {
 
     @Override
     public Mesh loadToGpu() {
-        Mesh mesh = new Mesh(positionsArray, indicesArray);
+        Mesh mesh = new Mesh(positionsArray, indicesArray, 2);
         positionsArray = null;
         indicesArray = null;
         return mesh;
@@ -169,90 +169,98 @@ public class GreedyMesher implements Mesher {
 
                                     int [] indexes = backFace ? indexes1 : indexes2;
 
-                                    long[] vertices = new long[4];
+                                    int[] vertices = new int[8];
 
                                     for (int index : indexes) {
                                         indices.add(index + passes * 4);
                                     }
 
+                                    vertices[0] = getCompressedData(x[0], x[1], x[2]);
+
+                                    vertices[2] = getCompressedData(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]);
+
+                                    vertices[4] = getCompressedData(x[0] + du[0], x[1] + du[1], x[2] + du[2]);
+
+                                    vertices[6] = getCompressedData(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]);
+
                                     // Texture re-orientation based on the direction
                                     if (d == 2) {
                                         if (!backFace) {
                                             // 2
-                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getNorthTexture());
+                                            vertices[1] = getCompressedData(0, h, block.getNorthTexture());
 
                                             // 0
-                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getNorthTexture());
+                                            vertices[3] = getCompressedData(0, 0, block.getNorthTexture());
 
                                             // 3
-                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getNorthTexture());
+                                            vertices[5] = getCompressedData(w, h, block.getNorthTexture());
 
                                             // 1
-                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getNorthTexture());
+                                            vertices[7] = getCompressedData(w, 0, block.getNorthTexture());
                                         } else {
                                             // 3
-                                            vertices[0] = getVertex(x[0], x[1], x[2], w, h, block.getSouthTexture());
+                                            vertices[1] = getCompressedData(w, h, block.getSouthTexture());
 
                                             // 1
-                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], w, 0, block.getSouthTexture());
+                                            vertices[3] = getCompressedData(w, 0, block.getSouthTexture());
 
                                             // 2
-                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], 0, h, block.getSouthTexture());
+                                            vertices[5] = getCompressedData(0, h, block.getSouthTexture());
 
                                             // 0
-                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], 0, 0, block.getSouthTexture());
+                                            vertices[7] = getCompressedData(0, 0, block.getSouthTexture());
                                         }
                                     } else if (d == 0) {
                                         if (backFace) {
                                             // 2
-                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getWestTexture());
+                                            vertices[1] = getCompressedData(0, w, block.getWestTexture());
 
                                             // 3
-                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getWestTexture());
+                                            vertices[3] = getCompressedData(h, w, block.getWestTexture());
 
                                             // 0
-                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getWestTexture());
+                                            vertices[5] = getCompressedData(0, 0, block.getWestTexture());
 
                                             // 1
-                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getWestTexture());
+                                            vertices[7] = getCompressedData(h, 0, block.getWestTexture());
                                         } else {
                                             // 2
-                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getEastTexture());
+                                            vertices[1] = getCompressedData(h, w, block.getEastTexture());
 
                                             // 3
-                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getEastTexture());
+                                            vertices[3] = getCompressedData(0, w, block.getEastTexture());
 
                                             // 1
-                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getEastTexture());
+                                            vertices[5] = getCompressedData(h, 0, block.getEastTexture());
 
                                             // 0
-                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getEastTexture());
+                                            vertices[7] = getCompressedData(0, 0, block.getEastTexture());
                                         }
                                     } else {
                                         if (!backFace) {
                                             // 0
-                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getTopTexture());
+                                            vertices[1] = getCompressedData(0, 0, block.getTopTexture());
 
                                             // 1
-                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getTopTexture());
+                                            vertices[3] = getCompressedData(h, 0, block.getTopTexture());
 
                                             // 2
-                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getTopTexture());
+                                            vertices[5] = getCompressedData(0, w, block.getTopTexture());
 
                                             // 3
-                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getTopTexture());
+                                            vertices[7] = getCompressedData(h, w, block.getTopTexture());
                                         } else {
                                             // 1
-                                            vertices[3] = getVertex(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], w, 0, block.getBottomTexture());
+                                            vertices[1] = getCompressedData(h, 0, block.getBottomTexture());
 
                                             // 0
-                                            vertices[1] = getVertex(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 0, 0, block.getBottomTexture());
+                                            vertices[3] = getCompressedData(0, 0, block.getBottomTexture());
 
                                             // 3
-                                            vertices[2] = getVertex(x[0] + du[0], x[1] + du[1], x[2] + du[2], w, h, block.getBottomTexture());
+                                            vertices[5] = getCompressedData(h, w, block.getBottomTexture());
 
                                             // 2
-                                            vertices[0] = getVertex(x[0], x[1], x[2], 0, h, block.getBottomTexture());
+                                            vertices[7] = getCompressedData(0, w, block.getBottomTexture());
                                         }
                                     }
 
@@ -260,6 +268,10 @@ public class GreedyMesher implements Mesher {
                                     positions.add(vertices[1]);
                                     positions.add(vertices[2]);
                                     positions.add(vertices[3]);
+                                    positions.add(vertices[4]);
+                                    positions.add(vertices[5]);
+                                    positions.add(vertices[6]);
+                                    positions.add(vertices[7]);
                                     passes++;
 
 //                                    quad(x[0],                 x[1],                   x[2],
@@ -296,8 +308,8 @@ public class GreedyMesher implements Mesher {
     private static final int[] indexes1 = new int[] { 2,0,1, 1,3,2 };
     private static final int[] indexes2 = new int[] { 2,3,1, 1,0,2 };
 
-    private long getVertex(int x, int y, int z, int xUv, int yUv, int zUv) {
-        return zUv | yUv << 7 | xUv << 8 | z << 37 | x << 46 | y << 55;
+    private int getCompressedData(int x, int y, int z) {
+        return z | x << 9 | y << 18;
     }
 
 }
