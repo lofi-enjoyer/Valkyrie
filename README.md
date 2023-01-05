@@ -24,7 +24,7 @@ Nublada is a personal project I'm working on with the objective of learning more
 
 ![2022-02-21 15-52-14 (5)](https://user-images.githubusercontent.com/25750692/155811531-ac8be712-774b-420f-b6e2-2bbdf0e50922.gif)
 
-> Render distance of 8 chunks (8 Minecraft chunks / ~256 meters) using around 500MB of memory, though the engine is capable of view distances up to 1 kilometer with a memory usage of about 4GB
+> Render distance of 8 chunks (16 Minecraft chunks / ~256 meters) using around 500MB of memory, though the engine is capable of view distances up to 1 kilometer with a memory usage of about 4GB
 
 <div id="features"></div>
 
