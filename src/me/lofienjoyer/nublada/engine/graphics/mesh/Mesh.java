@@ -6,7 +6,6 @@ public class Mesh {
 
     private final int vaoId;
     private final int vertexCount;
-    private int textureId;
 
     public Mesh(float[] positions, int[] indices, float[] uvs, float[] normals) {
         this(Nublada.LOADER.loadToVAO(positions, indices, uvs, normals), indices.length);
@@ -33,10 +32,6 @@ public class Mesh {
         this.vertexCount = vertexCount;
     }
 
-    public void setTextureId(int textureId) {
-        this.textureId = textureId;
-    }
-
     public int getVaoId() {
         return vaoId;
     }
@@ -45,7 +40,4 @@ public class Mesh {
         return vertexCount;
     }
 
-    public int getTextureId() {
-        return textureId;
-    }
 }

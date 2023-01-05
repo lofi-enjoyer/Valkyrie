@@ -26,7 +26,6 @@ const vec3[6] normalVectors = vec3[6](
     vec3( 0,  0, -1)
 );
 
-out vec3 toLightVector;
 out float distance;
 
 const float leavesMovement = 32;
@@ -41,6 +40,7 @@ void main() {
     uint xUv = (vertex & 0x100u) >> 8u;
     uint yUv = (vertex & 0x80u) >> 7u;
     uint zUv = vertex & 0x7Fu;
+    // FIXME: 02/02/2023 Temporary light value
     int light = 5;
 
     vec3 newPosition = vec3(x, y, z);
@@ -51,8 +51,6 @@ void main() {
     gl_Position = projectionMatrix * positionRelativeToCam;
     passColor = vec3(xUv, yUv, zUv);
     passLight = normalVectors[light];
-
-    toLightVector = vec3(0, 400, 0) - (newPosition);
 
     distance = length(cameraPosition.xz - worldPosition.xz);
 }

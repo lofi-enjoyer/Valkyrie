@@ -2,7 +2,6 @@
 
 in vec3 passColor;
 in vec3 passLight;
-in vec3 toLightVector;
 in float distance;
 in float faceLight;
 in float passViewDistance;

@@ -58,28 +58,6 @@ public class DynamicMesher implements Mesher {
     }
 
     private void computeMesh() {
-//        int[] vertices = new int[4];
-//        vertices[0] = getVertex(0, 100, 0, 1, 1, 2);
-//        vertices[1] = getVertex(0, 100, 10, 1, 0, 2);
-//        vertices[2] = getVertex(10, 100, 10, 0, 0, 2);
-//        vertices[3] = getVertex(10, 100, 0, 0, 1, 2);
-//        int test = 257;
-//        int test2 = test << 23;
-//        positions.add(vertices[0]);
-//        positions.add(vertices[1]);
-//        positions.add(vertices[2]);
-//        positions.add(vertices[3]);
-//
-//        indices.addAll(List.of(
-//                0 + passes,
-//                1 + passes,
-//                2 + passes,
-//                2 + passes,
-//                3 + passes,
-//                0 + passes
-//        ));
-//        passes += 4;
-
         int currentVoxel;
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int y = 0; y < CHUNK_HEIGHT; y++) {

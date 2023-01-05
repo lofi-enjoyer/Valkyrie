@@ -33,7 +33,6 @@ const float[6] lights = float[6](
     0.70
 );
 
-out vec3 toLightVector;
 out float distance;
 out float faceLight;
 out float passViewDistance;
@@ -46,8 +45,6 @@ void main() {
     gl_Position = projectionMatrix * positionRelativeToCam;
     passColor = color;
     passLight = normalVectors[int(light)];
-
-    toLightVector = vec3(0, 400, 0) - (position);
 
     distance = length(cameraPosition.xz - worldPosition.xz);
 
