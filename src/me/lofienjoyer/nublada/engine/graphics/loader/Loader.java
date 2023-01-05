@@ -50,6 +50,13 @@ public class Loader {
         return vao;
     }
 
+    public int loadToVAO(int[] positions, int[] indices) {
+        int vao = createVAO();
+        storeDataInAttributeList(0, 1, positions);
+        bindIndicesBuffer(indices);
+        return vao;
+    }
+
     public int loadToVAO(float[] positions) {
         int vao = createVAO();
         storeDataInAttributeList(0, 3, positions);
@@ -138,7 +145,7 @@ public class Loader {
         vboList.add(vboId);
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
         GL30.glBufferData(GL30.GL_ARRAY_BUFFER, data, GL30.GL_STATIC_DRAW);
-        GL30.glVertexAttribPointer(attributeNumber, size, GL30.GL_INT, false, 0, 0);
+        GL30.glVertexAttribIPointer(attributeNumber, size, GL30.GL_UNSIGNED_INT, 0, 0);
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
     }
 

@@ -2,9 +2,7 @@
 
 #define PI 3.14159265359
 
-in vec3 position;
-in vec3 color;
-in float light;
+in uint vertex;
 
 out vec3 passColor;
 out vec3 passLight;
@@ -36,24 +34,23 @@ const float waterSpeed = 0.25;
 
 void main() {
 
-    vec3 newPosition = vec3(position);
-    if (color.z == leavesId) {
-        newPosition.x += sin(position.y + time) / leavesMovement;
-        newPosition.z += cos(position.x + time + 2) / leavesMovement;
-        newPosition.y += sin(position.z + time + 5) / leavesMovement;
-    }
+    float y = (vertex >> 23u) & 0x1FFu;
+    float x = (vertex >> 16u) & 0x7Fu;
+    float z = (vertex >> 9u) & 0x7Fu;
 
-    if (color.z == waterId && light == 2) {
-        newPosition.y -= 0.1875f;
-        newPosition.y += (sin(((position.x + 16.0 * time * waterSpeed) / 16.0) * PI * 2)) * sin(((position.z + 16.0 * time * waterSpeed) / 8.0) * PI * 2) * 0.0625f;
-    }
+    uint xUv = (vertex & 0x100u) >> 8u;
+    uint yUv = (vertex & 0x80u) >> 7u;
+    uint zUv = vertex & 0x7Fu;
+    int light = 5;
+
+    vec3 newPosition = vec3(x, y, z);
 
     vec4 worldPosition = transformationMatrix * vec4(newPosition, 1.0);
     vec4 positionRelativeToCam = viewMatrix * worldPosition;
 
     gl_Position = projectionMatrix * positionRelativeToCam;
-    passColor = color;
-    passLight = normalVectors[int(light)];
+    passColor = vec3(xUv, yUv, zUv);
+    passLight = normalVectors[light];
 
     toLightVector = vec3(0, 400, 0) - (newPosition);
 

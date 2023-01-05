@@ -165,8 +165,6 @@ public class WorldRenderer {
 
             GL30.glBindVertexArray(chunk.getModel().getTransparentMeshes().getVaoId());
             GL30.glEnableVertexAttribArray(0);
-            GL30.glEnableVertexAttribArray(1);
-            GL30.glEnableVertexAttribArray(2);
 
             GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMeshes().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
         });
