@@ -1,6 +1,7 @@
 package me.lofienjoyer.nublada.game;
 
 import me.lofienjoyer.nublada.Nublada;
+import me.lofienjoyer.nublada.engine.graphics.render.RaycastRenderer;
 import me.lofienjoyer.nublada.engine.scene.IScene;
 import me.lofienjoyer.nublada.engine.graphics.camera.Camera;
 import me.lofienjoyer.nublada.engine.graphics.display.Window;
@@ -11,6 +12,7 @@ import me.lofienjoyer.nublada.engine.scripting.Script;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import me.lofienjoyer.nublada.engine.world.Player;
 import me.lofienjoyer.nublada.engine.world.World;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 public class WorldScene implements IScene {
@@ -20,6 +22,7 @@ public class WorldScene implements IScene {
     private WorldRenderer worldRenderer;
     private SkyboxRenderer skyboxRenderer;
     private SelectedBlockRenderer selectedBlockRenderer;
+    private RaycastRenderer raycastRenderer;
     private Player player;
 
     private Script script;
@@ -34,6 +37,8 @@ public class WorldScene implements IScene {
         skyboxRenderer.setupProjectionMatrix(640, 360);
         this.selectedBlockRenderer = new SelectedBlockRenderer();
         selectedBlockRenderer.setupProjectionMatrix(640, 360);
+        this.raycastRenderer = new RaycastRenderer();
+        raycastRenderer.setupProjectionMatrix(640, 360);
 
         this.player = new Player();
         player.camera = camera;
@@ -66,7 +71,12 @@ public class WorldScene implements IScene {
 
         worldRenderer.render(world, camera);
 
-//        if (selectedBlock != 0)
+        // TODO: 24/12/2022 Make this async
+        Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
+        if (hitPosition != null) {
+            raycastRenderer.render(camera, hitPosition);
+        }
+
         selectedBlockRenderer.render(selectedBlock);
 
         if (GLFW.glfwGetMouseButton(Window.id, 0) == 0 &&

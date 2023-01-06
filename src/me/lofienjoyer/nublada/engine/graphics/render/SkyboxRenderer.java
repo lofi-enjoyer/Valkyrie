@@ -6,8 +6,8 @@ import me.lofienjoyer.nublada.engine.graphics.mesh.Mesh;
 import me.lofienjoyer.nublada.engine.graphics.shaders.SkyboxShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL30;
+
+import static org.lwjgl.opengl.GL45.*;
 
 public class SkyboxRenderer {
 
@@ -59,9 +59,9 @@ public class SkyboxRenderer {
 
     private static String[] TEXTURE_FILES = { "right", "left", "top", "bottom", "back", "front" };
 
-    private Mesh mesh;
-    private int texture;
-    private SkyboxShader shader;
+    private final Mesh mesh;
+    private final int texture;
+    private final SkyboxShader shader;
     private Matrix4f projectionMatrix;
 
     public SkyboxRenderer() {
@@ -75,21 +75,21 @@ public class SkyboxRenderer {
     }
 
     public void render(Camera camera) {
-        GL30.glDisable(GL30.GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
 
         shader.start();
         shader.loadViewMatrix(camera);
 
-        GL30.glActiveTexture(GL13.GL_TEXTURE0);
-        GL30.glBindTexture(GL30.GL_TEXTURE_CUBE_MAP, texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 
-        GL30.glBindVertexArray(mesh.getVaoId());
-        GL30.glEnableVertexAttribArray(0);
-        GL30.glDrawArrays(GL30.GL_TRIANGLES, 0, mesh.getVertexCount());
+        glBindVertexArray(mesh.getVaoId());
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, mesh.getVertexCount());
 
-        GL30.glBindVertexArray(0);
+        glBindVertexArray(0);
 
-        GL30.glEnable(GL30.GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
     }
 
     public void setupProjectionMatrix(int width, int height) {

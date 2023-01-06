@@ -11,14 +11,14 @@ import me.lofienjoyer.nublada.engine.world.Chunk;
 import me.lofienjoyer.nublada.engine.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.lwjgl.opengl.GL45.*;
 
 public class WorldRenderer {
 
@@ -34,7 +34,6 @@ public class WorldRenderer {
     private final List<Chunk> chunksToRender = new ArrayList<>();
     private final Vector2i playerPosition;
 
-    private final RaycastRenderer raycastRenderer;
     private final AtomicBoolean needsSorting;
 
     public WorldRenderer() {
@@ -45,8 +44,6 @@ public class WorldRenderer {
 
         this.tester = new FrustumCullingTester();
         this.playerPosition = new Vector2i();
-
-        this.raycastRenderer = new RaycastRenderer();
 
         this.needsSorting = new AtomicBoolean(true);
 
@@ -61,6 +58,13 @@ public class WorldRenderer {
 
         world.checkGeneratingChunks();
 
+        /*
+            Checks the chunk the player is in, and if it changed
+            from the last frame it unloads the chunks that are not in view,
+            sets to load the new chunks that entered the view distance and if
+            new chunks are added for rendering sorts the list of chunks to
+            render them from back to front
+        */
         int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) World.CHUNK_WIDTH);
 
@@ -89,12 +93,93 @@ public class WorldRenderer {
             }
         }
 
-        List<Chunk> chunksToUnload = new ArrayList<>();
-
+        /*
+            If the chunks need sorting clears the render list
+        */
         if (needsSorting.get())
             chunksToRender.clear();
 
-        // Checks all loaded chunks, and if any is outside the view area unloads it
+        updateChunksToRenderList(world, playerX, playerZ);
+
+        if (needsSorting.get()) {
+            chunksToRender.sort(new SortByDistance());
+            needsSorting.set(false);
+        }
+
+        // Get the block the camera is in (for in-water effects)
+        int headBlock = world.getBlock(camera.getPosition());
+
+        renderSolidMeshes(camera, headBlock);
+
+        renderTransparentMeshes(camera, headBlock);
+
+        // TODO: 05/02/2022 Make a proper crosshair
+        // Renders a point in the middle of the screen
+        glUseProgram(0);
+        glPointSize(5);
+        glBegin(GL_POINTS);
+        glVertex2f(0, 0);
+        glEnd();
+        glPointSize(1);
+    }
+
+    // Renders the solid mesh for all chunks
+    private void renderSolidMeshes(Camera camera, int headBlock) {
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        glBindTexture(GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
+
+        // Renders the solid mesh for all chunks
+        solidsShader.start();
+        solidsShader.loadViewMatrix(camera);
+        solidsShader.loadViewDistance(VIEW_DISTANCE * 32);
+        solidsShader.setInWater(headBlock == 7);
+
+        chunksToRender.forEach(chunk -> {
+            if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
+                return;
+
+            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
+
+            glBindVertexArray(chunk.getModel().getSolidMeshes().getVaoId());
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+            glEnableVertexAttribArray(2);
+
+            glDrawElements(GL_TRIANGLES, chunk.getModel().getSolidMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
+        });
+    }
+
+    // Renders the transparent mesh for all chunks
+    private void renderTransparentMeshes(Camera camera, int headBlock) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        transparencyShader.start();
+        transparencyShader.loadViewMatrix(camera);
+        transparencyShader.loadTime((float) GLFW.glfwGetTime());
+        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32);
+        transparencyShader.setInWater(headBlock == 7);
+
+        chunksToRender.forEach(chunk -> {
+            if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
+                return;
+            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
+
+            glBindVertexArray(chunk.getModel().getTransparentMeshes().getVaoId());
+            glEnableVertexAttribArray(0);
+
+            glDrawElements(GL_TRIANGLES, chunk.getModel().getTransparentMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
+        });
+        glDisable(GL_BLEND);
+    }
+
+    // Checks all loaded chunks, and unloads any that is outside the view distance
+    private void updateChunksToRenderList(World world, int playerX, int playerZ) {
+        List<Chunk> chunksToUnload = new ArrayList<>();
+
         world.getChunks().forEach((position, chunk) -> {
             chunk.prepare();
 
@@ -114,82 +199,6 @@ public class WorldRenderer {
             chunk.onDestroy();
             world.getChunks().remove(chunk.getPosition());
         });
-
-        int headBlock = world.getBlock(camera.getPosition());
-
-        if (needsSorting.get()) {
-            chunksToRender.sort(new SortByDistance());
-            needsSorting.set(false);
-        }
-
-        GL30.glEnable(GL30.GL_DEPTH_TEST);
-        GL30.glEnable(GL30.GL_CULL_FACE);
-        GL30.glCullFace(GL30.GL_BACK);
-
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
-
-        // Renders the solid mesh for all chunks
-        solidsShader.start();
-        solidsShader.loadViewMatrix(camera);
-        solidsShader.loadViewDistance(VIEW_DISTANCE * 32);
-        solidsShader.setInWater(headBlock == 7);
-
-        chunksToRender.forEach(chunk -> {
-            if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
-                return;
-
-            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
-
-            GL30.glBindVertexArray(chunk.getModel().getSolidMeshes().getVaoId());
-            GL30.glEnableVertexAttribArray(0);
-            GL30.glEnableVertexAttribArray(1);
-            GL30.glEnableVertexAttribArray(2);
-
-            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getSolidMeshes().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
-        });
-
-        // Renders the transparent mesh for all chunks
-        GL30.glEnable(GL30.GL_BLEND);
-        GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
-
-        transparencyShader.start();
-        transparencyShader.loadViewMatrix(camera);
-        transparencyShader.loadTime((float) GLFW.glfwGetTime());
-        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32);
-        transparencyShader.setInWater(headBlock == 7);
-
-        chunksToRender.forEach(chunk -> {
-            if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
-                return;
-            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
-
-            GL30.glBindVertexArray(chunk.getModel().getTransparentMeshes().getVaoId());
-            GL30.glEnableVertexAttribArray(0);
-
-            GL30.glDrawElements(GL30.GL_TRIANGLES, chunk.getModel().getTransparentMeshes().getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
-        });
-        GL30.glDisable(GL30.GL_BLEND);
-
-        // Highlights the voxel the player is looking at
-        selectorShader.start();
-        selectorShader.loadViewMatrix(camera);
-        selectorShader.loadTime((float) GLFW.glfwGetTime());
-
-        // TODO: 24/12/2022 Make this async
-        Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
-        if (hitPosition != null) {
-            selectorShader.loadTransformationMatrix(Maths.createTransformationMatrix(hitPosition, 0));
-            raycastRenderer.render();
-        }
-
-        // TODO: 05/02/2022 Make a proper crosshair
-        // Renders a point in the middle of the screen
-        GL30.glUseProgram(0);
-        GL30.glPointSize(5);
-        GL30.glBegin(GL30.GL_POINTS);
-        GL30.glVertex2f(0, 0);
-        GL30.glEnd();
-        GL30.glPointSize(1);
     }
 
     public void updateFrustum(Camera camera) {
