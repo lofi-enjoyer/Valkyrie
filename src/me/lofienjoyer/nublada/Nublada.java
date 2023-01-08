@@ -51,7 +51,7 @@ public class Nublada {
         long timer = System.nanoTime();
         float delta = 1f;
 
-        framebuffer = new ColorFramebuffer(640, 360);
+        framebuffer = new ColorFramebuffer(window.getWidth() / 4, window.getHeight() / 4);
         FboShader shader = new FboShader();
         QuadMesh quadMesh = new QuadMesh();
 
@@ -93,7 +93,14 @@ public class Nublada {
             currentScene.dispose();
         scene.init();
         this.currentScene = scene;
-        window.setResizeCallback(scene::onResize);
+        window.setResizeCallback((width, height) -> {
+            onResize(width, height);
+            scene.onResize(width, height);
+        });
+    }
+
+    private void onResize(int width, int height) {
+        framebuffer.resize(width / 4, height / 4);
     }
 
     public void dispose() {

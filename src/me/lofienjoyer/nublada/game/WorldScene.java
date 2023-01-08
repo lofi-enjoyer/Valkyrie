@@ -95,9 +95,10 @@ public class WorldScene implements IScene {
 
     @Override
     public void onResize(int width, int height) {
-//        worldRenderer.setupProjectionMatrix(width, height);
-//        skyboxRenderer.setupProjectionMatrix(width, height);
-//        selectedBlockRenderer.setupProjectionMatrix(width, height);
+        worldRenderer.setupProjectionMatrix(width, height);
+        skyboxRenderer.setupProjectionMatrix(width, height);
+        selectedBlockRenderer.setupProjectionMatrix(width, height);
+        raycastRenderer.setupProjectionMatrix(width, height);
     }
 
     @Override

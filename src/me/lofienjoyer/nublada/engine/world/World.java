@@ -144,6 +144,7 @@ public class World {
                 try {
                     initializeChunk(future.get());
                 } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
                     Nublada.LOG.severe(e.getMessage());
                 }
             }
