@@ -1,5 +1,6 @@
 package me.lofienjoyer.nublada;
 
+import me.lofienjoyer.nublada.engine.graphics.mesh.QuadMesh;
 import me.lofienjoyer.nublada.engine.graphics.shaders.FboShader;
 import me.lofienjoyer.nublada.engine.scene.IScene;
 import me.lofienjoyer.nublada.engine.graphics.display.Window;
@@ -68,29 +69,8 @@ public class Nublada {
             Nublada.LOG.severe("Error while creating framebuffer!");
         }
 
-        float[] quadVertices = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-                // positions   // texCoords
-                -1.0f,  1.0f,  0.0f, 1.0f,
-                -1.0f, -1.0f,  0.0f, 0.0f,
-                1.0f, -1.0f,  1.0f, 0.0f,
-
-                -1.0f,  1.0f,  0.0f, 1.0f,
-                1.0f, -1.0f,  1.0f, 0.0f,
-                1.0f,  1.0f,  1.0f, 1.0f
-        };
-
         FboShader shader = new FboShader();
-
-        int quadVAO, quadVBO;
-        quadVAO = GL30.glGenVertexArrays();
-        quadVBO = GL30.glGenBuffers();
-        GL30.glBindVertexArray(quadVAO);
-        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, quadVBO);
-        GL30.glBufferData(GL30.GL_ARRAY_BUFFER, quadVertices, GL30.GL_STATIC_DRAW);
-        GL30.glEnableVertexAttribArray(0);
-        GL30.glVertexAttribPointer(0, 2, GL30.GL_FLOAT, false, 4 * Float.BYTES, 0);
-        GL30.glEnableVertexAttribArray(1);
-        GL30.glVertexAttribPointer(1, 2, GL30.GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
+        QuadMesh quadMesh = new QuadMesh();
 
         while (window.keepOpen()) {
             GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, framebuffer);
@@ -109,7 +89,7 @@ public class Nublada {
             shader.start();
 
             GL30.glViewport(0, 0, window.getWidth(), window.getHeight());
-            GL30.glBindVertexArray(quadVAO);
+            GL30.glBindVertexArray(quadMesh.getVaoId());
             GL30.glDisable(GL11.GL_DEPTH_TEST);
             GL30.glBindTexture(GL11.GL_TEXTURE_2D, textureColorBuffer);
             GL30.glDrawArrays(GL11.GL_TRIANGLES, 0, 6);
