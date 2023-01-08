@@ -37,7 +37,7 @@ public class CastlePopulator extends Populator{
         for (int x = 0; x < 9; x++) {
             for (int z = 0; z < 9; z++) {
                 for (int y = 0; y < 5; y++) {
-                    chunk.setBlock(2, castleX + x, castleY + y, castleZ + z);
+                    chunk.setBlock(2, castleX + x, castleY + y, castleZ + z, false);
                 }
             }
         }
