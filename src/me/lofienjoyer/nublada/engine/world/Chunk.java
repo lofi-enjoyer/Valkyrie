@@ -52,6 +52,8 @@ public class Chunk {
 
     public boolean updated = false;
 
+    private boolean loaded = false;
+
     private Future<MeshBundle> mesherFuture;
 
     public Chunk(Vector2i position, World world) {
@@ -64,7 +66,7 @@ public class Chunk {
     // TODO: 24/01/2022 Implement generators for World Generation
     // Temporary generation code
     public void loadChunk(World world, FutureChunk futureChunk) {
-        if (!loadFromFile()) {
+        if (true) {
             voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
             for (Populator populator : world.getPopulators()) {
@@ -75,7 +77,10 @@ public class Chunk {
                 futureChunk.setBlocksInChunk(this);
 
             this.compressedData = compress(voxels);
+            voxels = null;
         }
+
+        loaded = true;
     }
 
     private boolean loadFromFile() {
@@ -97,6 +102,7 @@ public class Chunk {
         return true;
     }
 
+    // FIXME 09/01/2023
     public void saveToFile() {
         try {
             if (voxels == null)
@@ -105,6 +111,7 @@ public class Chunk {
             File file = new File("world//" + position.x + "_" + position.y + ".dat");
 
             DataOutputStream output = new DataOutputStream(new FileOutputStream(file));
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             DeflaterOutputStream dos = new DeflaterOutputStream(output);
 
             dos.write(compress(voxels));
@@ -130,20 +137,34 @@ public class Chunk {
             }
 
             iis.close();
-
             return decompressedData;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
 
     private byte[] compress(short[] data) {
-        byte[] compressedData = new byte[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH * 2];
-        for (int i = 0; i < voxels.length; i++) {
-            compressedData[i * 2] = (byte) (voxels[i] & 0xff);
-            compressedData[i * 2 + 1] = (byte) ((voxels[i] >> 8) & 0xff);
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            DeflaterOutputStream dos = new DeflaterOutputStream(outputStream);
+
+            byte[] intermediateData = new byte[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH * 2];
+            for (int i = 0; i < data.length; i++) {
+                intermediateData[i * 2] = (byte) (data[i] & 0xff);
+                intermediateData[i * 2 + 1] = (byte) ((data[i] >> 8) & 0xff);
+            }
+            dos.write(intermediateData);
+            dos.flush();
+            dos.close();
+
+            outputStream.close();
+
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return compressedData;
+        return new byte[0];
     }
 
     /**
@@ -151,7 +172,7 @@ public class Chunk {
      * the mesh data to the GPU when meshing is finished
      */
     public void prepare() {
-        if (!updated) {
+        if (!updated & loaded) {
             updated = true;
             generateMesh();
         }

@@ -57,7 +57,6 @@ public class WorldRenderer {
     public void render(World world, Camera camera) {
 
         world.checkGeneratingChunks();
-
         /*
             Checks the chunk the player is in, and if it changed
             from the last frame it unloads the chunks that are not in view,
@@ -181,6 +180,7 @@ public class WorldRenderer {
         List<Chunk> chunksToUnload = new ArrayList<>();
 
         world.getChunks().forEach((position, chunk) -> {
+            // FIXME 09/01/2023 Lag spikes when many chunks are queued to load data to gpu
             chunk.prepare();
 
             long distance = position.distanceSquared(playerX, playerZ);
