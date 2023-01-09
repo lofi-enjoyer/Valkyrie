@@ -1,6 +1,7 @@
 package me.lofienjoyer.nublada.engine.graphics.mesh;
 
 import me.lofienjoyer.nublada.engine.world.Chunk;
+import me.lofienjoyer.nublada.engine.world.ChunkPreMeshData;
 
 /**
  * Contains the solid and transparent meshes of a chunk
@@ -14,9 +15,11 @@ public class MeshBundle {
     private Mesher dynamicMesher;
 
     public MeshBundle(Chunk chunk) {
-        this.greedyMesher = new GreedyMesher(chunk).compute();
+        ChunkPreMeshData chunkPreMeshData = new ChunkPreMeshData(chunk);
 
-        this.dynamicMesher = new DynamicMesher(chunk).compute();
+        this.greedyMesher = new GreedyMesher(chunkPreMeshData).compute();
+
+        this.dynamicMesher = new DynamicMesher(chunkPreMeshData).compute();
     }
 
     public MeshBundle loadMeshToGpu() {

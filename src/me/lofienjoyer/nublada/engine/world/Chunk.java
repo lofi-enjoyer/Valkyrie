@@ -25,7 +25,7 @@ public class Chunk {
     private static final int EAST = 1;
     private static final int WEST = 3;
 
-    private static final Vector2i[] NEIGHBOR_VECTORS = {
+    protected static final Vector2i[] NEIGHBOR_VECTORS = {
             new Vector2i( 0, -1),
             new Vector2i(-1,  0),
             new Vector2i( 0,  1),
@@ -64,17 +64,18 @@ public class Chunk {
     // TODO: 24/01/2022 Implement generators for World Generation
     // Temporary generation code
     public void loadChunk(World world, FutureChunk futureChunk) {
-        voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
+        if (!loadFromFile()) {
+            voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
-        if (loadFromFile())
-            return;
+            for (Populator populator : world.getPopulators()) {
+                populator.populate(this);
+            }
 
-        for (Populator populator : world.getPopulators()) {
-            populator.populate(this);
+            if (futureChunk != null)
+                futureChunk.setBlocksInChunk(this);
+
+            this.compressedData = compress(voxels);
         }
-
-        if (futureChunk != null)
-            futureChunk.setBlocksInChunk(this);
     }
 
     private boolean loadFromFile() {
@@ -87,19 +88,10 @@ public class Chunk {
             DataInputStream input = new DataInputStream(new FileInputStream(file));
             this.compressedData = input.readAllBytes();
             input.close();
-            InflaterInputStream iis = new InflaterInputStream(new ByteArrayInputStream(compressedData));
-
-            byte[] data = iis.readAllBytes();
-
-            for (int i = 0; i < voxels.length; i++) {
-                voxels[i] = (short) ((data[i * 2 + 1] << 4) | data[i * 2]);
-            }
-
-            input.close();
+            this.voxels = decompress(compressedData);
 
         } catch (IOException exception) {
             exception.printStackTrace();
-            voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
             return false;
         }
         return true;
@@ -114,13 +106,9 @@ public class Chunk {
 
             DataOutputStream output = new DataOutputStream(new FileOutputStream(file));
             DeflaterOutputStream dos = new DeflaterOutputStream(output);
-            byte[] data = new byte[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH * 2];
-            for (int i = 0; i < voxels.length; i++) {
-                data[i * 2] = (byte) (voxels[i] & 0xff);
-                data[i * 2 + 1] = (byte) ((voxels[i] >> 8) & 0xff);
-            }
 
-            dos.write(data);
+            dos.write(compress(voxels));
+
             dos.flush();
             dos.close();
 
@@ -128,6 +116,34 @@ public class Chunk {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
+    }
+
+    protected short[] decompress(byte[] data) {
+        try {
+            InflaterInputStream iis = new InflaterInputStream(new ByteArrayInputStream(data));
+
+            byte[] intermediateByteData = iis.readAllBytes();
+            short[] decompressedData = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
+
+            for (int i = 0; i < decompressedData.length; i++) {
+                decompressedData[i] = (short) ((intermediateByteData[i * 2 + 1] << 4) | intermediateByteData[i * 2]);
+            }
+
+            iis.close();
+
+            return decompressedData;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private byte[] compress(short[] data) {
+        byte[] compressedData = new byte[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH * 2];
+        for (int i = 0; i < voxels.length; i++) {
+            compressedData[i * 2] = (byte) (voxels[i] & 0xff);
+            compressedData[i * 2 + 1] = (byte) ((voxels[i] >> 8) & 0xff);
+        }
+        return compressedData;
     }
 
     /**
@@ -220,6 +236,18 @@ public class Chunk {
             neighbor.neighbors[(i + 2) % 4] = null;
             neighbor.updated = false;
         }
+    }
+
+    public short[] getVoxels() {
+        return voxels;
+    }
+
+    public byte[] getCompressedData() {
+        return compressedData;
+    }
+
+    protected Chunk[] getNeighbors() {
+        return neighbors;
     }
 
     public Vector2i getPosition() {

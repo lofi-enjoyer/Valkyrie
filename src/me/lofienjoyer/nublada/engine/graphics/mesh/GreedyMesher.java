@@ -4,6 +4,7 @@ import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.world.Block;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import me.lofienjoyer.nublada.engine.world.Chunk;
+import me.lofienjoyer.nublada.engine.world.ChunkPreMeshData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class GreedyMesher implements Mesher {
 
     private final int[] dims;
 
-    private final Chunk chunk;
+    private final ChunkPreMeshData chunkData;
 
     private int passes = 0;
 
@@ -36,8 +37,8 @@ public class GreedyMesher implements Mesher {
     private int[] positionsArray;
     private int[] indicesArray;
 
-    public GreedyMesher(Chunk chunk) {
-        this.chunk = chunk;
+    public GreedyMesher(ChunkPreMeshData chunkPreMeshData) {
+        this.chunkData = chunkPreMeshData;
 
         this.dims = new int[] { CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH };
     }
@@ -110,8 +111,8 @@ public class GreedyMesher implements Mesher {
 
                         for(x[u] = 0; x[u] < dims[u]; x[u]++) {
 
-                            voxelFace  = chunk.getBlock(x[0], x[1], x[2]);
-                            voxelFace1 = chunk.getBlock((x[0] + q[0]), (x[1] + q[1]), (x[2] + q[2]));
+                            voxelFace  = chunkData.getBlock(x[0], x[1], x[2]);
+                            voxelFace1 = chunkData.getBlock((x[0] + q[0]), (x[1] + q[1]), (x[2] + q[2]));
 
                             if (voxelFace != 0 && BlockRegistry.getBLock(voxelFace).isTransparent()) {
                                 voxelFace = 0;
