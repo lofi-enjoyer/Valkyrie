@@ -77,7 +77,6 @@ public class Chunk {
                 futureChunk.setBlocksInChunk(this);
 
             this.compressedData = compress(voxels);
-            voxels = null;
         }
 
         loaded = true;

@@ -18,7 +18,6 @@ public class MeshBundle {
         ChunkPreMeshData chunkPreMeshData = new ChunkPreMeshData(chunk);
 
         this.greedyMesher = new GreedyMesher(chunkPreMeshData).compute();
-
         this.dynamicMesher = new DynamicMesher(chunkPreMeshData).compute();
     }
 

@@ -14,11 +14,7 @@ public class ChunkPreMeshData {
     private short[][] neighborsData;
 
     public ChunkPreMeshData(Chunk chunk) {
-        if (chunk.getVoxels() != null) {
-            chunkData = chunk.getVoxels();
-        } else {
-            chunkData = chunk.decompress(chunk.getCompressedData());
-        }
+        this.chunkData = chunk.decompress(chunk.getCompressedData());
 
         this.neighborsData = new short[chunk.getNeighbors().length][CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
         for (int i = 0; i < chunk.getNeighbors().length; i++) {
@@ -26,11 +22,7 @@ public class ChunkPreMeshData {
             if (neighbor == null || neighbor.getCompressedData() == null)
                 continue;
 
-            if (neighbor.getVoxels() != null) {
-                neighborsData[i] = neighbor.getVoxels();
-            } else {
-                neighborsData[i] = neighbor.decompress(neighbor.getCompressedData());
-            }
+            neighborsData[i] = neighbor.decompress(neighbor.getCompressedData());
         }
     }
 

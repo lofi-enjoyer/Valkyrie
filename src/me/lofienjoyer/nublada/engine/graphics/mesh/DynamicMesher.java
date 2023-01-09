@@ -16,7 +16,7 @@ import static me.lofienjoyer.nublada.engine.world.World.CHUNK_HEIGHT;
  */
 public class DynamicMesher implements Mesher {
 
-    private final ChunkPreMeshData chunkData;
+    private ChunkPreMeshData chunkData;
 
     private List<Integer> positions;
     private List<Integer> indices;
@@ -34,6 +34,10 @@ public class DynamicMesher implements Mesher {
         this.indices = new ArrayList<>(6000);
 
         computeMesh();
+
+        // IMPORTANT - DO NOT DELETE
+        // De-references ChunkPreMeshData to avoid memory leaks
+        this.chunkData = null;
 
         positionsArray = new int[positions.size()];
         for (int i = 0; i < positions.size(); i++) {

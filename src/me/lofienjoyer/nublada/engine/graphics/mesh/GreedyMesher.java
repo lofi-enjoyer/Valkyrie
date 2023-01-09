@@ -20,7 +20,7 @@ public class GreedyMesher implements Mesher {
 
     private final int[] dims;
 
-    private final ChunkPreMeshData chunkData;
+    private ChunkPreMeshData chunkData;
 
     private int passes = 0;
 
@@ -49,6 +49,10 @@ public class GreedyMesher implements Mesher {
         this.indices = new ArrayList<>(6000);
 
         computeMesh();
+
+        // IMPORTANT - DO NOT DELETE
+        // De-references ChunkPreMeshData to avoid memory leaks
+        this.chunkData = null;
 
         positionsArray = new int[positions.size()];
         for (int i = 0; i < positions.size(); i++) {
