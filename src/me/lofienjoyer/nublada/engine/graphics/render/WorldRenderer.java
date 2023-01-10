@@ -75,14 +75,14 @@ public class WorldRenderer {
 
         // Checks all the chunks within the view distance,
         // and loads those which are not loaded
-        for(int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; x++){
-            for(int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; z++){
+        for(int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; x++) {
+            for(int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; z++) {
                 int chunkX = playerX + x;
                 int chunkZ = playerZ + z;
 
                 int distance = x * x + z * z;
 
-                if(distance < VIEW_DISTANCE * VIEW_DISTANCE){
+                if(distance < VIEW_DISTANCE * VIEW_DISTANCE) {
                     if (world.getChunk(chunkX, chunkZ) == null) {
                         world.addChunk(chunkX, chunkZ);
                         needsSorting.set(true);
@@ -133,7 +133,7 @@ public class WorldRenderer {
         // Renders the solid mesh for all chunks
         solidsShader.start();
         solidsShader.loadViewMatrix(camera);
-        solidsShader.loadViewDistance(VIEW_DISTANCE * 32);
+        solidsShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
         solidsShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
@@ -159,7 +159,7 @@ public class WorldRenderer {
         transparencyShader.start();
         transparencyShader.loadViewMatrix(camera);
         transparencyShader.loadTime((float) GLFW.glfwGetTime());
-        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32);
+        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
         transparencyShader.setInWater(headBlock == 7);
 
         chunksToRender.forEach(chunk -> {
@@ -184,8 +184,9 @@ public class WorldRenderer {
             chunk.prepare();
 
             long distance = position.distanceSquared(playerX, playerZ);
-            if (distance > VIEW_DISTANCE * VIEW_DISTANCE + 2) {
+            if (distance > VIEW_DISTANCE * VIEW_DISTANCE) {
                 chunksToUnload.add(chunk);
+                chunksToRender.remove(chunk);
                 return;
             }
 
