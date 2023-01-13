@@ -49,7 +49,7 @@ _Prerequisites: Java Development Kit 11 or newer and Maven_
 
 1. Clone the repository and access the directory
 ```sh
-git clone https://github.com/aurgiyalgo/Nublada
+git clone https://github.com/lofi-enjoyer/Nublada
 cd Nublada/
 ```
 
