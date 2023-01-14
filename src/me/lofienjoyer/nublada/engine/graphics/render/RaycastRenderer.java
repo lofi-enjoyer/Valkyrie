@@ -6,8 +6,12 @@ import me.lofienjoyer.nublada.engine.graphics.shaders.SelectorShader;
 import me.lofienjoyer.nublada.engine.utils.Maths;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL30;
+
+import java.nio.IntBuffer;
+
+import static org.lwjgl.opengl.GL45.*;
 
 public class RaycastRenderer {
 
@@ -15,6 +19,10 @@ public class RaycastRenderer {
     private final SelectorShader selectorShader;
 
     private Matrix4f projectionMatrix;
+
+    int[] indirectData = {
+            36, 1, 0, 0, 0
+    };
 
     public RaycastRenderer() {
         float[] positions = {
@@ -48,6 +56,13 @@ public class RaycastRenderer {
                 6, 7, 3
         };
 
+        int iboId = glGenBuffers();
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, iboId);
+
+        IntBuffer ibuf = BufferUtils.createIntBuffer(indirectData.length);
+        ibuf.put(indirectData).flip();
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, ibuf, GL_STATIC_DRAW);
+
         this.mesh = new Mesh(positions, indices);
 
         this.selectorShader = new SelectorShader();
@@ -60,22 +75,24 @@ public class RaycastRenderer {
         selectorShader.loadTime((float) GLFW.glfwGetTime());
         selectorShader.loadTransformationMatrix(Maths.createTransformationMatrix(hitPosition, 0));
 
-        GL30.glLineWidth(4);
-        GL30.glDisable(GL30.GL_DEPTH_TEST);
-        GL30.glEnable(GL30.GL_BLEND);
-        GL30.glDisable(GL30.GL_CULL_FACE);
+        glLineWidth(4);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glDisable(GL_CULL_FACE);
 
-        GL30.glBindVertexArray(mesh.getVaoId());
-        GL30.glEnableVertexAttribArray(0);
+        glBindVertexArray(mesh.getVaoId());
+        glEnableVertexAttribArray(0);
 
-        GL30.glDrawElements(GL30.GL_TRIANGLES, mesh.getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
+        glFinish();
+        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, GL_ZERO, indirectData.length / 5, GL_ZERO);
+//        glDrawElements(GL_TRIANGLES, mesh.getVertexCount(), GL_UNSIGNED_INT, 0);
 
-        GL30.glBindVertexArray(0);
+        glBindVertexArray(0);
 
-        GL30.glLineWidth(1);
-        GL30.glEnable(GL30.GL_DEPTH_TEST);
-        GL30.glDisable(GL30.GL_BLEND);
-        GL30.glEnable(GL30.GL_CULL_FACE);
+        glLineWidth(1);
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
     }
 
     /**
