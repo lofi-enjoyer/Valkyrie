@@ -29,7 +29,6 @@ public class WorldRenderer {
 
     private final SolidsShader solidsShader;
     private final TransparencyShader transparencyShader;
-    private final SelectorShader selectorShader;
 
     private final List<Chunk> chunksToRender = new ArrayList<>();
     private final Vector2i playerPosition;
@@ -40,7 +39,6 @@ public class WorldRenderer {
         this.projectionMatrix = new Matrix4f();
         this.solidsShader = new SolidsShader();
         this.transparencyShader = new TransparencyShader();
-        this.selectorShader = new SelectorShader();
 
         this.tester = new FrustumCullingTester();
         this.playerPosition = new Vector2i();
@@ -144,8 +142,6 @@ public class WorldRenderer {
 
             glBindVertexArray(chunk.getModel().getSolidMeshes().getVaoId());
             glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glEnableVertexAttribArray(2);
 
             glDrawElements(GL_TRIANGLES, chunk.getModel().getSolidMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
         });
@@ -219,8 +215,6 @@ public class WorldRenderer {
         solidsShader.loadProjectionMatrix(projectionMatrix);
         transparencyShader.start();
         transparencyShader.loadProjectionMatrix(projectionMatrix);
-        selectorShader.start();
-        selectorShader.loadProjectionMatrix(projectionMatrix);
     }
 
     class SortByDistance implements Comparator<Chunk> {
