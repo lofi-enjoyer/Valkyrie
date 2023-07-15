@@ -63,4 +63,4 @@ mvn package
 
 ## License 📜 
 
-This project is under a MIT License. Check [`LICENSE`](https://github.com/aurgiyalgo/TownyElections/blob/master/LICENSE) for more information.
+This project is under a GPL-3.0 license. Check [`LICENSE`](https://github.com/lofi-enjoyer/Nublada/blob/master/LICENSE) for more information.
