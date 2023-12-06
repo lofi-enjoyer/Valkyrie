@@ -1,13 +1,15 @@
 package me.lofienjoyer.nublada;
 
+import me.lofienjoyer.nublada.engine.events.EventHandler;
+import me.lofienjoyer.nublada.engine.events.global.StartupEvent;
+import me.lofienjoyer.nublada.engine.graphics.display.Window;
 import me.lofienjoyer.nublada.engine.graphics.framebuffer.ColorFramebuffer;
 import me.lofienjoyer.nublada.engine.graphics.framebuffer.Framebuffer;
+import me.lofienjoyer.nublada.engine.graphics.loader.Loader;
 import me.lofienjoyer.nublada.engine.graphics.mesh.QuadMesh;
 import me.lofienjoyer.nublada.engine.graphics.shaders.FboShader;
-import me.lofienjoyer.nublada.engine.scene.IScene;
-import me.lofienjoyer.nublada.engine.graphics.display.Window;
-import me.lofienjoyer.nublada.engine.graphics.loader.Loader;
 import me.lofienjoyer.nublada.engine.log.NubladaLogHandler;
+import me.lofienjoyer.nublada.engine.scene.IScene;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
@@ -21,6 +23,7 @@ public class Nublada {
 
     public static final Logger LOG = NubladaLogHandler.initLogs();
     public static final Loader LOADER = new Loader();
+    public static final EventHandler EVENT_HANDLER = new EventHandler();
 
     private final Window window;
     public static long WINDOW_ID;
@@ -35,6 +38,9 @@ public class Nublada {
         this.window = new Window(1280, 720, "Nublada");
 
         WINDOW_ID = window.getId();
+        EVENT_HANDLER.registerListener(StartupEvent.class, (event) -> {
+            LOG.info("Successful startup!");
+        });
     }
 
     public void init() {
@@ -54,6 +60,8 @@ public class Nublada {
         framebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
         FboShader shader = new FboShader();
         QuadMesh quadMesh = new QuadMesh();
+
+        EVENT_HANDLER.process(new StartupEvent());
 
         while (window.keepOpen()) {
             framebuffer.bind();
@@ -78,6 +86,7 @@ public class Nublada {
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             window.update();
+            EVENT_HANDLER.update();
 
             delta = (System.nanoTime() - timer) / 1000000000f;
             timer = System.nanoTime();

@@ -1,13 +1,13 @@
 package me.lofienjoyer.nublada.game;
 
 import me.lofienjoyer.nublada.Nublada;
-import me.lofienjoyer.nublada.engine.graphics.render.RaycastRenderer;
-import me.lofienjoyer.nublada.engine.scene.IScene;
 import me.lofienjoyer.nublada.engine.graphics.camera.Camera;
 import me.lofienjoyer.nublada.engine.graphics.display.Window;
+import me.lofienjoyer.nublada.engine.graphics.render.RaycastRenderer;
 import me.lofienjoyer.nublada.engine.graphics.render.SkyboxRenderer;
 import me.lofienjoyer.nublada.engine.graphics.render.WorldRenderer;
 import me.lofienjoyer.nublada.engine.graphics.render.gui.SelectedBlockRenderer;
+import me.lofienjoyer.nublada.engine.scene.IScene;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import me.lofienjoyer.nublada.engine.world.Player;
 import me.lofienjoyer.nublada.engine.world.World;
@@ -86,7 +86,7 @@ public class WorldScene implements IScene {
 
     @Override
     public void onClose() {
-        world.saveWorld();
+
     }
 
     @Override
