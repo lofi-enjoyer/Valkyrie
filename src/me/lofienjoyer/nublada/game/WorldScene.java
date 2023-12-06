@@ -8,7 +8,6 @@ import me.lofienjoyer.nublada.engine.graphics.display.Window;
 import me.lofienjoyer.nublada.engine.graphics.render.SkyboxRenderer;
 import me.lofienjoyer.nublada.engine.graphics.render.WorldRenderer;
 import me.lofienjoyer.nublada.engine.graphics.render.gui.SelectedBlockRenderer;
-import me.lofienjoyer.nublada.engine.scripting.Script;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import me.lofienjoyer.nublada.engine.world.Player;
 import me.lofienjoyer.nublada.engine.world.World;
@@ -24,8 +23,6 @@ public class WorldScene implements IScene {
     private SelectedBlockRenderer selectedBlockRenderer;
     private RaycastRenderer raycastRenderer;
     private Player player;
-
-    private Script script;
 
     @Override
     public void init() {
@@ -52,10 +49,6 @@ public class WorldScene implements IScene {
                 selectedBlock = BlockRegistry.getBlockCount() - 1;
             }
         });
-
-        Nublada.LOG.info("Starting script loading...");
-        this.script = new Script("res/scripts");
-        Nublada.LOG.info("Script loaded succesfully!");
     }
 
     int mouse = 0;
@@ -81,16 +74,6 @@ public class WorldScene implements IScene {
 
         if (GLFW.glfwGetMouseButton(Window.id, 0) == 0 &&
                 GLFW.glfwGetMouseButton(Window.id, 1) == 0) mouse = 0;
-
-        if (mouse != 1 && GLFW.glfwGetMouseButton(Window.id, 0) != 0) {
-            mouse = 1;
-            script.callFunction("onBreak", world, camera);
-        }
-
-        if (mouse != 1 && GLFW.glfwGetMouseButton(Window.id, 1) != 0) {
-            mouse = 1;
-            script.callFunction("onPlace", world, camera, selectedBlock);
-        }
     }
 
     @Override
