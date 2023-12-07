@@ -16,8 +16,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -43,11 +42,10 @@ public class WorldRenderer {
     private final SolidsShader solidsShader;
     private final TransparencyShader transparencyShader;
 
-    private final Vector2i playerPosition;
-
     private final Map<Vector2i, MeshBundle> chunkMeshes;
     private final Map<Vector2i, Future<MeshBundle>> meshFutures;
     private final Map<Vector2i, MeshBundle> meshesToUpload;
+    private final Set<Chunk> chunksToUpdate;
 
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
@@ -55,11 +53,11 @@ public class WorldRenderer {
         this.transparencyShader = new TransparencyShader();
 
         this.tester = new FrustumCullingTester();
-        this.playerPosition = new Vector2i();
 
         this.chunkMeshes = new HashMap<>();
         this.meshFutures = new HashMap<>();
         this.meshesToUpload = new HashMap<>();
+        this.chunksToUpdate = new HashSet<>();
 
         Nublada.EVENT_HANDLER.registerListener(ChunkLoadEvent.class, this::handleChunkLoading);
         Nublada.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdating);
@@ -81,6 +79,11 @@ public class WorldRenderer {
             meshesToUploadIterator.remove();
         }
 
+        chunksToUpdate.forEach(chunk -> {
+            generateMesh(chunk, chunkMeshes.get(chunk.getPosition()));
+        });
+        chunksToUpdate.clear();
+
         /*
             Checks the chunk the player is in, and if it changed
             from the last frame it unloads the chunks that are not in view,
@@ -88,29 +91,6 @@ public class WorldRenderer {
             new chunks are added for rendering sorts the list of chunks to
             render them from back to front
         */
-        int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);
-        int playerZ = (int) Math.floor(camera.getPosition().z / (float) World.CHUNK_WIDTH);
-
-        playerPosition.x = playerX;
-        playerPosition.y = playerZ;
-
-        // Checks all the chunks within the view distance,
-        // and loads those which are not loaded
-        for(int x = -VIEW_DISTANCE; x <= VIEW_DISTANCE; x++) {
-            for(int z = -VIEW_DISTANCE; z <= VIEW_DISTANCE; z++) {
-                int chunkX = playerX + x;
-                int chunkZ = playerZ + z;
-
-                int distance = x * x + z * z;
-
-                if(distance < VIEW_DISTANCE * VIEW_DISTANCE) {
-                    if (world.getChunk(chunkX, chunkZ) == null) {
-                        world.addChunk(chunkX, chunkZ);
-                    }
-                }
-
-            }
-        }
 
 //        updateChunksToRenderList(world, playerX, playerZ);
 
@@ -189,7 +169,7 @@ public class WorldRenderer {
     }
 
     private void handleChunkUpdating(ChunkUpdateEvent event) {
-        generateMesh(event.getChunk(), chunkMeshes.get(event.getChunk().getPosition()));
+        chunksToUpdate.add(event.getChunk());
     }
 
     private void handleMeshGeneration(MeshGenerationEvent event) {

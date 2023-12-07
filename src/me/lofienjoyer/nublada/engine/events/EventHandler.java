@@ -4,7 +4,7 @@ import java.util.*;
 
 public class EventHandler {
 
-    private final Map<Class<? extends Event>, List<EventConsumer>> listeners;
+    private final Map<Class<? extends Event>, Set<EventConsumer>> listeners;
     private List<Event> eventsToProcess;
     private final List<Event> nextTickEvents;
 
@@ -47,7 +47,7 @@ public class EventHandler {
         var currentEventListeners = listeners.get(eventType);
 
         if (currentEventListeners == null) {
-            listeners.put(eventType, new ArrayList<>());
+            listeners.put(eventType, new HashSet<>());
             currentEventListeners = listeners.get(eventType);
         }
 

@@ -21,6 +21,9 @@ public class MeshBundle {
 
     public MeshBundle(Chunk chunk) {
         this.chunk = chunk;
+
+        this.solidMesh = Nublada.LOADER.allocateMesh();
+        this.transparentMesh = Nublada.LOADER.allocateMesh();
     }
 
     public void compute() {
@@ -33,12 +36,6 @@ public class MeshBundle {
     public MeshBundle loadMeshToGpu() {
         if (greedyMesher == null || dynamicMesher == null)
             return null;
-
-        if (solidMesh == null)
-            solidMesh = Nublada.LOADER.allocateMesh();
-
-        if (transparentMesh == null)
-            transparentMesh = Nublada.LOADER.allocateMesh();
 
         greedyMesher.loadToGpu(solidMesh);
         dynamicMesher.loadToGpu(transparentMesh);

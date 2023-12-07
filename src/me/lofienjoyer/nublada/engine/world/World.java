@@ -3,6 +3,7 @@ package me.lofienjoyer.nublada.engine.world;
 import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.events.world.ChunkLoadEvent;
 import me.lofienjoyer.nublada.engine.events.world.ChunkUpdateEvent;
+import me.lofienjoyer.nublada.engine.graphics.camera.Camera;
 import me.lofienjoyer.nublada.engine.utils.Maths;
 import me.lofienjoyer.nublada.engine.utils.PerlinNoise;
 import me.lofienjoyer.nublada.engine.world.populator.CastlePopulator;
@@ -25,6 +26,7 @@ public class World {
 
     public static final int CHUNK_WIDTH = 32;
     public static final int CHUNK_HEIGHT = 256;
+    public static int LOAD_DISTANCE = 8;
 
     private final List<Populator> populators;
 
@@ -37,6 +39,8 @@ public class World {
     private final Map<Vector2i, Chunk> chunks;
     private final Map<Vector2i, FutureChunk> futureChunks;
 
+    private final Vector2i playerPosition;
+
     private final PerlinNoise noise;
     private double seed;
 
@@ -46,6 +50,7 @@ public class World {
         this.chunks = new HashMap<>();
         this.futureChunks = new HashMap<>();
         this.chunkGenerationFutures = new ArrayList<>();
+        this.playerPosition = new Vector2i();
 
         Nublada.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdate);
 
@@ -85,8 +90,30 @@ public class World {
         Nublada.LOG.info("World generation seed set to " + noise.getSeed());
     }
 
-    public void update(float delta) {
+    public void update(float delta, Camera camera) {
         checkGeneratingChunks();
+
+        int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);
+        int playerZ = (int) Math.floor(camera.getPosition().z / (float) World.CHUNK_WIDTH);
+
+        playerPosition.x = playerX;
+        playerPosition.y = playerZ;
+
+        for(int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++) {
+            for(int z = -LOAD_DISTANCE; z <= LOAD_DISTANCE; z++) {
+                int chunkX = playerX + x;
+                int chunkZ = playerZ + z;
+
+                int distance = x * x + z * z;
+
+                if(distance < LOAD_DISTANCE * LOAD_DISTANCE) {
+                    if (getChunk(chunkX, chunkZ) == null) {
+                        addChunk(chunkX, chunkZ);
+                    }
+                }
+
+            }
+        }
     }
 
     /**
@@ -136,7 +163,7 @@ public class World {
     }
 
     private void handleChunkUpdate(ChunkUpdateEvent event) {
-//        event.getChunk().generateMesh();
+
     }
 
     /**
@@ -252,7 +279,6 @@ public class World {
                 futureChunk = futureChunks.put(position, new FutureChunk(position));
             }
             futureChunk.addBlock((short) voxel, x, y, z);
-//            Nublada.LOG.warning("Tried to set a block on a non-loaded chunk (" + x + ", " + y + ", " + z + ")");
             return;
         }
 

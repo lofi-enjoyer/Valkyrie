@@ -60,7 +60,7 @@ public class WorldScene implements IScene {
     public void render(float delta) {
         player.update(delta);
         camera.update(Window.id, delta);
-        world.update(delta);
+        world.update(delta, camera);
         worldRenderer.updateFrustum(camera);
 
         skyboxRenderer.render(camera);
