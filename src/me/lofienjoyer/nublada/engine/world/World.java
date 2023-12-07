@@ -85,6 +85,10 @@ public class World {
         Nublada.LOG.info("World generation seed set to " + noise.getSeed());
     }
 
+    public void update(float delta) {
+        checkGeneratingChunks();
+    }
+
     /**
      * Adds a chunk to the world and schedules it for generation
      * @param x Chunk X coordinate
@@ -138,7 +142,7 @@ public class World {
     /**
      * Checks the chunks in the generation queue and adds those which finished
      */
-    public void checkGeneratingChunks() {
+    private void checkGeneratingChunks() {
         var iterator = chunkGenerationFutures.iterator();
 
         while (iterator.hasNext()) {

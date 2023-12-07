@@ -192,80 +192,80 @@ public class GreedyMesher implements Mesher {
                                     if (d == 2) {
                                         if (!backFace) {
                                             // 2
-                                            vertices[1] = getCompressedData(0, h, block.getNorthTexture());
+                                            vertices[1] = getCompressedData(0, h, block.getNorthTexture(), 0);
 
                                             // 0
-                                            vertices[3] = getCompressedData(0, 0, block.getNorthTexture());
+                                            vertices[3] = getCompressedData(0, 0, block.getNorthTexture(), 0);
 
                                             // 3
-                                            vertices[5] = getCompressedData(w, h, block.getNorthTexture());
+                                            vertices[5] = getCompressedData(w, h, block.getNorthTexture(), 0);
 
                                             // 1
-                                            vertices[7] = getCompressedData(w, 0, block.getNorthTexture());
+                                            vertices[7] = getCompressedData(w, 0, block.getNorthTexture(), 0);
                                         } else {
                                             // 3
-                                            vertices[1] = getCompressedData(w, h, block.getSouthTexture());
+                                            vertices[1] = getCompressedData(w, h, block.getSouthTexture(), 1);
 
                                             // 1
-                                            vertices[3] = getCompressedData(w, 0, block.getSouthTexture());
+                                            vertices[3] = getCompressedData(w, 0, block.getSouthTexture(), 1);
 
                                             // 2
-                                            vertices[5] = getCompressedData(0, h, block.getSouthTexture());
+                                            vertices[5] = getCompressedData(0, h, block.getSouthTexture(), 1);
 
                                             // 0
-                                            vertices[7] = getCompressedData(0, 0, block.getSouthTexture());
+                                            vertices[7] = getCompressedData(0, 0, block.getSouthTexture(), 1);
                                         }
                                     } else if (d == 0) {
                                         if (backFace) {
                                             // 2
-                                            vertices[1] = getCompressedData(0, w, block.getWestTexture());
+                                            vertices[1] = getCompressedData(0, w, block.getWestTexture(), 4);
 
                                             // 3
-                                            vertices[3] = getCompressedData(h, w, block.getWestTexture());
+                                            vertices[3] = getCompressedData(h, w, block.getWestTexture(), 4);
 
                                             // 0
-                                            vertices[5] = getCompressedData(0, 0, block.getWestTexture());
+                                            vertices[5] = getCompressedData(0, 0, block.getWestTexture(), 4);
 
                                             // 1
-                                            vertices[7] = getCompressedData(h, 0, block.getWestTexture());
+                                            vertices[7] = getCompressedData(h, 0, block.getWestTexture(), 4);
                                         } else {
                                             // 2
-                                            vertices[1] = getCompressedData(h, w, block.getEastTexture());
+                                            vertices[1] = getCompressedData(h, w, block.getEastTexture(), 5);
 
                                             // 3
-                                            vertices[3] = getCompressedData(0, w, block.getEastTexture());
+                                            vertices[3] = getCompressedData(0, w, block.getEastTexture(), 5);
 
                                             // 1
-                                            vertices[5] = getCompressedData(h, 0, block.getEastTexture());
+                                            vertices[5] = getCompressedData(h, 0, block.getEastTexture(), 5);
 
                                             // 0
-                                            vertices[7] = getCompressedData(0, 0, block.getEastTexture());
+                                            vertices[7] = getCompressedData(0, 0, block.getEastTexture(), 5);
                                         }
                                     } else {
                                         if (!backFace) {
                                             // 0
-                                            vertices[1] = getCompressedData(0, 0, block.getTopTexture());
+                                            vertices[1] = getCompressedData(0, 0, block.getTopTexture(), 2);
 
                                             // 1
-                                            vertices[3] = getCompressedData(h, 0, block.getTopTexture());
+                                            vertices[3] = getCompressedData(h, 0, block.getTopTexture(), 2);
 
                                             // 2
-                                            vertices[5] = getCompressedData(0, w, block.getTopTexture());
+                                            vertices[5] = getCompressedData(0, w, block.getTopTexture(), 2);
 
                                             // 3
-                                            vertices[7] = getCompressedData(h, w, block.getTopTexture());
+                                            vertices[7] = getCompressedData(h, w, block.getTopTexture(), 2);
                                         } else {
                                             // 1
-                                            vertices[1] = getCompressedData(h, 0, block.getBottomTexture());
+                                            vertices[1] = getCompressedData(h, 0, block.getBottomTexture(), 3);
 
                                             // 0
-                                            vertices[3] = getCompressedData(0, 0, block.getBottomTexture());
+                                            vertices[3] = getCompressedData(0, 0, block.getBottomTexture(), 3);
 
                                             // 3
-                                            vertices[5] = getCompressedData(h, w, block.getBottomTexture());
+                                            vertices[5] = getCompressedData(h, w, block.getBottomTexture(), 3);
 
                                             // 2
-                                            vertices[7] = getCompressedData(0, w, block.getBottomTexture());
+                                            vertices[7] = getCompressedData(0, w, block.getBottomTexture(), 3);
                                         }
                                     }
 
@@ -315,6 +315,10 @@ public class GreedyMesher implements Mesher {
 
     private int getCompressedData(int x, int y, int z) {
         return z | x << 9 | y << 18;
+    }
+
+    private int getCompressedData(int x, int y, int z, int w) {
+        return z | x << 9 | y << 18 | w << 27;
     }
 
 }

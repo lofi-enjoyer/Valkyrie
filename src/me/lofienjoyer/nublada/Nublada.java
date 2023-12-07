@@ -14,15 +14,12 @@ import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.lwjgl.opengl.GL45.*;
 
 public class Nublada {
-
-    public static final AtomicInteger TOTAL_MEMORY = new AtomicInteger(0);
 
     public static final Logger LOG = NubladaLogHandler.initLogs();
     public static final Loader LOADER = new Loader();
@@ -96,7 +93,6 @@ public class Nublada {
             timer = System.nanoTime();
 
             GLFW.glfwSetWindowTitle(window.getId(), "Nublada | FPS: " + (int) (1f / delta) + " (delta: " + delta + "s) | " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 2024) + "MB");
-            System.out.println(TOTAL_MEMORY.get());
         }
 
         currentScene.onClose();

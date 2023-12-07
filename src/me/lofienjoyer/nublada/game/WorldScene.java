@@ -60,7 +60,7 @@ public class WorldScene implements IScene {
     public void render(float delta) {
         player.update(delta);
         camera.update(Window.id, delta);
-        world.checkGeneratingChunks();
+        world.update(delta);
         worldRenderer.updateFrustum(camera);
 
         skyboxRenderer.render(camera);
@@ -74,13 +74,19 @@ public class WorldScene implements IScene {
 
         selectedBlockRenderer.render(selectedBlock);
 
-        mouse = GLFW.glfwGetMouseButton(Window.id, 0);
+        if (GLFW.glfwGetMouseButton(Window.id, 0) != 0) {
+            mouse = 1;
+        } else if (GLFW.glfwGetMouseButton(Window.id, 1) != 0) {
+            mouse = 2;
+        } else {
+            mouse = 0;
+        }
 
-        if (hitPosition != null && mouse != 0) {
+        if (hitPosition != null && mouse != 0 && BlockRegistry.getBLock(selectedBlock) != null) {
             for (int x = -RADIUS; x <= RADIUS; x++) {
                 for (int y = -RADIUS; y <= RADIUS; y++) {
                     for (int z = -RADIUS; z <= RADIUS; z++) {
-                        world.setBlock(0, new Vector3f(hitPosition.x + x, hitPosition.y + y, hitPosition.z + z));
+                        world.setBlock(mouse == 1 ? 0 : selectedBlock, new Vector3f(hitPosition.x + x, hitPosition.y + y, hitPosition.z + z));
                     }
                 }
             }

@@ -44,6 +44,7 @@ void main() {
     uint yUv = (vertex.y >> 18u) & 0x1FFu;
     uint xUv = (vertex.y >> 9u) & 0x1FFu;
     uint zUv = (vertex.y) & 0x1FFu;
+    uint wUv = (vertex.y >> 27u) & 0x7u;
     // FIXME: 02/02/2023 Temporary light value
     int light = 5;
 
@@ -54,11 +55,11 @@ void main() {
 
     gl_Position = projectionMatrix * positionRelativeToCam;
     passColor = vec3(xUv, yUv, zUv);
-    passLight = normalVectors[light];
+    passLight = normalVectors[wUv];
 
     distance = length(cameraPosition.xz - worldPosition.xz);
 
-    faceLight = lights[5];
+    faceLight = lights[wUv];
     passViewDistance = viewDistance;
     passInWater = inWater;
 }
