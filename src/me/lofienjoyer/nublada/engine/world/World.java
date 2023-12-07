@@ -1,6 +1,8 @@
 package me.lofienjoyer.nublada.engine.world;
 
 import me.lofienjoyer.nublada.Nublada;
+import me.lofienjoyer.nublada.engine.events.world.ChunkLoadEvent;
+import me.lofienjoyer.nublada.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.nublada.engine.utils.Maths;
 import me.lofienjoyer.nublada.engine.utils.PerlinNoise;
 import me.lofienjoyer.nublada.engine.world.populator.CastlePopulator;
@@ -9,9 +11,7 @@ import me.lofienjoyer.nublada.engine.world.populator.TerrainPopulator;
 import me.lofienjoyer.nublada.engine.world.populator.TreePopulator;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -46,6 +46,8 @@ public class World {
         this.chunks = new HashMap<>();
         this.futureChunks = new HashMap<>();
         this.chunkGenerationFutures = new ArrayList<>();
+
+        Nublada.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdate);
 
         // TODO: 22/9/22 Temporary code (replace with proper world loading)
         this.seed = new Random().nextGaussian() * 255;
@@ -112,41 +114,46 @@ public class World {
      * @param chunk Chunk to mesh
      */
     private void initializeChunk(Chunk chunk) {
-        chunk.generateMesh();
+        Nublada.EVENT_HANDLER.process(new ChunkLoadEvent(chunk));
 
-        for(int i = -1; i <= 1;i++){
-            for(int j = -1; j <= 1;j++){
-                if(i == 0 && j == 0){
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) {
                     continue;
                 }
 
-                Chunk other = getChunk(i + chunk.getPosition().x, j + chunk.getPosition().y);
-                if(other != null){
-                    other.updated = false;
+                var neighbor = getChunk(i + chunk.getPosition().x, j + chunk.getPosition().y);
+                if (neighbor != null) {
+                    Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor));
                 }
 
             }
         }
     }
 
+    private void handleChunkUpdate(ChunkUpdateEvent event) {
+//        event.getChunk().generateMesh();
+    }
+
     /**
      * Checks the chunks in the generation queue and adds those which finished
      */
     public void checkGeneratingChunks() {
-        Iterator<Future<Chunk>> iterator = chunkGenerationFutures.iterator();
+        var iterator = chunkGenerationFutures.iterator();
 
         while (iterator.hasNext()) {
-            Future<Chunk> future = iterator.next();
+            var future = iterator.next();
 
-            if (future.isDone()) {
-                iterator.remove();
+            if (!future.isDone())
+                return;
 
-                try {
-                    initializeChunk(future.get());
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                    Nublada.LOG.severe(e.getMessage());
-                }
+            iterator.remove();
+
+            try {
+                initializeChunk(future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                Nublada.LOG.severe(e.getMessage());
             }
         }
     }

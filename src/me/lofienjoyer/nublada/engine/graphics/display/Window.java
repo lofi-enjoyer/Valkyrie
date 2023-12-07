@@ -62,6 +62,9 @@ public class Window {
                 vsync = !vsync;
                 glfwSwapInterval(vsync ? 1 : 0);
             }
+            if (key == GLFW_KEY_P && action == GLFW_RELEASE) {
+                System.gc();
+            }
         });
 
         glfwSetWindowSizeCallback(id, (window, newwidth, newheight) -> {

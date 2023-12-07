@@ -1,19 +1,16 @@
 package me.lofienjoyer.nublada.engine.world;
 
-import me.lofienjoyer.nublada.engine.graphics.mesh.MeshBundle;
+import me.lofienjoyer.nublada.Nublada;
+import me.lofienjoyer.nublada.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.nublada.engine.world.populator.Populator;
 import org.joml.Vector2i;
 
 import java.io.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import static me.lofienjoyer.nublada.engine.world.World.CHUNK_WIDTH;
 import static me.lofienjoyer.nublada.engine.world.World.CHUNK_HEIGHT;
+import static me.lofienjoyer.nublada.engine.world.World.CHUNK_WIDTH;
 
 /**
  * Handles the data and meshing tasks of a single chunk
@@ -32,29 +29,15 @@ public class Chunk {
             new Vector2i( 1,  0),
     };
 
-    // TODO: 24/03/2022 Make the core count customizable
-    private static final ScheduledExecutorService meshService =
-            new ScheduledThreadPoolExecutor(4, r -> {
-        Thread thread = new Thread(r, "Meshing Thread");
-        thread.setDaemon(true);
-
-        return thread;
-    });
-
     private short[] voxels;
     private final Vector2i position;
-    private MeshBundle mesh;
     private byte[] compressedData;
 
     private final World world;
 
     private final Chunk[] neighbors;
 
-    public boolean updated = false;
-
     private boolean loaded = false;
-
-    private Future<MeshBundle> mesherFuture;
 
     public Chunk(Vector2i position, World world) {
         this.position = position;
@@ -166,41 +149,7 @@ public class Chunk {
         return new byte[0];
     }
 
-    /**
-     * Queries the chunk to mesh if it is not updated, and loads
-     * the mesh data to the GPU when meshing is finished
-     */
-    public void prepare() {
-        if (!updated & loaded) {
-            updated = true;
-            generateMesh();
-        }
-
-        if (mesherFuture != null && mesherFuture.isDone()) {
-            try {
-                mesh = mesherFuture.get().loadMeshToGpu();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            } finally {
-                mesherFuture = null;
-            }
-        }
-    }
-
-    /**
-     * Queues a task to mesh the chunk
-     */
-    public void generateMesh() {
-        if (mesherFuture != null) {
-            mesherFuture.cancel(true);
-            mesherFuture = null;
-        }
-
-        cacheNeighbors();
-        mesherFuture = meshService.submit(() -> new MeshBundle(this));
-    }
-
-    private void cacheNeighbors() {
+    public void cacheNeighbors() {
         for (int i = 0; i < 4; i++) {
             neighbors[i] = world.getChunk(position.x + NEIGHBOR_VECTORS[i].x, position.y + NEIGHBOR_VECTORS[i].y);
         }
@@ -238,12 +187,12 @@ public class Chunk {
         if (!updateChunk)
             return;
 
-        // Marks the chunk as not updated and check borders to mark adjacent chunks as not updated
-        updated = false;
-        if (x == 0) world.getChunk(position.x - 1, position.y).updated = false;
-        if (x == CHUNK_WIDTH - 1) world.getChunk(position.x + 1, position.y).updated = false;
-        if (z == 0) world.getChunk(position.x, position.y - 1).updated = false;
-        if (z == CHUNK_WIDTH - 1) world.getChunk(position.x, position.y + 1).updated = false;
+        Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(this));
+
+        if (x == 0) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x - 1, position.y)));
+        if (x == CHUNK_WIDTH - 1) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x + 1, position.y)));
+        if (z == 0) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y - 1)));
+        if (z == CHUNK_WIDTH - 1) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y + 1)));
     }
 
     public void onDestroy() {
@@ -254,12 +203,16 @@ public class Chunk {
                 continue;
 
             neighbor.neighbors[(i + 2) % 4] = null;
-            neighbor.updated = false;
+            Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor));
         }
     }
 
     public short[] getVoxels() {
         return voxels;
+    }
+
+    public boolean isLoaded() {
+        return loaded;
     }
 
     public byte[] getCompressedData() {
@@ -272,10 +225,6 @@ public class Chunk {
 
     public Vector2i getPosition() {
         return position;
-    }
-
-    public MeshBundle getModel() {
-        return mesh;
     }
 
 }

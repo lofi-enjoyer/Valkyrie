@@ -10,7 +10,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera {
 
-    private static final float SPEED = 8f;
+    private static final float SPEED = 32f;
 
     private final Vector3f position;
     private float rotationY, rotationX, roll;
@@ -72,7 +72,7 @@ public class Camera {
             this.position.z += Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
         }
 
-        if (GLFW.glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
+        if (GLFW.glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !mouseLocked) {
             GLFW.glfwSetCursorPos(window, 320, 180);
             GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
 

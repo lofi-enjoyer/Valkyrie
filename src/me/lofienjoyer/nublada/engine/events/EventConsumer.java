@@ -1,7 +1,7 @@
 package me.lofienjoyer.nublada.engine.events;
 
-public interface EventConsumer {
+public interface EventConsumer<T extends Event> {
 
-    void consume(Event event);
+    void consume(T event);
 
 }

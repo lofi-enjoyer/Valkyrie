@@ -1,8 +1,11 @@
 package me.lofienjoyer.nublada.engine.graphics.render;
 
 import me.lofienjoyer.nublada.Nublada;
+import me.lofienjoyer.nublada.engine.events.mesh.MeshGenerationEvent;
+import me.lofienjoyer.nublada.engine.events.world.ChunkLoadEvent;
+import me.lofienjoyer.nublada.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.nublada.engine.graphics.camera.Camera;
-import me.lofienjoyer.nublada.engine.graphics.shaders.SelectorShader;
+import me.lofienjoyer.nublada.engine.graphics.mesh.MeshBundle;
 import me.lofienjoyer.nublada.engine.graphics.shaders.SolidsShader;
 import me.lofienjoyer.nublada.engine.graphics.shaders.TransparencyShader;
 import me.lofienjoyer.nublada.engine.utils.Maths;
@@ -13,10 +16,11 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static org.lwjgl.opengl.GL45.*;
 
@@ -24,16 +28,26 @@ public class WorldRenderer {
 
     public static int VIEW_DISTANCE = 8;
 
+    // TODO: 24/03/2022 Make the core count customizable
+    private static final ScheduledExecutorService meshService =
+            new ScheduledThreadPoolExecutor(4, r -> {
+                Thread thread = new Thread(r, "Meshing Thread");
+                thread.setDaemon(true);
+
+                return thread;
+            });
+
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
 
     private final SolidsShader solidsShader;
     private final TransparencyShader transparencyShader;
 
-    private final List<Chunk> chunksToRender = new ArrayList<>();
     private final Vector2i playerPosition;
 
-    private final AtomicBoolean needsSorting;
+    private final Map<Vector2i, MeshBundle> chunkMeshes;
+    private final Map<Vector2i, Future<MeshBundle>> meshFutures;
+    private final Map<Vector2i, MeshBundle> meshesToUpload;
 
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
@@ -43,7 +57,13 @@ public class WorldRenderer {
         this.tester = new FrustumCullingTester();
         this.playerPosition = new Vector2i();
 
-        this.needsSorting = new AtomicBoolean(true);
+        this.chunkMeshes = new HashMap<>();
+        this.meshFutures = new HashMap<>();
+        this.meshesToUpload = new HashMap<>();
+
+        Nublada.EVENT_HANDLER.registerListener(ChunkLoadEvent.class, this::handleChunkLoading);
+        Nublada.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdating);
+        Nublada.EVENT_HANDLER.registerListener(MeshGenerationEvent.class, this::handleMeshGeneration);
 
         transparencyShader.start();
         transparencyShader.loadLeavesId(BlockRegistry.getBLock(6).getTopTexture());
@@ -54,7 +74,14 @@ public class WorldRenderer {
 
     public void render(World world, Camera camera) {
 
-        world.checkGeneratingChunks();
+        var meshesToUploadIterator = meshesToUpload.entrySet().iterator();
+        if (meshesToUploadIterator.hasNext()) {
+            var currentMeshEntry = meshesToUploadIterator.next();
+            currentMeshEntry.getValue().loadMeshToGpu();
+            meshesToUploadIterator.remove();
+            chunkMeshes.put(currentMeshEntry.getKey(), currentMeshEntry.getValue());
+        }
+
         /*
             Checks the chunk the player is in, and if it changed
             from the last frame it unloads the chunks that are not in view,
@@ -64,9 +91,6 @@ public class WorldRenderer {
         */
         int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) World.CHUNK_WIDTH);
-
-        if (!playerPosition.equals(new Vector2i(playerX, playerZ)))
-            needsSorting.set(true);
 
         playerPosition.x = playerX;
         playerPosition.y = playerZ;
@@ -83,25 +107,13 @@ public class WorldRenderer {
                 if(distance < VIEW_DISTANCE * VIEW_DISTANCE) {
                     if (world.getChunk(chunkX, chunkZ) == null) {
                         world.addChunk(chunkX, chunkZ);
-                        needsSorting.set(true);
                     }
                 }
 
             }
         }
 
-        /*
-            If the chunks need sorting clears the render list
-        */
-        if (needsSorting.get())
-            chunksToRender.clear();
-
         updateChunksToRenderList(world, playerX, playerZ);
-
-        if (needsSorting.get()) {
-            chunksToRender.sort(new SortByDistance());
-            needsSorting.set(false);
-        }
 
         // Get the block the camera is in (for in-water effects)
         int headBlock = world.getBlock(camera.getPosition());
@@ -134,16 +146,16 @@ public class WorldRenderer {
         solidsShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
         solidsShader.setInWater(headBlock == 7);
 
-        chunksToRender.forEach(chunk -> {
-            if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
+        chunkMeshes.forEach((position, mesh) -> {
+            if (!tester.isChunkInside(position, camera.getPosition().y))
                 return;
 
-            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
+            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(position));
 
-            glBindVertexArray(chunk.getModel().getSolidMeshes().getVaoId());
+            glBindVertexArray(mesh.getSolidMeshes().getVaoId());
             glEnableVertexAttribArray(0);
 
-            glDrawElements(GL_TRIANGLES, chunk.getModel().getSolidMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, mesh.getSolidMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
         });
     }
 
@@ -158,44 +170,66 @@ public class WorldRenderer {
         transparencyShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
         transparencyShader.setInWater(headBlock == 7);
 
-        chunksToRender.forEach(chunk -> {
-            if (chunk.getModel() == null || !tester.isChunkInside(chunk, camera.getPosition().y))
+        chunkMeshes.forEach((position, mesh) -> {
+            if (!tester.isChunkInside(position, camera.getPosition().y))
                 return;
-            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(chunk.getPosition()));
+            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(position));
 
-            glBindVertexArray(chunk.getModel().getTransparentMeshes().getVaoId());
+            glBindVertexArray(mesh.getTransparentMeshes().getVaoId());
             glEnableVertexAttribArray(0);
 
-            glDrawElements(GL_TRIANGLES, chunk.getModel().getTransparentMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, mesh.getTransparentMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
         });
         glDisable(GL_BLEND);
     }
 
+    private void handleChunkLoading(ChunkLoadEvent event) {
+        generateMesh(event.getChunk());
+    }
+
+    private void handleChunkUpdating(ChunkUpdateEvent event) {
+        generateMesh(event.getChunk());
+    }
+
+    private void handleMeshGeneration(MeshGenerationEvent event) {
+        meshesToUpload.put(event.getPosition(), event.getMeshBundle());
+    }
+
+    /**
+     * Queues a task to mesh the chunk
+     */
+    public void generateMesh(Chunk chunk) {
+        if (!chunk.isLoaded())
+            return;
+
+        var meshFuture = meshFutures.get(chunk.getPosition());
+
+        if (meshFuture != null) {
+            meshFuture.cancel(true);
+            meshFutures.remove(chunk.getPosition());
+        }
+
+        chunk.cacheNeighbors();
+        meshFuture = meshService.submit(() -> {
+            var meshBundle = new MeshBundle(chunk);
+            Nublada.EVENT_HANDLER.process(new MeshGenerationEvent(chunk.getPosition(), meshBundle));
+            return meshBundle;
+        });
+
+        meshFutures.put(chunk.getPosition(), meshFuture);
+    }
+
     // Checks all loaded chunks, and unloads any that is outside the view distance
     private void updateChunksToRenderList(World world, int playerX, int playerZ) {
-        List<Chunk> chunksToUnload = new ArrayList<>();
+        var iterator = chunkMeshes.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
 
-        world.getChunks().forEach((position, chunk) -> {
-            // FIXME 09/01/2023 Lag spikes when many chunks are queued to load data to gpu
-            chunk.prepare();
-
-            long distance = position.distanceSquared(playerX, playerZ);
+            long distance = entry.getKey().distanceSquared(playerX, playerZ);
             if (distance > VIEW_DISTANCE * VIEW_DISTANCE) {
-                chunksToUnload.add(chunk);
-                chunksToRender.remove(chunk);
-                return;
+                iterator.remove();
             }
-
-            if (!needsSorting.get())
-                return;
-
-            chunksToRender.add(chunk);
-        });
-
-        chunksToUnload.forEach(chunk -> {
-            chunk.onDestroy();
-            world.getChunks().remove(chunk.getPosition());
-        });
+        }
     }
 
     public void updateFrustum(Camera camera) {
@@ -215,15 +249,6 @@ public class WorldRenderer {
         solidsShader.loadProjectionMatrix(projectionMatrix);
         transparencyShader.start();
         transparencyShader.loadProjectionMatrix(projectionMatrix);
-    }
-
-    class SortByDistance implements Comparator<Chunk> {
-
-        @Override
-        public int compare(Chunk chunk1, Chunk chunk2) {
-            return (int) Math.floor(chunk2.getPosition().distanceSquared(playerPosition.x, playerPosition.y) - chunk1.getPosition().distanceSquared(playerPosition.x, playerPosition.y));
-        }
-
     }
 
 }

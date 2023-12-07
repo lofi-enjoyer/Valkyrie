@@ -54,26 +54,37 @@ public class WorldScene implements IScene {
     int mouse = 0;
     int selectedBlock = 0;
 
+    private static final int RADIUS = 2;
+
     @Override
     public void render(float delta) {
         player.update(delta);
         camera.update(Window.id, delta);
+        world.checkGeneratingChunks();
         worldRenderer.updateFrustum(camera);
 
         skyboxRenderer.render(camera);
 
         worldRenderer.render(world, camera);
 
-        // TODO: 24/12/2022 Make this async
-        Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
+        Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 64, false);
         if (hitPosition != null) {
             raycastRenderer.render(camera, hitPosition);
         }
 
         selectedBlockRenderer.render(selectedBlock);
 
-        if (GLFW.glfwGetMouseButton(Window.id, 0) == 0 &&
-                GLFW.glfwGetMouseButton(Window.id, 1) == 0) mouse = 0;
+        mouse = GLFW.glfwGetMouseButton(Window.id, 0);
+
+        if (hitPosition != null && mouse != 0) {
+            for (int x = -RADIUS; x <= RADIUS; x++) {
+                for (int y = -RADIUS; y <= RADIUS; y++) {
+                    for (int z = -RADIUS; z <= RADIUS; z++) {
+                        world.setBlock(0, new Vector3f(hitPosition.x + x, hitPosition.y + y, hitPosition.z + z));
+                    }
+                }
+            }
+        }
     }
 
     @Override

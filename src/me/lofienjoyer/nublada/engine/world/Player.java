@@ -23,7 +23,8 @@ public class Player {
     }
 
     public void update(float delta) {
-        if (world.getChunk((int) Math.floor(position.x / CHUNK_WIDTH), (int) Math.floor(position.z / CHUNK_WIDTH)) == null)
+        var currentChunk = world.getChunk((int) Math.floor(position.x / CHUNK_WIDTH), (int) Math.floor(position.z / CHUNK_WIDTH));
+        if (currentChunk == null || currentChunk.getVoxels() == null)
             return;
 
         position.x = camera.getPosition().x;
