@@ -14,6 +14,7 @@ import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

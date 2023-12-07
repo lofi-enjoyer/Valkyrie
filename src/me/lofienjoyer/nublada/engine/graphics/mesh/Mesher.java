@@ -4,6 +4,6 @@ public interface Mesher {
 
     Mesher compute();
 
-    Mesh loadToGpu();
+    Mesh loadToGpu(Mesh mesh);
 
 }

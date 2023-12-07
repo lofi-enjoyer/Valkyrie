@@ -1,6 +1,7 @@
 package me.lofienjoyer.nublada.engine.graphics.loader;
 
 import me.lofienjoyer.nublada.Nublada;
+import me.lofienjoyer.nublada.engine.graphics.mesh.Mesh;
 import me.lofienjoyer.nublada.engine.graphics.texture.Texture;
 import me.lofienjoyer.nublada.engine.graphics.texture.TextureArray;
 import org.lwjgl.opengl.GL30;
@@ -27,6 +28,11 @@ public class Loader {
         this.vaoList = new ArrayList<>();
         this.vboList = new ArrayList<>();
         this.textureList = new ArrayList<>();
+    }
+
+    public Mesh allocateMesh() {
+        int vaoId = createVAO();
+        return new Mesh(vaoId, 0);
     }
 
     public int loadToVAO(float[] positions, int[] indices, float[] uvs, float[] normals) {
@@ -65,6 +71,18 @@ public class Loader {
         storeDataInAttributeList(0, size, positions);
         bindIndicesBuffer(indices);
         return vao;
+    }
+
+    public void updateVAO(int vaoId, int[] positions, int[] indices, int size) {
+        GL30.glBindVertexArray(vaoId);
+        storeDataInAttributeList(0, size, positions);
+        bindIndicesBuffer(indices);
+    }
+
+    public void updateVAO(int vaoId, int[] positions, int[] indices) {
+        GL30.glBindVertexArray(vaoId);
+        storeDataInAttributeList(0, 1, positions);
+        bindIndicesBuffer(indices);
     }
 
     public int loadToVAO(long[] positions, int[] indices) {
@@ -186,6 +204,10 @@ public class Loader {
         vaoList.forEach(GL30::glDeleteVertexArrays);
         vboList.forEach(GL30::glDeleteBuffers);
         textureList.forEach(GL30::glDeleteTextures);
+    }
+
+    public int getVaoCount() {
+        return vaoList.size();
     }
 
 }

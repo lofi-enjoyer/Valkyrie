@@ -5,7 +5,7 @@ import me.lofienjoyer.nublada.Nublada;
 public class Mesh {
 
     private final int vaoId;
-    private final int vertexCount;
+    private int vertexCount;
 
     public Mesh(float[] positions, int[] indices, float[] uvs, float[] normals) {
         this(Nublada.LOADER.loadToVAO(positions, indices, uvs, normals), indices.length);
@@ -31,9 +31,19 @@ public class Mesh {
         this(Nublada.LOADER.loadToVAO(positions), positions.length / 3);
     }
 
-    private Mesh(int vaoId, int vertexCount) {
+    public Mesh(int vaoId, int vertexCount) {
         this.vaoId = vaoId;
         this.vertexCount = vertexCount;
+    }
+
+    public void updateMesh(int[] positions, int[] indices, int size) {
+        Nublada.LOADER.updateVAO(vaoId, positions, indices, size);
+        this.vertexCount = indices.length;
+    }
+
+    public void updateMesh(int[] positions, int[] indices) {
+        Nublada.LOADER.updateVAO(vaoId, positions, indices);
+        this.vertexCount = indices.length;
     }
 
     public int getVaoId() {

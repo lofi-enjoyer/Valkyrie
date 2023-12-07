@@ -70,8 +70,8 @@ public class GreedyMesher implements Mesher {
     }
 
     @Override
-    public Mesh loadToGpu() {
-        Mesh mesh = new Mesh(positionsArray, indicesArray, 2);
+    public Mesh loadToGpu(Mesh mesh) {
+        mesh.updateMesh(positionsArray, indicesArray, 2);
         positionsArray = null;
         indicesArray = null;
         return mesh;

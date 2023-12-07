@@ -79,7 +79,6 @@ public class WorldRenderer {
             var currentMeshEntry = meshesToUploadIterator.next();
             currentMeshEntry.getValue().loadMeshToGpu();
             meshesToUploadIterator.remove();
-            chunkMeshes.put(currentMeshEntry.getKey(), currentMeshEntry.getValue());
         }
 
         /*
@@ -113,7 +112,7 @@ public class WorldRenderer {
             }
         }
 
-        updateChunksToRenderList(world, playerX, playerZ);
+//        updateChunksToRenderList(world, playerX, playerZ);
 
         // Get the block the camera is in (for in-water effects)
         int headBlock = world.getBlock(camera.getPosition());
@@ -147,7 +146,7 @@ public class WorldRenderer {
         solidsShader.setInWater(headBlock == 7);
 
         chunkMeshes.forEach((position, mesh) -> {
-            if (!tester.isChunkInside(position, camera.getPosition().y))
+            if (!mesh.isLoaded() || !tester.isChunkInside(position, camera.getPosition().y))
                 return;
 
             solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(position));
@@ -171,7 +170,7 @@ public class WorldRenderer {
         transparencyShader.setInWater(headBlock == 7);
 
         chunkMeshes.forEach((position, mesh) -> {
-            if (!tester.isChunkInside(position, camera.getPosition().y))
+            if (!mesh.isLoaded() || !tester.isChunkInside(position, camera.getPosition().y))
                 return;
             transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(position));
 
@@ -184,11 +183,13 @@ public class WorldRenderer {
     }
 
     private void handleChunkLoading(ChunkLoadEvent event) {
-        generateMesh(event.getChunk());
+        var meshBundle = new MeshBundle(event.getChunk());
+        chunkMeshes.put(event.getChunk().getPosition(), meshBundle);
+        generateMesh(event.getChunk(), meshBundle);
     }
 
     private void handleChunkUpdating(ChunkUpdateEvent event) {
-        generateMesh(event.getChunk());
+        generateMesh(event.getChunk(), chunkMeshes.get(event.getChunk().getPosition()));
     }
 
     private void handleMeshGeneration(MeshGenerationEvent event) {
@@ -198,7 +199,7 @@ public class WorldRenderer {
     /**
      * Queues a task to mesh the chunk
      */
-    public void generateMesh(Chunk chunk) {
+    public void generateMesh(Chunk chunk, MeshBundle meshBundle) {
         if (!chunk.isLoaded())
             return;
 
@@ -211,7 +212,7 @@ public class WorldRenderer {
 
         chunk.cacheNeighbors();
         meshFuture = meshService.submit(() -> {
-            var meshBundle = new MeshBundle(chunk);
+            meshBundle.compute();
             Nublada.EVENT_HANDLER.process(new MeshGenerationEvent(chunk.getPosition(), meshBundle));
             return meshBundle;
         });

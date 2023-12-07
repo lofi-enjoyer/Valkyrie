@@ -55,8 +55,8 @@ public class DynamicMesher implements Mesher {
     }
 
     @Override
-    public Mesh loadToGpu() {
-        Mesh mesh = new Mesh(positionsArray, indicesArray);
+    public Mesh loadToGpu(Mesh mesh) {
+        mesh.updateMesh(positionsArray, indicesArray);
         positionsArray = null;
         indicesArray = null;
         return mesh;

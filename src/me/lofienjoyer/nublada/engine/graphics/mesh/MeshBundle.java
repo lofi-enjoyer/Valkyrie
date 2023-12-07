@@ -1,5 +1,6 @@
 package me.lofienjoyer.nublada.engine.graphics.mesh;
 
+import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.world.Chunk;
 import me.lofienjoyer.nublada.engine.world.ChunkPreMeshData;
 
@@ -8,13 +9,21 @@ import me.lofienjoyer.nublada.engine.world.ChunkPreMeshData;
  */
 public class MeshBundle {
 
+    private final Chunk chunk;
+
     private Mesh solidMesh;
     private Mesh transparentMesh;
 
     private Mesher greedyMesher;
     private Mesher dynamicMesher;
 
+    private boolean loaded = false;
+
     public MeshBundle(Chunk chunk) {
+        this.chunk = chunk;
+    }
+
+    public void compute() {
         ChunkPreMeshData chunkPreMeshData = new ChunkPreMeshData(chunk);
 
         this.greedyMesher = new GreedyMesher(chunkPreMeshData).compute();
@@ -22,11 +31,21 @@ public class MeshBundle {
     }
 
     public MeshBundle loadMeshToGpu() {
-        solidMesh = greedyMesher.loadToGpu();
-        transparentMesh = dynamicMesher.loadToGpu();
+        if (greedyMesher == null || dynamicMesher == null)
+            return null;
+
+        if (solidMesh == null)
+            solidMesh = Nublada.LOADER.allocateMesh();
+
+        if (transparentMesh == null)
+            transparentMesh = Nublada.LOADER.allocateMesh();
+
+        greedyMesher.loadToGpu(solidMesh);
+        dynamicMesher.loadToGpu(transparentMesh);
 
         greedyMesher = null;
         dynamicMesher = null;
+        this.loaded = true;
         return this;
     }
 
@@ -37,4 +56,9 @@ public class MeshBundle {
     public Mesh getTransparentMeshes() {
         return transparentMesh;
     }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
 }
