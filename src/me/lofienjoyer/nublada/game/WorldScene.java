@@ -23,6 +23,7 @@ public class WorldScene implements IScene {
     private SelectedBlockRenderer selectedBlockRenderer;
     private RaycastRenderer raycastRenderer;
     private Player player;
+    private Vector3f hitPosition;
 
     @Override
     public void init() {
@@ -58,16 +59,14 @@ public class WorldScene implements IScene {
 
     @Override
     public void render(float delta) {
-        player.update(delta);
         camera.update(Window.id, delta);
-        world.update(delta, camera);
+        player.update(1 / 20f);
         worldRenderer.updateFrustum(camera);
 
         skyboxRenderer.render(camera);
 
         worldRenderer.render(world, camera);
 
-        Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 64, false);
         if (hitPosition != null) {
             raycastRenderer.render(camera, hitPosition);
         }
@@ -91,6 +90,13 @@ public class WorldScene implements IScene {
                 }
             }
         }
+    }
+
+    @Override
+    public void fixedUpdate() {
+        world.update(1 / 20f, camera);
+
+        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 128, false);
     }
 
     @Override

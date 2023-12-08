@@ -57,7 +57,7 @@ public class Nublada {
 
     public void loop() {
         long timer = System.nanoTime();
-        float delta = 1f;
+        float delta = 0f;
 
         framebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
         FboShader shader = new FboShader();
@@ -65,7 +65,16 @@ public class Nublada {
 
         EVENT_HANDLER.process(new StartupEvent());
 
+        float fixedUpdateTimer = 0f;
+
         while (window.keepOpen()) {
+
+            fixedUpdateTimer += delta;
+            while (fixedUpdateTimer >= 1 / 20f) {
+                currentScene.fixedUpdate();
+                fixedUpdateTimer -= 1 / 20f;
+            }
+
             framebuffer.bind();
             glClearColor(0.125f, 0f, 1.0f, 0.5f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
