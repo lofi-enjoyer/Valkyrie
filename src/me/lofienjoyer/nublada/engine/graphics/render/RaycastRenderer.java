@@ -1,5 +1,6 @@
 package me.lofienjoyer.nublada.engine.graphics.render;
 
+import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.graphics.camera.Camera;
 import me.lofienjoyer.nublada.engine.graphics.mesh.Mesh;
 import me.lofienjoyer.nublada.engine.graphics.shaders.SelectorShader;
@@ -102,7 +103,7 @@ public class RaycastRenderer {
      */
     public void setupProjectionMatrix(int width, int height) {
         this.projectionMatrix = new Matrix4f();
-        this.projectionMatrix.perspective(70, width / (float)height, 0.01f, 5000f);
+        this.projectionMatrix.perspective(Nublada.FOV, width / (float)height, 0.01f, 5000f);
 
         selectorShader.start();
         selectorShader.loadProjectionMatrix(projectionMatrix);

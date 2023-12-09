@@ -7,6 +7,7 @@ import me.lofienjoyer.nublada.engine.graphics.render.RaycastRenderer;
 import me.lofienjoyer.nublada.engine.graphics.render.SkyboxRenderer;
 import me.lofienjoyer.nublada.engine.graphics.render.WorldRenderer;
 import me.lofienjoyer.nublada.engine.graphics.render.gui.SelectedBlockRenderer;
+import me.lofienjoyer.nublada.engine.input.Input;
 import me.lofienjoyer.nublada.engine.scene.IScene;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import me.lofienjoyer.nublada.engine.world.Player;
@@ -24,23 +25,24 @@ public class WorldScene implements IScene {
     private RaycastRenderer raycastRenderer;
     private Player player;
     private Vector3f hitPosition;
+    private Input input;
+    private Window window;
 
     @Override
     public void init() {
         this.camera = new Camera();
         this.world = new World();
         this.worldRenderer = new WorldRenderer();
-        worldRenderer.setupProjectionMatrix(640, 360);
         this.skyboxRenderer = new SkyboxRenderer();
-        skyboxRenderer.setupProjectionMatrix(640, 360);
         this.selectedBlockRenderer = new SelectedBlockRenderer();
-        selectedBlockRenderer.setupProjectionMatrix(640, 360);
         this.raycastRenderer = new RaycastRenderer();
-        raycastRenderer.setupProjectionMatrix(640, 360);
 
         this.player = new Player();
         player.camera = camera;
         player.world = world;
+
+        this.input = Input.getInstance();
+        this.window = Window.getInstance();
 
         GLFW.glfwSetScrollCallback(Nublada.WINDOW_ID, (id, xOffset, yOffset) -> {
             selectedBlock += yOffset;
@@ -72,31 +74,22 @@ public class WorldScene implements IScene {
         }
 
         selectedBlockRenderer.render(selectedBlock);
-
-        if (GLFW.glfwGetMouseButton(Window.id, 0) != 0) {
-            mouse = 1;
-        } else if (GLFW.glfwGetMouseButton(Window.id, 1) != 0) {
-            mouse = 2;
-        } else {
-            mouse = 0;
-        }
-
-        if (hitPosition != null && mouse != 0 && BlockRegistry.getBLock(selectedBlock) != null) {
-            for (int x = -RADIUS; x <= RADIUS; x++) {
-                for (int y = -RADIUS; y <= RADIUS; y++) {
-                    for (int z = -RADIUS; z <= RADIUS; z++) {
-                        world.setBlock(mouse == 1 ? 0 : selectedBlock, new Vector3f(hitPosition.x + x, hitPosition.y + y, hitPosition.z + z));
-                    }
-                }
-            }
-        }
     }
 
     @Override
     public void fixedUpdate() {
         world.update(1 / 20f, camera);
 
-        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 128, false);
+        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
+
+        if (hitPosition != null) {
+            if (input.isButtonJustPressed(0)) {
+                world.setBlock(0, hitPosition);
+            } else if (input.isButtonJustPressed(1) && BlockRegistry.getBLock(selectedBlock) != null) {
+                var blockToPlacePosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
+                world.setBlock(selectedBlock, blockToPlacePosition);
+            }
+        }
     }
 
     @Override

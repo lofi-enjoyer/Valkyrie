@@ -48,16 +48,13 @@ public class Chunk {
 
     // TODO: 24/01/2022 Implement generators for World Generation
     // Temporary generation code
-    public void loadChunk(World world, FutureChunk futureChunk) {
+    public void loadChunk(World world) {
         if (true) {
             voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
             for (Populator populator : world.getPopulators()) {
                 populator.populate(this);
             }
-
-            if (futureChunk != null)
-                futureChunk.setBlocksInChunk(this);
 
             this.compressedData = compress(voxels);
         }
@@ -178,9 +175,10 @@ public class Chunk {
     }
 
     public void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
-        if (x < 0 || y < 0 || z < 0) return;
-        if (x > CHUNK_WIDTH - 1 || y > CHUNK_HEIGHT - 1 || z > CHUNK_WIDTH - 1)
+        // Check if the block is inside the chunk
+        if (x < 0 || y < 0 || z < 0 || x > CHUNK_WIDTH - 1 || y > CHUNK_HEIGHT - 1 || z > CHUNK_WIDTH - 1) {
             return;
+        }
 
         voxels[x | y << 5 | z << 13] = (short) voxel;
 
@@ -209,6 +207,10 @@ public class Chunk {
 
     public short[] getVoxels() {
         return voxels;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
     }
 
     public boolean isLoaded() {

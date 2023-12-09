@@ -130,10 +130,11 @@ public class World {
 
         chunks.put(position, chunk);
 
-        FutureChunk futureChunk = futureChunks.remove(position);
-
         Future<Chunk> future = generationService.submit(() -> {
-            chunk.loadChunk(this, futureChunk);
+            chunk.loadChunk(this);
+            var futureChunk = futureChunks.get(position);
+            if (futureChunk != null)
+                futureChunk.setBlocksInChunk(chunk);
             return chunk;
         });
 
@@ -183,8 +184,7 @@ public class World {
             try {
                 initializeChunk(future.get());
             } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                Nublada.LOG.severe(e.getMessage());
+                throw new RuntimeException(e.getCause());
             }
         }
     }
@@ -271,22 +271,23 @@ public class World {
         return getBlock((int)position.x, (int)position.y, (int)position.z);
     }
 
-    public void setBlock(int voxel, int x, int y, int z) {
+    public void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
         Vector2i position = getChunkPositionAt(x, z);
         if (!chunks.containsKey(position)) {
             FutureChunk futureChunk = futureChunks.get(position);
             if (futureChunk == null) {
-                futureChunk = futureChunks.put(position, new FutureChunk(position));
+                futureChunk = new FutureChunk(position);
+                futureChunks.put(position, futureChunk);
             }
             futureChunk.addBlock((short) voxel, x, y, z);
             return;
         }
 
-        chunks.get(position).setBlock(voxel, Math.abs(position.x * CHUNK_WIDTH - x), y, Math.abs(position.y * CHUNK_WIDTH - z));
+        chunks.get(position).setBlock(voxel, Math.abs(position.x * CHUNK_WIDTH - x), y, Math.abs(position.y * CHUNK_WIDTH - z), updateChunk);
     }
 
     public void setBlock(int voxel, Vector3f position) {
-        setBlock(voxel, (int)position.x, (int)position.y, (int)position.z);
+        setBlock(voxel, (int)position.x, (int)position.y, (int)position.z, true);
     }
 
     private Vector2i getChunkPositionAt(int x, int z) {

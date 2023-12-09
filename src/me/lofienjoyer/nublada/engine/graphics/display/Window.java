@@ -8,7 +8,8 @@ import org.lwjgl.system.*;
 
 import java.awt.*;
 import java.nio.*;
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -17,21 +18,25 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class Window {
 
+    private static Window instance;
+
     public static long id;
 
     private int width;
     private int height;
-    private final String title;
 
     private boolean wireframe;
-    private boolean faceCulling;
     private boolean vsync = true;
 
-    // TODO: 09/02/2022 Make this a singleton
-    public Window(int width, int height, String title) {
-        this.width = width;
-        this.height = height;
-        this.title = title;
+    private final List<GLFWWindowSizeCallbackI> resizeCallbacks;
+    private final List<GLFWKeyCallbackI> keyCallbacks;
+    private final List<GLFWMouseButtonCallbackI> buttonCallbacks;
+    private final List<GLFWCursorPosCallbackI> cursorPosCallbacks;
+
+    private Window() {
+        this.width = 800;
+        this.height = 600;
+        String title = "Nublada";
 
         GLFWErrorCallback.createPrint(System.err).set();
 
@@ -41,11 +46,32 @@ public class Window {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_SAMPLES, 8);
 
         id = glfwCreateWindow(width, height, title, NULL, NULL);
         if (id == NULL)
             Nublada.LOG.severe("Error while creating the window");
+
+        this.resizeCallbacks = new ArrayList<>();
+        glfwSetWindowSizeCallback(id, (id, width, height) -> {
+            this.width = width;
+            this.height = height;
+            resizeCallbacks.forEach(callback -> callback.invoke(id, width, height));
+        });
+
+        this.keyCallbacks = new ArrayList<>();
+        glfwSetKeyCallback(id, (id, key, scancode, action, mods) -> {
+            keyCallbacks.forEach(callback -> callback.invoke(id, key, scancode, action, mods));
+        });
+
+        this.buttonCallbacks = new ArrayList<>();
+        glfwSetMouseButtonCallback(id, (id, button, action, mods) -> {
+            buttonCallbacks.forEach(callback -> callback.invoke(id, button, action, mods));
+        });
+
+        this.cursorPosCallbacks = new ArrayList<>();
+        glfwSetCursorPosCallback(id, (id, width, height) -> {
+            cursorPosCallbacks.forEach(callback -> callback.invoke(id, width, height));
+        });
 
         glfwSetKeyCallback(id, (window, key, scancode, action, mods) -> {
             if (key == GLFW_KEY_R && action == GLFW_RELEASE) {
@@ -65,10 +91,6 @@ public class Window {
             if (key == GLFW_KEY_P && action == GLFW_RELEASE) {
                 System.gc();
             }
-        });
-
-        glfwSetWindowSizeCallback(id, (window, newwidth, newheight) -> {
-            glViewport(0, 0, newwidth, newheight);
         });
 
         try (MemoryStack stack = stackPush()) {
@@ -106,12 +128,44 @@ public class Window {
         glfwPollEvents();
     }
 
-    public void setResizeCallback(BiConsumer<Integer, Integer> action) {
-        glfwSetWindowSizeCallback(id, (window, newWidth, newHeight) -> {
-            this.width = newWidth;
-            this.height = newHeight;
-            action.accept(newWidth, newHeight);
-        });
+    public void registerResizeCallback(GLFWWindowSizeCallbackI callback) {
+        resizeCallbacks.add(callback);
+    }
+
+    public void unregisterResizeCallback(GLFWWindowSizeCallbackI callback) {
+        resizeCallbacks.remove(callback);
+    }
+
+    public void registerKeyCallback(GLFWKeyCallbackI callback) {
+        keyCallbacks.add(callback);
+    }
+
+    public void unregisterKeyCallback(GLFWKeyCallbackI callback) {
+        keyCallbacks.remove(callback);
+    }
+
+    public void registerButtonCallback(GLFWMouseButtonCallbackI callback) {
+        buttonCallbacks.add(callback);
+    }
+
+    public void unregisterButtonCallback(GLFWMouseButtonCallbackI callback) {
+        buttonCallbacks.remove(callback);
+    }
+
+    public void registerCursorPosCallback(GLFWCursorPosCallbackI callback) {
+        cursorPosCallbacks.add(callback);
+    }
+
+    public void unregisterCursorPosCallback(GLFWCursorPosCallbackI callback) {
+        cursorPosCallbacks.remove(callback);
+    }
+
+    public void setSize(int width, int height) {
+        glfwSetWindowSize(id, width, height);
+    }
+
+    public void setTitle(String title) {
+        glfwSetWindowTitle(id, title);
     }
 
     public void setClearColor(float r, float g, float b, float a) {
@@ -137,4 +191,12 @@ public class Window {
     public long getId() {
         return id;
     }
+
+    public static Window getInstance() {
+        if (instance == null)
+            instance = new Window();
+
+        return instance;
+    }
+
 }

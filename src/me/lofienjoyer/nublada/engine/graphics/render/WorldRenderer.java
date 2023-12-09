@@ -224,7 +224,7 @@ public class WorldRenderer {
      */
     public void setupProjectionMatrix(int width, int height) {
         this.projectionMatrix = new Matrix4f();
-        this.projectionMatrix.perspective(70, width / (float)height, 0.01f, 5000f);
+        this.projectionMatrix.perspective(Nublada.FOV, width / (float)height, 0.01f, 5000f);
 
         solidsShader.start();
         solidsShader.loadProjectionMatrix(projectionMatrix);

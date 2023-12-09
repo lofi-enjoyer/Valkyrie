@@ -8,13 +8,13 @@ import me.lofienjoyer.nublada.engine.graphics.framebuffer.Framebuffer;
 import me.lofienjoyer.nublada.engine.graphics.loader.Loader;
 import me.lofienjoyer.nublada.engine.graphics.mesh.QuadMesh;
 import me.lofienjoyer.nublada.engine.graphics.shaders.FboShader;
+import me.lofienjoyer.nublada.engine.input.Input;
 import me.lofienjoyer.nublada.engine.log.NubladaLogHandler;
 import me.lofienjoyer.nublada.engine.scene.IScene;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +26,10 @@ public class Nublada {
     public static final Loader LOADER = new Loader();
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
+    public static float FOV = (float) Math.toRadians(80.0);
+
     private final Window window;
+    private final Input input;
     public static long WINDOW_ID;
     private Framebuffer framebuffer;
 
@@ -36,7 +39,11 @@ public class Nublada {
         LOG.setLevel(Level.INFO);
 
         // FIXME: 09/01/2022 Make this customizable
-        this.window = new Window(1280, 720, "Nublada");
+        this.window = Window.getInstance();
+        window.setSize(1280, 720);
+        window.setTitle("Nublada");
+
+        this.input = Input.getInstance();
 
         WINDOW_ID = window.getId();
         EVENT_HANDLER.registerListener(StartupEvent.class, (event) -> {
@@ -51,6 +58,8 @@ public class Nublada {
         BlockRegistry.setup();
 
         window.setClearColor(0.45f, 0.71f, 1.00f, 1f);
+        window.registerResizeCallback((windowId, width, height) -> glViewport(0, 0, width, height));
+        window.registerResizeCallback(this::onResize);
 
         window.show();
     }
@@ -72,6 +81,7 @@ public class Nublada {
             fixedUpdateTimer += delta;
             while (fixedUpdateTimer >= 1 / 20f) {
                 currentScene.fixedUpdate();
+                input.update();
                 fixedUpdateTimer -= 1 / 20f;
             }
 
@@ -102,7 +112,15 @@ public class Nublada {
             delta = (System.nanoTime() - timer) / 1000000000f;
             timer = System.nanoTime();
 
-            GLFW.glfwSetWindowTitle(window.getId(), "Nublada | FPS: " + (int) (1f / delta) + " (delta: " + delta + "s) | " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 2024) + "MB");
+            GLFW.glfwSetWindowTitle(
+                    window.getId(),
+                    String.format(
+                            "Nublada | FPS: %.1f (delta: %.4fs) | Memory usage: %.2f/%.2f MB",
+                            1f / delta,
+                            delta,
+                            (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),
+                            Runtime.getRuntime().totalMemory() / (1024 * 1024f)
+            ));
         }
 
         currentScene.onClose();
@@ -113,14 +131,12 @@ public class Nublada {
             currentScene.dispose();
         scene.init();
         this.currentScene = scene;
-        window.setResizeCallback((width, height) -> {
-            onResize(width, height);
-            scene.onResize(width, height);
-        });
+        scene.onResize(window.getWidth(), window.getHeight());
     }
 
-    private void onResize(int width, int height) {
+    private void onResize(long windowId, int width, int height) {
         framebuffer.resize(width, height);
+        currentScene.onResize(width, height);
     }
 
     public void dispose() {
