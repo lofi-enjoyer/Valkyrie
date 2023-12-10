@@ -132,9 +132,11 @@ public class World {
 
         Future<Chunk> future = generationService.submit(() -> {
             chunk.loadChunk(this);
-            var futureChunk = futureChunks.get(position);
-            if (futureChunk != null)
-                futureChunk.setBlocksInChunk(chunk);
+            loadFutureChunk(chunk);
+            chunk.setLoaded(true);
+//            var futureChunk = futureChunks.get(position);
+//            if (futureChunk != null)
+//                futureChunk.setBlocksInChunk(chunk);
             return chunk;
         });
 
@@ -256,6 +258,16 @@ public class World {
         return null;
     }
 
+    public synchronized void loadFutureChunk(Chunk chunk) {
+        var futureChunk = futureChunks.get(chunk.getPosition());
+        if (futureChunk == null)
+            return;
+
+        futureChunk.setBlocksInChunk(chunk);
+//        futureChunks.remove(chunk.getPosition());
+        chunk.setLoaded(true);
+    }
+
     public Chunk getChunk(int x, int z) {
         return chunks.get(new Vector2i(x, z));
     }
@@ -271,19 +283,20 @@ public class World {
         return getBlock((int)position.x, (int)position.y, (int)position.z);
     }
 
-    public void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
+    public synchronized void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
         Vector2i position = getChunkPositionAt(x, z);
-        if (!chunks.containsKey(position)) {
+        var chunk = chunks.get(position);
+        if (chunk == null || !chunk.isLoaded()) {
             FutureChunk futureChunk = futureChunks.get(position);
             if (futureChunk == null) {
                 futureChunk = new FutureChunk(position);
                 futureChunks.put(position, futureChunk);
             }
-            futureChunk.addBlock((short) voxel, x, y, z);
+            futureChunk.addBlock((short) voxel, x - position.x * CHUNK_WIDTH, y, z - position.y * CHUNK_WIDTH);
             return;
         }
 
-        chunks.get(position).setBlock(voxel, Math.abs(position.x * CHUNK_WIDTH - x), y, Math.abs(position.y * CHUNK_WIDTH - z), updateChunk);
+        chunk.setBlock(voxel, x - position.x * CHUNK_WIDTH, y, z - position.y * CHUNK_WIDTH, updateChunk);
     }
 
     public void setBlock(int voxel, Vector3f position) {

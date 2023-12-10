@@ -59,7 +59,7 @@ public class Chunk {
             this.compressedData = compress(voxels);
         }
 
-        loaded = true;
+//        loaded = true;
     }
 
     private boolean loadFromFile() {
@@ -177,6 +177,7 @@ public class Chunk {
     public void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
         // Check if the block is inside the chunk
         if (x < 0 || y < 0 || z < 0 || x > CHUNK_WIDTH - 1 || y > CHUNK_HEIGHT - 1 || z > CHUNK_WIDTH - 1) {
+            world.setBlock(voxel, position.x * CHUNK_WIDTH + x, y, position.y * CHUNK_WIDTH + z, false);
             return;
         }
 
