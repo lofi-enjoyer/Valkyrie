@@ -13,6 +13,7 @@ import me.lofienjoyer.nublada.engine.world.populator.TerrainPopulator;
 import me.lofienjoyer.nublada.engine.world.populator.TreePopulator;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -27,6 +28,7 @@ public class World {
 
     public static final int CHUNK_WIDTH = 32;
     public static final int CHUNK_HEIGHT = 256;
+    public static final int CHUNK_SECTION_HEIGHT = 32;
     public static int LOAD_DISTANCE = 8;
 
     private final List<Populator> populators;
@@ -172,7 +174,9 @@ public class World {
 
                 var neighbor = getChunk(i + chunk.getPosition().x, j + chunk.getPosition().y);
                 if (neighbor != null) {
-                    Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor));
+                    for (int k = 0; k < 8; k++) {
+                        Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor, new Vector3i(0, k * CHUNK_SECTION_HEIGHT, 0)));
+                    }
                 }
 
             }

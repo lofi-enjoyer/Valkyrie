@@ -4,6 +4,8 @@ import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.world.Chunk;
 import me.lofienjoyer.nublada.engine.world.ChunkPreMeshData;
 
+import static me.lofienjoyer.nublada.engine.world.World.*;
+
 /**
  * Contains the solid and transparent meshes of a chunk
  */
@@ -11,47 +13,57 @@ public class MeshBundle {
 
     private final Chunk chunk;
 
-    private Mesh solidMesh;
-    private Mesh transparentMesh;
+    private final Mesh[] solidMesh;
+    private final Mesh[] transparentMesh;
 
-    private Mesher greedyMesher;
-    private Mesher dynamicMesher;
+    private final Mesher[] greedyMesher;
+    private final Mesher[] dynamicMesher;
 
     private boolean loaded = false;
 
     public MeshBundle(Chunk chunk) {
         this.chunk = chunk;
 
-        this.solidMesh = Nublada.LOADER.allocateMesh();
-        this.transparentMesh = Nublada.LOADER.allocateMesh();
+        this.solidMesh = new Mesh[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
+        for (int i = 0; i < solidMesh.length; i++) {
+            solidMesh[i] = Nublada.LOADER.allocateMesh();
+        }
+
+        this.transparentMesh = new Mesh[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
+        for (int i = 0; i < transparentMesh.length; i++) {
+            transparentMesh[i] = Nublada.LOADER.allocateMesh();
+        }
+
+        this.greedyMesher = new Mesher[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
+        this.dynamicMesher = new Mesher[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
     }
 
-    public void compute() {
+    public void compute(int section) {
         ChunkPreMeshData chunkPreMeshData = new ChunkPreMeshData(chunk);
 
-        this.greedyMesher = new GreedyMesher(chunkPreMeshData).compute();
-        this.dynamicMesher = new DynamicMesher(chunkPreMeshData).compute();
+        greedyMesher[section] = new GreedyMesher(chunkPreMeshData, section).compute();
+        dynamicMesher[section] = new DynamicMesher(chunkPreMeshData, section).compute();
     }
 
-    public MeshBundle loadMeshToGpu() {
-        if (greedyMesher == null || dynamicMesher == null)
+    public MeshBundle loadMeshToGpu(int section) {
+        if (greedyMesher[section] == null || dynamicMesher[section] == null)
             return null;
 
-        greedyMesher.loadToGpu(solidMesh);
-        dynamicMesher.loadToGpu(transparentMesh);
+        greedyMesher[section].loadToGpu(solidMesh[section]);
+        dynamicMesher[section].loadToGpu(transparentMesh[section]);
 
-        greedyMesher = null;
-        dynamicMesher = null;
+        greedyMesher[section] = null;
+        dynamicMesher[section] = null;
         this.loaded = true;
         return this;
     }
 
-    public Mesh getSolidMeshes() {
-        return solidMesh;
+    public Mesh getSolidMeshes(int section) {
+        return solidMesh[section];
     }
 
-    public Mesh getTransparentMeshes() {
-        return transparentMesh;
+    public Mesh getTransparentMeshes(int section) {
+        return transparentMesh[section];
     }
 
     public boolean isLoaded() {

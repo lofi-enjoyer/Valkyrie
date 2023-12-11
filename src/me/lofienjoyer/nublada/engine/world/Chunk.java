@@ -4,13 +4,13 @@ import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.nublada.engine.world.populator.Populator;
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 
 import java.io.*;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import static me.lofienjoyer.nublada.engine.world.World.CHUNK_HEIGHT;
-import static me.lofienjoyer.nublada.engine.world.World.CHUNK_WIDTH;
+import static me.lofienjoyer.nublada.engine.world.World.*;
 
 /**
  * Handles the data and meshing tasks of a single chunk
@@ -186,12 +186,15 @@ public class Chunk {
         if (!updateChunk)
             return;
 
-        Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(this));
+        var blockPosition = new Vector3i(x, y, z);
+        Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(this, blockPosition));
 
-        if (x == 0) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x - 1, position.y)));
-        if (x == CHUNK_WIDTH - 1) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x + 1, position.y)));
-        if (z == 0) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y - 1)));
-        if (z == CHUNK_WIDTH - 1) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y + 1)));
+        if (x == 0) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x - 1, position.y), blockPosition));
+        if (x == CHUNK_WIDTH - 1) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x + 1, position.y), blockPosition));
+        if (z == 0) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y - 1), blockPosition));
+        if (z == CHUNK_WIDTH - 1) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y + 1), blockPosition));
+        if (y % CHUNK_SECTION_HEIGHT == 0) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y), blockPosition));
+        if ((y + 1) % CHUNK_SECTION_HEIGHT == 0) Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y), blockPosition));
     }
 
     public void onDestroy() {
@@ -202,7 +205,9 @@ public class Chunk {
                 continue;
 
             neighbor.neighbors[(i + 2) % 4] = null;
-            Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor));
+            for (int j = 0; j < 8; j++) {
+                Nublada.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor, new Vector3i(0, j * CHUNK_SECTION_HEIGHT, 0)));
+            }
         }
     }
 

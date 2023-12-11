@@ -15,6 +15,7 @@ import me.lofienjoyer.nublada.engine.world.Chunk;
 import me.lofienjoyer.nublada.engine.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
@@ -30,7 +31,7 @@ public class WorldRenderer {
 
     // TODO: 24/03/2022 Make the core count customizable
     private static final ScheduledExecutorService meshService =
-            new ScheduledThreadPoolExecutor(2, r -> {
+            new ScheduledThreadPoolExecutor(4, r -> {
                 Thread thread = new Thread(r, "Meshing Thread");
                 thread.setDaemon(true);
 
@@ -44,9 +45,9 @@ public class WorldRenderer {
     private final TransparencyShader transparencyShader;
 
     private final Map<Vector2i, MeshBundle> chunkMeshes;
-    private final Map<Vector2i, Future<MeshBundle>> meshFutures;
-    private final Map<Vector2i, MeshBundle> meshesToUpload;
-    private final Set<Chunk> chunksToUpdate;
+    private final Map<Vector3i, Future<MeshBundle>> meshFutures;
+    private final Map<Vector3i, MeshBundle> meshesToUpload;
+    private final Map<Vector3i, Chunk> chunksToUpdate;
 
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
@@ -58,7 +59,7 @@ public class WorldRenderer {
         this.chunkMeshes = new HashMap<>();
         this.meshFutures = new HashMap<>();
         this.meshesToUpload = new HashMap<>();
-        this.chunksToUpdate = new HashSet<>();
+        this.chunksToUpdate = new HashMap<>();
 
         Nublada.EVENT_HANDLER.registerListener(ChunkLoadEvent.class, this::handleChunkLoading);
         Nublada.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdating);
@@ -75,14 +76,14 @@ public class WorldRenderer {
     public void render(World world, Camera camera) {
 
         var meshesToUploadIterator = meshesToUpload.entrySet().iterator();
-        if (meshesToUploadIterator.hasNext()) {
+        while (meshesToUploadIterator.hasNext()) {
             var currentMeshEntry = meshesToUploadIterator.next();
-            currentMeshEntry.getValue().loadMeshToGpu();
+            currentMeshEntry.getValue().loadMeshToGpu(currentMeshEntry.getKey().y);
             meshesToUploadIterator.remove();
         }
 
-        chunksToUpdate.forEach(chunk -> {
-            generateMesh(chunk, chunkMeshes.get(chunk.getPosition()));
+        chunksToUpdate.forEach((position, chunk) -> {
+            generateMesh(chunk, chunkMeshes.get(chunk.getPosition()), position.y);
         });
         chunksToUpdate.clear();
 
@@ -98,6 +99,8 @@ public class WorldRenderer {
 
         // Get the block the camera is in (for in-water effects)
         int headBlock = world.getBlock(camera.getPosition());
+
+        glBindTexture(GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
 
         renderSolidMeshes(camera, headBlock);
 
@@ -119,8 +122,6 @@ public class WorldRenderer {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        glBindTexture(GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
-
         // Renders the solid mesh for all chunks
         solidsShader.start();
         solidsShader.loadViewMatrix(camera);
@@ -131,12 +132,14 @@ public class WorldRenderer {
             if (!mesh.isLoaded() || !tester.isChunkInside(position, camera.getPosition().y))
                 return;
 
-            solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(position));
+            for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
+                solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
-            glBindVertexArray(mesh.getSolidMeshes().getVaoId());
-            glEnableVertexAttribArray(0);
+                glBindVertexArray(mesh.getSolidMeshes(y).getVaoId());
+                glEnableVertexAttribArray(0);
 
-            glDrawElements(GL_TRIANGLES, mesh.getSolidMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, mesh.getSolidMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
+            }
         });
     }
 
@@ -154,12 +157,15 @@ public class WorldRenderer {
         chunkMeshes.forEach((position, mesh) -> {
             if (!mesh.isLoaded() || !tester.isChunkInside(position, camera.getPosition().y))
                 return;
-            transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(position));
 
-            glBindVertexArray(mesh.getTransparentMeshes().getVaoId());
-            glEnableVertexAttribArray(0);
+            for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
+                transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
-            glDrawElements(GL_TRIANGLES, mesh.getTransparentMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
+                glBindVertexArray(mesh.getTransparentMeshes(y).getVaoId());
+                glEnableVertexAttribArray(0);
+
+                glDrawElements(GL_TRIANGLES, mesh.getTransparentMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
+            }
         });
         glDisable(GL_BLEND);
     }
@@ -167,15 +173,17 @@ public class WorldRenderer {
     private void handleChunkLoading(ChunkLoadEvent event) {
         var meshBundle = new MeshBundle(event.getChunk());
         chunkMeshes.put(event.getChunk().getPosition(), meshBundle);
-        chunksToUpdate.add(event.getChunk());
+        for (int i = 0; i < 8; i++) {
+            chunksToUpdate.put(new Vector3i(event.getChunk().getPosition().x, i, event.getChunk().getPosition().y), event.getChunk());
+        }
     }
 
     private void handleChunkUpdating(ChunkUpdateEvent event) {
         if (event.getChunk() == null)
             return;
 
-        chunksToUpdate.add(event.getChunk());
-        meshesToUpload.remove(event.getChunk().getPosition());
+        chunksToUpdate.put(new Vector3i(event.getChunk().getPosition().x, event.getUpdatePosition().y / World.CHUNK_SECTION_HEIGHT, event.getChunk().getPosition().y), event.getChunk());
+        meshesToUpload.remove(new Vector3i(event.getChunk().getPosition().x, event.getUpdatePosition().y / World.CHUNK_SECTION_HEIGHT, event.getChunk().getPosition().y));
     }
 
     private void handleMeshGeneration(MeshGenerationEvent event) {
@@ -183,10 +191,13 @@ public class WorldRenderer {
     }
 
     private void handleChunkUnloading(ChunkUnloadEvent event) {
-        var meshFuture = meshFutures.get(event.getChunk().getPosition());
-        if (meshFuture != null) {
-            meshFuture.cancel(true);
-            meshFutures.remove(event.getChunk().getPosition());
+        for (int i = 0; i < 8; i++) {
+            var meshPosition = new Vector3i(event.getChunk().getPosition().x, i, event.getChunk().getPosition().y);
+            var meshFuture = meshFutures.get(meshPosition);
+            if (meshFuture != null) {
+                meshFuture.cancel(true);
+                meshFutures.remove(meshPosition);
+            }
         }
 
         chunkMeshes.remove(event.getChunk().getPosition());
@@ -195,25 +206,48 @@ public class WorldRenderer {
     /**
      * Queues a task to mesh the chunk
      */
-    public void generateMesh(Chunk chunk, MeshBundle meshBundle) {
+//    public void generateMesh(Chunk chunk, MeshBundle meshBundle) {
+//        if (!chunk.isLoaded())
+//            return;
+//
+//        var meshFuture = meshFutures.get(chunk.getPosition());
+//
+//        if (meshFuture != null) {
+//            meshFuture.cancel(true);
+//            meshFutures.remove(chunk.getPosition());
+//        }
+//
+//        chunk.cacheNeighbors();
+//        meshFuture = meshService.submit(() -> {
+//            meshBundle.compute();
+//            Nublada.EVENT_HANDLER.process(new MeshGenerationEvent(chunk.getPosition(), meshBundle));
+//            return meshBundle;
+//        });
+//
+//        meshFutures.put(chunk.getPosition(), meshFuture);
+//    }
+
+    public void generateMesh(Chunk chunk, MeshBundle meshBundle, int section) {
         if (!chunk.isLoaded())
             return;
 
-        var meshFuture = meshFutures.get(chunk.getPosition());
+        var position = chunk.getPosition();
+        var meshPosition = new Vector3i(position.x, section, position.y);
+        var meshFuture = meshFutures.get(meshPosition);
 
         if (meshFuture != null) {
             meshFuture.cancel(true);
-            meshFutures.remove(chunk.getPosition());
+            meshFutures.remove(meshPosition);
         }
 
         chunk.cacheNeighbors();
         meshFuture = meshService.submit(() -> {
-            meshBundle.compute();
-            Nublada.EVENT_HANDLER.process(new MeshGenerationEvent(chunk.getPosition(), meshBundle));
+            meshBundle.compute(section);
+            Nublada.EVENT_HANDLER.process(new MeshGenerationEvent(meshPosition, meshBundle));
             return meshBundle;
         });
 
-        meshFutures.put(chunk.getPosition(), meshFuture);
+        meshFutures.put(meshPosition, meshFuture);
     }
 
     // Checks all loaded chunks, and unloads any that is outside the view distance

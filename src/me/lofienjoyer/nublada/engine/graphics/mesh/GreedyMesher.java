@@ -9,8 +9,7 @@ import me.lofienjoyer.nublada.engine.world.ChunkPreMeshData;
 import java.util.ArrayList;
 import java.util.List;
 
-import static me.lofienjoyer.nublada.engine.world.World.CHUNK_WIDTH;
-import static me.lofienjoyer.nublada.engine.world.World.CHUNK_HEIGHT;
+import static me.lofienjoyer.nublada.engine.world.World.*;
 
 /**
  * Based on roboleary's algorithm, but improved to support non-cubic chunks
@@ -37,10 +36,13 @@ public class GreedyMesher implements Mesher {
     private int[] positionsArray;
     private int[] indicesArray;
 
-    public GreedyMesher(ChunkPreMeshData chunkPreMeshData) {
-        this.chunkData = chunkPreMeshData;
+    private final int section;
 
-        this.dims = new int[] { CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH };
+    public GreedyMesher(ChunkPreMeshData chunkPreMeshData, int section) {
+        this.chunkData = chunkPreMeshData;
+        this.section = section;
+
+        this.dims = new int[] { CHUNK_WIDTH, CHUNK_SECTION_HEIGHT, CHUNK_WIDTH };
     }
 
     @Override
@@ -115,8 +117,8 @@ public class GreedyMesher implements Mesher {
 
                         for(x[u] = 0; x[u] < dims[u]; x[u]++) {
 
-                            voxelFace  = chunkData.getBlock(x[0], x[1], x[2]);
-                            voxelFace1 = chunkData.getBlock((x[0] + q[0]), (x[1] + q[1]), (x[2] + q[2]));
+                            voxelFace  = chunkData.getBlock(x[0], x[1] + CHUNK_SECTION_HEIGHT * section, x[2]);
+                            voxelFace1 = chunkData.getBlock((x[0] + q[0]), (x[1] + q[1]) + CHUNK_SECTION_HEIGHT * section, (x[2] + q[2]));
 
                             if (voxelFace != 0 && BlockRegistry.getBLock(voxelFace).isTransparent()) {
                                 voxelFace = 0;

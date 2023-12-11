@@ -8,8 +8,7 @@ import me.lofienjoyer.nublada.engine.world.ChunkPreMeshData;
 import java.util.ArrayList;
 import java.util.List;
 
-import static me.lofienjoyer.nublada.engine.world.World.CHUNK_WIDTH;
-import static me.lofienjoyer.nublada.engine.world.World.CHUNK_HEIGHT;
+import static me.lofienjoyer.nublada.engine.world.World.*;
 
 /**
  * Generates the transparent mesh of a chunk
@@ -24,8 +23,11 @@ public class DynamicMesher implements Mesher {
     private int[] positionsArray;
     private int[] indicesArray;
 
-    public DynamicMesher(ChunkPreMeshData chunkPreMeshData) {
+    private final int section;
+
+    public DynamicMesher(ChunkPreMeshData chunkPreMeshData, int section) {
         this.chunkData = chunkPreMeshData;
+        this.section = section;
     }
 
     @Override
@@ -65,9 +67,9 @@ public class DynamicMesher implements Mesher {
     private void computeMesh() {
         int currentVoxel;
         for (int x = 0; x < CHUNK_WIDTH; x++) {
-            for (int y = 0; y < CHUNK_HEIGHT; y++) {
+            for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++) {
                 for (int z = 0; z < CHUNK_WIDTH; z++) {
-                    currentVoxel = chunkData.getBlock(x, y, z);
+                    currentVoxel = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z);
                     if (currentVoxel == 0 || !BlockRegistry.getBLock(currentVoxel).isTransparent()) continue;
 
                     meshBlock(x, y, z, BlockRegistry.getBLock(currentVoxel));
@@ -79,7 +81,7 @@ public class DynamicMesher implements Mesher {
     int passes = 0;
 
     private void meshBlock(int x, int y, int z, Block block) {
-        int westBlock = chunkData.getBlock(x + 1, y, z);
+        int westBlock = chunkData.getBlock(x + 1, y + (CHUNK_SECTION_HEIGHT * section), z);
         if (westBlock == 0 || (block.getId() != westBlock && BlockRegistry.getBLock(westBlock).isTransparent())) {
             int[] vertices = new int[4];
             vertices[0] = getVertex(x + 1, y + 0, z + 0, 1, 1, block.getWestTexture());
@@ -102,7 +104,7 @@ public class DynamicMesher implements Mesher {
             passes += 4;
         }
 
-        int eastBlock = chunkData.getBlock(x - 1, y, z);
+        int eastBlock = chunkData.getBlock(x - 1, y + (CHUNK_SECTION_HEIGHT * section), z);
         if (eastBlock == 0 || (block.getId() != eastBlock && BlockRegistry.getBLock(eastBlock).isTransparent())) {
             int[] vertices = new int[4];
             vertices[0] = getVertex(x + 0, y + 0, z + 0, 1, 1, block.getEastTexture());
@@ -125,7 +127,7 @@ public class DynamicMesher implements Mesher {
             passes += 4;
         }
 
-        int northBlock = chunkData.getBlock(x, y, z - 1);
+        int northBlock = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z - 1);
         if (northBlock == 0 || (block.getId() != northBlock && BlockRegistry.getBLock(northBlock).isTransparent())) {
             int[] vertices = new int[4];
             vertices[0] = getVertex(x + 0, y + 0, z + 0, 1, 1, block.getNorthTexture());
@@ -148,7 +150,7 @@ public class DynamicMesher implements Mesher {
             passes += 4;
         }
 
-        int southBlock = chunkData.getBlock(x, y, z + 1);
+        int southBlock = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z + 1);
         if (southBlock == 0 || (block.getId() != southBlock && BlockRegistry.getBLock(southBlock).isTransparent())) {
             int[] vertices = new int[4];
             vertices[0] = getVertex(x + 0, y + 0, z + 1, 1, 1, block.getSouthTexture());
@@ -171,7 +173,7 @@ public class DynamicMesher implements Mesher {
             passes += 4;
         }
 
-        int upBlock = chunkData.getBlock(x, y + 1, z);
+        int upBlock = chunkData.getBlock(x, y + 1 + (CHUNK_SECTION_HEIGHT * section), z);
         if (upBlock == 0 || (block.getId() != upBlock && BlockRegistry.getBLock(upBlock).isTransparent())) {
             int[] vertices = new int[4];
             vertices[0] = getVertex(x + 0, y + 1, z + 0, 1, 1, block.getTopTexture());
@@ -194,7 +196,7 @@ public class DynamicMesher implements Mesher {
             passes += 4;
         }
 
-        int bottomBlock = chunkData.getBlock(x, y - 1, z);
+        int bottomBlock = chunkData.getBlock(x, y - 1 + (CHUNK_SECTION_HEIGHT * section), z);
         if (bottomBlock == 0 || (block.getId() != bottomBlock && BlockRegistry.getBLock(bottomBlock).isTransparent())) {
             int[] vertices = new int[4];
             vertices[0] = getVertex(x + 0, y + 0, z + 0, 1, 1, block.getBottomTexture());

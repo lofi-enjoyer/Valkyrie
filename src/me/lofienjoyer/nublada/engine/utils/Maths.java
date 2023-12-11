@@ -2,10 +2,9 @@ package me.lofienjoyer.nublada.engine.utils;
 
 import me.lofienjoyer.nublada.engine.graphics.camera.Camera;
 import me.lofienjoyer.nublada.engine.world.World;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
+import org.joml.*;
+
+import java.lang.Math;
 
 public class Maths {
 
@@ -13,6 +12,13 @@ public class Maths {
         Matrix4f matrix = new Matrix4f();
         matrix.identity();
         matrix.translate(position.x * World.CHUNK_WIDTH, 0, position.y * World.CHUNK_WIDTH);
+        return matrix;
+    }
+
+    public static Matrix4f createTransformationMatrix(Vector3i position) {
+        Matrix4f matrix = new Matrix4f();
+        matrix.identity();
+        matrix.translate(position.x * World.CHUNK_WIDTH, position.y * World.CHUNK_SECTION_HEIGHT, position.z * World.CHUNK_WIDTH);
         return matrix;
     }
 
