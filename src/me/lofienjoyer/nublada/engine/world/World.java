@@ -122,12 +122,8 @@ public class World {
                 int chunkX = playerX + x;
                 int chunkZ = playerZ + z;
 
-                int distance = x * x + z * z;
-
-                if (distance < LOAD_DISTANCE * LOAD_DISTANCE) {
-                    if (getChunk(chunkX, chunkZ) == null) {
-                        addChunk(chunkX, chunkZ);
-                    }
+                if (getChunk(chunkX, chunkZ) == null) {
+                    addChunk(chunkX, chunkZ);
                 }
 
             }
