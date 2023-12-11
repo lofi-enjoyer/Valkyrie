@@ -15,20 +15,21 @@ public class TerrainPopulator extends Populator {
         int chunkX = chunk.getPosition().x * CHUNK_WIDTH;
         int chunkZ = chunk.getPosition().y * CHUNK_WIDTH;
 
-        byte voxel;
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
 
                 double noiseValue = (noise.noise(x + chunkX, z + chunkZ) + 1) / 2f;
                 double maxHeight = noiseValue * noiseValue * 250;
 
-                for (int y = 0; y < maxHeight; y++) {
-                    voxel = 2;
-                    if ((int) (maxHeight) == y) {
-                        voxel = 1;
-                    }
-                    chunk.setBlock(voxel, x, y, z, false);
+                for (int y = 0; y < (int)maxHeight - 2; y++) {
+                    chunk.setBlock(2, x, y, z, false);
                 }
+
+                for (int y = (int)maxHeight - 2; y < (int) maxHeight; y++) {
+                    chunk.setBlock(8, x, y, z, false);
+                }
+
+                chunk.setBlock(1, x, (int)maxHeight, z, false);
 
                 // Water and sand
                 if (maxHeight < 40) {

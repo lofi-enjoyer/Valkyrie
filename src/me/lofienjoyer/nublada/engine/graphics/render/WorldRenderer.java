@@ -3,6 +3,7 @@ package me.lofienjoyer.nublada.engine.graphics.render;
 import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.events.mesh.MeshGenerationEvent;
 import me.lofienjoyer.nublada.engine.events.world.ChunkLoadEvent;
+import me.lofienjoyer.nublada.engine.events.world.ChunkUnloadEvent;
 import me.lofienjoyer.nublada.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.nublada.engine.graphics.camera.Camera;
 import me.lofienjoyer.nublada.engine.graphics.mesh.MeshBundle;
@@ -29,7 +30,7 @@ public class WorldRenderer {
 
     // TODO: 24/03/2022 Make the core count customizable
     private static final ScheduledExecutorService meshService =
-            new ScheduledThreadPoolExecutor(4, r -> {
+            new ScheduledThreadPoolExecutor(2, r -> {
                 Thread thread = new Thread(r, "Meshing Thread");
                 thread.setDaemon(true);
 
@@ -61,6 +62,7 @@ public class WorldRenderer {
 
         Nublada.EVENT_HANDLER.registerListener(ChunkLoadEvent.class, this::handleChunkLoading);
         Nublada.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdating);
+        Nublada.EVENT_HANDLER.registerListener(ChunkUnloadEvent.class, this::handleChunkUnloading);
         Nublada.EVENT_HANDLER.registerListener(MeshGenerationEvent.class, this::handleMeshGeneration);
 
         transparencyShader.start();
@@ -165,15 +167,29 @@ public class WorldRenderer {
     private void handleChunkLoading(ChunkLoadEvent event) {
         var meshBundle = new MeshBundle(event.getChunk());
         chunkMeshes.put(event.getChunk().getPosition(), meshBundle);
-        generateMesh(event.getChunk(), meshBundle);
+        chunksToUpdate.add(event.getChunk());
     }
 
     private void handleChunkUpdating(ChunkUpdateEvent event) {
+        if (event.getChunk() == null)
+            return;
+
         chunksToUpdate.add(event.getChunk());
+        meshesToUpload.remove(event.getChunk().getPosition());
     }
 
     private void handleMeshGeneration(MeshGenerationEvent event) {
         meshesToUpload.put(event.getPosition(), event.getMeshBundle());
+    }
+
+    private void handleChunkUnloading(ChunkUnloadEvent event) {
+        var meshFuture = meshFutures.get(event.getChunk().getPosition());
+        if (meshFuture != null) {
+            meshFuture.cancel(true);
+            meshFutures.remove(event.getChunk().getPosition());
+        }
+
+        chunkMeshes.remove(event.getChunk().getPosition());
     }
 
     /**

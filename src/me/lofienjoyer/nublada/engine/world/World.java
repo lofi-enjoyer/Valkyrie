@@ -2,6 +2,7 @@ package me.lofienjoyer.nublada.engine.world;
 
 import me.lofienjoyer.nublada.Nublada;
 import me.lofienjoyer.nublada.engine.events.world.ChunkLoadEvent;
+import me.lofienjoyer.nublada.engine.events.world.ChunkUnloadEvent;
 import me.lofienjoyer.nublada.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.nublada.engine.graphics.camera.Camera;
 import me.lofienjoyer.nublada.engine.utils.Maths;
@@ -96,17 +97,34 @@ public class World {
         int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) World.CHUNK_WIDTH);
 
+        if (playerPosition.x != playerX || playerPosition.y != playerZ) {
+            var iterator = chunks.entrySet().iterator();
+            while (iterator.hasNext()) {
+                var entry = iterator.next();
+                var position = entry.getKey();
+                if (position.x < playerX - LOAD_DISTANCE - 2 ||
+                        position.x > playerX + LOAD_DISTANCE + 2 ||
+                        position.y < playerZ - LOAD_DISTANCE - 2 ||
+                        position.y > playerZ + LOAD_DISTANCE + 2
+                ) {
+                    iterator.remove();
+                    entry.getValue().onDestroy();
+                    Nublada.EVENT_HANDLER.process(new ChunkUnloadEvent(entry.getValue()));
+                }
+            }
+        }
+
         playerPosition.x = playerX;
         playerPosition.y = playerZ;
 
-        for(int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++) {
-            for(int z = -LOAD_DISTANCE; z <= LOAD_DISTANCE; z++) {
+        for (int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++) {
+            for (int z = -LOAD_DISTANCE; z <= LOAD_DISTANCE; z++) {
                 int chunkX = playerX + x;
                 int chunkZ = playerZ + z;
 
                 int distance = x * x + z * z;
 
-                if(distance < LOAD_DISTANCE * LOAD_DISTANCE) {
+                if (distance < LOAD_DISTANCE * LOAD_DISTANCE) {
                     if (getChunk(chunkX, chunkZ) == null) {
                         addChunk(chunkX, chunkZ);
                     }

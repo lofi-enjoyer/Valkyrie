@@ -23,12 +23,13 @@ public class Player {
     }
 
     public void update(float delta) {
+        position.x = camera.getPosition().x;
+        position.z = camera.getPosition().z;
+
         var currentChunk = world.getChunk((int) Math.floor(position.x / CHUNK_WIDTH), (int) Math.floor(position.z / CHUNK_WIDTH));
         if (currentChunk == null || currentChunk.getVoxels() == null)
             return;
 
-        position.x = camera.getPosition().x;
-        position.z = camera.getPosition().z;
         int currentBlock = world.getBlock((int)(Math.floor(position.x)), (int)(position.y + 0.5f), (int)(Math.floor(position.z)));
         int blockUnder = world.getBlock((int)(Math.floor(position.x)), (int)(position.y - 0.5f), (int)(Math.floor(position.z)));
         if (currentBlock != 0 && currentBlock != 7) {
