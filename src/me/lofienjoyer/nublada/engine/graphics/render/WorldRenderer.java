@@ -77,10 +77,12 @@ public class WorldRenderer {
     public void render(World world, Camera camera) {
 
         var meshesToUploadIterator = meshesToUpload.entrySet().iterator();
-        if (meshesToUploadIterator.hasNext()) {
+        while (meshesToUploadIterator.hasNext()) {
             var currentMeshEntry = meshesToUploadIterator.next();
-            currentMeshEntry.getValue().loadMeshToGpu(currentMeshEntry.getKey().y);
             meshesToUploadIterator.remove();
+
+            if (currentMeshEntry.getValue().loadMeshToGpu(currentMeshEntry.getKey().y))
+                break;
         }
 
         chunksToUpdate.forEach((position, chunk) -> {

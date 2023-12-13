@@ -45,9 +45,9 @@ public class MeshBundle {
         dynamicMesher[section] = new DynamicMesher(chunkPreMeshData, section).compute();
     }
 
-    public MeshBundle loadMeshToGpu(int section) {
+    public boolean loadMeshToGpu(int section) {
         if (greedyMesher[section] == null || dynamicMesher[section] == null)
-            return null;
+            return false;
 
         greedyMesher[section].loadToGpu(solidMesh[section]);
         dynamicMesher[section].loadToGpu(transparentMesh[section]);
@@ -55,7 +55,11 @@ public class MeshBundle {
         greedyMesher[section] = null;
         dynamicMesher[section] = null;
         this.loaded = true;
-        return this;
+
+        if (solidMesh[section].getVertexCount() == 0 && transparentMesh[section].getVertexCount() == 0)
+            return false;
+
+        return true;
     }
 
     public Mesh getSolidMeshes(int section) {
