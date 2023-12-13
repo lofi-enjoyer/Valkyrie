@@ -12,6 +12,7 @@ import me.lofienjoyer.nublada.engine.graphics.shaders.TransparencyShader;
 import me.lofienjoyer.nublada.engine.utils.Maths;
 import me.lofienjoyer.nublada.engine.world.BlockRegistry;
 import me.lofienjoyer.nublada.engine.world.Chunk;
+import me.lofienjoyer.nublada.engine.world.ChunkState;
 import me.lofienjoyer.nublada.engine.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
@@ -76,7 +77,7 @@ public class WorldRenderer {
     public void render(World world, Camera camera) {
 
         var meshesToUploadIterator = meshesToUpload.entrySet().iterator();
-        while (meshesToUploadIterator.hasNext()) {
+        if (meshesToUploadIterator.hasNext()) {
             var currentMeshEntry = meshesToUploadIterator.next();
             currentMeshEntry.getValue().loadMeshToGpu(currentMeshEntry.getKey().y);
             meshesToUploadIterator.remove();
@@ -228,7 +229,7 @@ public class WorldRenderer {
 //    }
 
     public void generateMesh(Chunk chunk, MeshBundle meshBundle, int section) {
-        if (!chunk.isLoaded())
+        if (chunk.getState() == ChunkState.UNLOADED)
             return;
 
         var position = chunk.getPosition();

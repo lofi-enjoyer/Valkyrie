@@ -23,7 +23,7 @@ public class ChunkPreMeshData {
         this.neighborsData = new short[chunk.getNeighbors().length][CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
         for (int i = 0; i < chunk.getNeighbors().length; i++) {
             Chunk neighbor = chunk.getNeighbors()[i];
-            if (neighbor == null || !neighbor.isLoaded())
+            if (neighbor == null || neighbor.getState() == ChunkState.UNLOADED)
                 continue;
 
             if (neighbor.getVoxels() != null) {

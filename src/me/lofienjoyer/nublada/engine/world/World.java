@@ -30,6 +30,7 @@ public class World {
     public static final int CHUNK_HEIGHT = 256;
     public static final int CHUNK_SECTION_HEIGHT = 32;
     public static int LOAD_DISTANCE = 8;
+    public static int FULLY_LOAD_DISTANCE = 1;
 
     private final List<Populator> populators;
 
@@ -124,8 +125,18 @@ public class World {
                 int chunkX = playerX + x;
                 int chunkZ = playerZ + z;
 
-                if (getChunk(chunkX, chunkZ) == null) {
+                var chunk = getChunk(chunkX, chunkZ);
+                if (chunk == null) {
                     addChunk(chunkX, chunkZ);
+                } else {
+                    if (chunk.getState() == ChunkState.UNLOADED)
+                        continue;
+
+                    if (x < -FULLY_LOAD_DISTANCE || x > FULLY_LOAD_DISTANCE || z < -FULLY_LOAD_DISTANCE || z > FULLY_LOAD_DISTANCE) {
+                        setChunkState(chunk, ChunkState.SOFT_LOADED);
+                    } else {
+                        setChunkState(chunk, ChunkState.FULLY_LOADED);
+                    }
                 }
 
             }
@@ -149,10 +160,6 @@ public class World {
         Future<Chunk> future = generationService.submit(() -> {
             chunk.loadChunk(this);
             loadFutureChunk(chunk);
-            chunk.setLoaded(true);
-//            var futureChunk = futureChunks.get(position);
-//            if (futureChunk != null)
-//                futureChunk.setBlocksInChunk(chunk);
             return chunk;
         });
 
@@ -278,12 +285,10 @@ public class World {
 
     public synchronized void loadFutureChunk(Chunk chunk) {
         var futureChunk = futureChunks.get(chunk.getPosition());
-        if (futureChunk == null)
-            return;
+        if (futureChunk != null)
+            futureChunk.setBlocksInChunk(chunk);
 
-        futureChunk.setBlocksInChunk(chunk);
-//        futureChunks.remove(chunk.getPosition());
-        chunk.setLoaded(true);
+        chunk.setState(ChunkState.FULLY_LOADED);
     }
 
     public Chunk getChunk(int x, int z) {
@@ -304,7 +309,7 @@ public class World {
     public synchronized void setBlock(int voxel, int x, int y, int z, boolean updateChunk) {
         Vector2i position = getChunkPositionAt(x, z);
         var chunk = chunks.get(position);
-        if (chunk == null || !chunk.isLoaded()) {
+        if (chunk == null || chunk.getState() != ChunkState.FULLY_LOADED) {
             FutureChunk futureChunk = futureChunks.get(position);
             if (futureChunk == null) {
                 futureChunk = new FutureChunk(position);
@@ -319,6 +324,25 @@ public class World {
 
     public void setBlock(int voxel, Vector3f position) {
         setBlock(voxel, (int)position.x, (int)position.y, (int)position.z, true);
+    }
+
+    // TODO 13/12/23 Move the data compression/decompression to the generation service
+    public synchronized void setChunkState(Chunk chunk, ChunkState chunkState) {
+        switch (chunkState){
+            case SOFT_LOADED:
+                if (chunk.state != ChunkState.SOFT_LOADED) {
+                    chunk.compressedData = chunk.compress(chunk.voxels);
+                    chunk.voxels = null;
+                }
+                break;
+            case FULLY_LOADED:
+                if (chunk.state != ChunkState.FULLY_LOADED) {
+                    chunk.voxels = chunk.decompress(chunk.compressedData);
+                }
+                break;
+        }
+
+        chunk.state = chunkState;
     }
 
     private Vector2i getChunkPositionAt(int x, int z) {

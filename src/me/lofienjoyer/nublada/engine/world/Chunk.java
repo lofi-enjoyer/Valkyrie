@@ -29,37 +29,34 @@ public class Chunk {
             new Vector2i( 1,  0),
     };
 
-    private short[] voxels;
+    protected short[] voxels;
     private final Vector2i position;
-    private byte[] compressedData;
+    protected byte[] compressedData;
 
     private final World world;
 
     private final Chunk[] neighbors;
 
-    private boolean loaded = false;
+    protected ChunkState state;
 
     public Chunk(Vector2i position, World world) {
         this.position = position;
         this.world = world;
 
         this.neighbors = new Chunk[4];
+        this.state = ChunkState.UNLOADED;
     }
 
     // TODO: 24/01/2022 Implement generators for World Generation
     // Temporary generation code
     public void loadChunk(World world) {
-        if (true) {
-            voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
+        voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
-            for (Populator populator : world.getPopulators()) {
-                populator.populate(this);
-            }
-
-            this.compressedData = compress(voxels);
+        for (Populator populator : world.getPopulators()) {
+            populator.populate(this);
         }
 
-//        loaded = true;
+        this.compressedData = compress(voxels);
     }
 
     private boolean loadFromFile() {
@@ -123,7 +120,7 @@ public class Chunk {
         }
     }
 
-    private byte[] compress(short[] data) {
+    protected byte[] compress(short[] data) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             DeflaterOutputStream dos = new DeflaterOutputStream(outputStream);
@@ -215,12 +212,12 @@ public class Chunk {
         return voxels;
     }
 
-    public void setLoaded(boolean loaded) {
-        this.loaded = loaded;
+    public ChunkState getState() {
+        return state;
     }
 
-    public boolean isLoaded() {
-        return loaded;
+    public void setState(ChunkState state) {
+        this.state = state;
     }
 
     public byte[] getCompressedData() {
