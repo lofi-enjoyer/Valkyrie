@@ -12,10 +12,14 @@ uniform float viewDistance;
 
 const vec3 skyColor = vec3(0.45, 0.71, 1.00);
 
+const int atlasSize = 8192;
+const int textureSize = 32;
+const int texturesPerSide = atlasSize / textureSize;
+
 void main() {
 
-    float xUv = mod(passColor.z, (1024 / 8)) / (1024 / 8.0) + mod(passColor.x, 1.0) / (1024 / 8);
-    float yUv = int(passColor.z / (1024 / 8.0)) / (1024 / 8.0) + mod(passColor.y, 1.0) / (1024 / 8);
+    float xUv = mod(passColor.z, texturesPerSide) / texturesPerSide + mod(passColor.x, 1.0) / texturesPerSide;
+    float yUv = int(passColor.z / texturesPerSide) / texturesPerSide + mod(passColor.y, 1.0) / texturesPerSide;
 
     vec4 textureColour = texture(textureSampler, vec2(xUv, yUv));
 

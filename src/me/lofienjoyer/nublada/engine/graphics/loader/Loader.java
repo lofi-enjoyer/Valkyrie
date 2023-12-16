@@ -128,18 +128,18 @@ public class Loader {
     }
 
     public int loadTileset(String... fileName) {
-        var image = new BufferedImage(1024, 1024, BufferedImage.TYPE_INT_ARGB);
+        var image = new BufferedImage(8192, 8192, BufferedImage.TYPE_INT_ARGB);
         var graphics = image.createGraphics();
         for (int i = 0; i < fileName.length; i++) {
-            var x = i % (1024 / 8);
-            var y = i / (1024 / 8);
+            var x = i % (8192 / 32);
+            var y = i / (8192 / 32);
             BufferedImage texture = null;
             try {
                 texture = ImageIO.read(new File(fileName[i]));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            graphics.drawImage(texture, x * 8, y * 8, 8, 8, null);
+            graphics.drawImage(texture, x * 32, y * 32, 32, 32, null);
         }
 
         int[] pixels = new int[image.getWidth() * image.getHeight()];
@@ -166,7 +166,7 @@ public class Loader {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 8192, 8192, 0,
                 GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
         glBindTexture(GL_TEXTURE_2D, 0);

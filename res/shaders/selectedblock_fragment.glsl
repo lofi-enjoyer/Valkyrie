@@ -6,10 +6,14 @@ out vec4 outColor;
 
 uniform sampler2D textureSampler;
 
+const int atlasSize = 8192;
+const int textureSize = 32;
+const int texturesPerSide = atlasSize / textureSize;
+
 void main() {
 
-    float xUv = mod(passTexture.z, (1024 / 8)) / (1024 / 8.0) + mod(passTexture.x, 1.0) / (1024 / 8);
-    float yUv = int(passTexture.z / (1024 / 8.0)) / (1024 / 8.0) + mod(passTexture.y, 1.0) / (1024 / 8);
+    float xUv = mod(passTexture.z, texturesPerSide) / texturesPerSide + mod(passTexture.x, 1.0) / texturesPerSide;
+    float yUv = int(passTexture.z / texturesPerSide) / texturesPerSide + mod(passTexture.y, 1.0) / texturesPerSide;
 
     outColor = texture(textureSampler, vec2(xUv, yUv));
 
