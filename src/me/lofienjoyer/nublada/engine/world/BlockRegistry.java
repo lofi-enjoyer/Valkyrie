@@ -14,7 +14,7 @@ import java.util.Map;
 public class BlockRegistry {
 
     private static Block[] BLOCKS;
-    public static int TEXTURE_ARRAY_ID;
+    public static int TILESET_ID;
     private static List<String> texturesList;
 
     public static void setup() {
@@ -84,7 +84,7 @@ public class BlockRegistry {
 
         blocksToLoad.sort(Comparator.comparingInt(Block::getId));
 
-        TEXTURE_ARRAY_ID = Nublada.LOADER.loadTextureArray(texturesList.toArray(new String[0]));
+        TILESET_ID = Nublada.LOADER.loadTileset(texturesList.toArray(new String[0]));
 
         blocksToLoad.forEach(Block::setupMesh);
 

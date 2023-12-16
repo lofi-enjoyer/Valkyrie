@@ -103,7 +103,7 @@ public class WorldRenderer {
         // Get the block the camera is in (for in-water effects)
         int headBlock = world.getBlock(camera.getPosition());
 
-        glBindTexture(GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
+        glBindTexture(GL_TEXTURE_2D, BlockRegistry.TILESET_ID);
 
         renderSolidMeshes(camera, headBlock);
 

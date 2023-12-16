@@ -7,13 +7,16 @@ in float faceLight;
 in float passViewDistance;
 in float passInWater;
 
-uniform sampler2DArray textureSampler;
+uniform sampler2D textureSampler;
 
 const vec3 skyColor = vec3(0.45, 0.71, 1.00);
 
 void main() {
 
-    vec4 textureColour = texture(textureSampler, passColor);
+    float xUv = mod(passColor.z, (1024 / 8)) / (1024 / 8.0) + mod(passColor.x, 1.0) / (1024 / 8);
+    float yUv = int(passColor.z / (1024 / 8.0)) / (1024 / 8.0) + mod(passColor.y, 1.0) / (1024 / 8);
+
+    vec4 textureColour = texture(textureSampler, vec2(xUv, yUv));
 
     float visibility = 1;
     if (distance > passViewDistance - 64) {

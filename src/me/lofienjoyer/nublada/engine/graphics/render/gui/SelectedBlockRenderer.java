@@ -60,7 +60,7 @@ public class SelectedBlockRenderer {
 
         GL30.glEnable(GL30.GL_BLEND);
 
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, BlockRegistry.TEXTURE_ARRAY_ID);
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, BlockRegistry.TILESET_ID);
 
         shader.start();
 

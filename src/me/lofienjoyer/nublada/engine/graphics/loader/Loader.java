@@ -1,22 +1,31 @@
 package me.lofienjoyer.nublada.engine.graphics.loader;
 
 import me.lofienjoyer.nublada.Nublada;
+import me.lofienjoyer.nublada.engine.graphics.framebuffer.ColorFramebuffer;
 import me.lofienjoyer.nublada.engine.graphics.mesh.Mesh;
 import me.lofienjoyer.nublada.engine.graphics.texture.Texture;
 import me.lofienjoyer.nublada.engine.graphics.texture.TextureArray;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.opengl.GL44;
 import org.lwjgl.opengl.GL45;
 import org.lwjgl.system.MemoryStack;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.stb.STBImage.stbi_failure_reason;
-import static org.lwjgl.stb.STBImage.stbi_load;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
+import static org.lwjgl.stb.STBImage.*;
 
 public class Loader {
 
@@ -115,6 +124,53 @@ public class Loader {
         }
         int textureId = texture.getId();
         textureList.add(textureId);
+        return textureId;
+    }
+
+    public int loadTileset(String... fileName) {
+        var image = new BufferedImage(1024, 1024, BufferedImage.TYPE_INT_ARGB);
+        var graphics = image.createGraphics();
+        for (int i = 0; i < fileName.length; i++) {
+            var x = i % (1024 / 8);
+            var y = i / (1024 / 8);
+            BufferedImage texture = null;
+            try {
+                texture = ImageIO.read(new File(fileName[i]));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            graphics.drawImage(texture, x * 8, y * 8, 8, 8, null);
+        }
+
+        int[] pixels = new int[image.getWidth() * image.getHeight()];
+        image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+
+        ByteBuffer buffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
+
+        for(int h = 0; h < image.getHeight(); h++) {
+            for(int w = 0; w < image.getWidth(); w++) {
+                int pixel = pixels[h * image.getWidth() + w];
+
+                buffer.put((byte) ((pixel >> 16) & 0xFF));
+                buffer.put((byte) ((pixel >> 8) & 0xFF));
+                buffer.put((byte) (pixel & 0xFF));
+                buffer.put((byte) ((pixel >> 24) & 0xFF));
+            }
+        }
+
+        buffer.flip();
+
+        int textureId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, textureId);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
         return textureId;
     }
 
