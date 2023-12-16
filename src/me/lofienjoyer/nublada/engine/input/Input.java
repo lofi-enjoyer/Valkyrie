@@ -3,6 +3,7 @@ package me.lofienjoyer.nublada.engine.input;
 import me.lofienjoyer.nublada.engine.graphics.display.Window;
 import org.joml.Vector2d;
 
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
 public class Input {
@@ -73,36 +74,36 @@ public class Input {
         cursorPosition.y = posY;
     }
 
-    public boolean isKeyPressed(int key) {
-        return pressedKeys[key];
+    public static boolean isKeyPressed(int key) {
+        return instance.pressedKeys[key];
     }
 
-    public boolean isKeyJustPressed(int key) {
-        return justPressedKeys[key];
+    public static boolean isKeyJustPressed(int key) {
+        return instance.justPressedKeys[key];
     }
 
-    public boolean isButtonPressed(int button) {
-        return pressedMouseButtons[button];
+    public static boolean isButtonPressed(int button) {
+        return instance.pressedMouseButtons[button];
     }
 
-    public boolean isButtonJustPressed(int button) {
-        return justPressedMouseButtons[button];
+    public static boolean isButtonJustPressed(int button) {
+        return instance.justPressedMouseButtons[button];
     }
 
-    public double getCursorX() {
-        return cursorPosition.x;
+    public static double getCursorX() {
+        return instance.cursorPosition.x;
     }
 
-    public double getCursorY() {
-        return cursorPosition.y;
+    public static double getCursorY() {
+        return instance.cursorPosition.y;
     }
 
-    public double getCursorMovementX() {
-        return cursorMovement.x;
+    public static double getCursorMovementX() {
+        return (int)instance.cursorMovement.x;
     }
 
-    public double getCursorMovementY() {
-        return (int)cursorMovement.y;
+    public static double getCursorMovementY() {
+        return (int)instance.cursorMovement.y;
     }
 
     public static Input getInstance() {

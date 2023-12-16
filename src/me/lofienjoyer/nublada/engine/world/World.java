@@ -29,7 +29,7 @@ public class World {
     public static final int CHUNK_WIDTH = 32;
     public static final int CHUNK_HEIGHT = 256;
     public static final int CHUNK_SECTION_HEIGHT = 32;
-    public static int LOAD_DISTANCE = 8;
+    public static int LOAD_DISTANCE = 5;
     public static int FULLY_LOAD_DISTANCE = 1;
 
     private final List<Populator> populators;
@@ -293,6 +293,10 @@ public class World {
 
     public Chunk getChunk(int x, int z) {
         return chunks.get(new Vector2i(x, z));
+    }
+
+    public int getBlock(float x, float y, float z) {
+        return getBlock((int)Math.floor(x), (int)Math.floor(y), (int)Math.floor(z));
     }
 
     public int getBlock(int x, int y, int z) {

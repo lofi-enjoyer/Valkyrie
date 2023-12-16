@@ -52,26 +52,6 @@ public class Camera {
             GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
 
-        if (GLFW.glfwGetKey(window, GLFW_KEY_W) == 1) {
-            this.position.z -= Math.cos(Math.toRadians(rotationX)) * SPEED * delta;
-            this.position.x += Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
-        }
-
-        if (GLFW.glfwGetKey(window, GLFW_KEY_S) == 1) {
-            this.position.z += Math.cos(Math.toRadians(rotationX)) * SPEED * delta;
-            this.position.x -= Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
-        }
-
-        if (GLFW.glfwGetKey(window, GLFW_KEY_A) == 1) {
-            this.position.x -= Math.cos(Math.toRadians(rotationX)) * SPEED * delta;
-            this.position.z -= Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
-        }
-
-        if (GLFW.glfwGetKey(window, GLFW_KEY_D) == 1) {
-            this.position.x += Math.cos(Math.toRadians(rotationX)) * SPEED * delta;
-            this.position.z += Math.sin(Math.toRadians(rotationX)) * SPEED * delta;
-        }
-
         if (GLFW.glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !mouseLocked) {
             GLFW.glfwSetCursorPos(window, 320, 180);
             GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
@@ -121,12 +101,26 @@ public class Camera {
         return position;
     }
 
+    public void setPosition(Vector3f position) {
+        this.position.x = position.x;
+        this.position.y = position.y;
+        this.position.z = position.z;
+    }
+
     public float getRotationY() {
         return rotationY;
     }
 
     public float getRotationX() {
         return rotationX;
+    }
+
+    public void setRotationX(float rotationX) {
+        this.rotationX = rotationX;
+    }
+
+    public void setRotationY(float rotationY) {
+        this.rotationY = rotationY;
     }
 
     public float getRoll() {

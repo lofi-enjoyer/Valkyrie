@@ -15,6 +15,8 @@ import me.lofienjoyer.nublada.engine.world.World;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+
 public class WorldScene implements IScene {
 
     private Camera camera;
@@ -37,9 +39,7 @@ public class WorldScene implements IScene {
         this.selectedBlockRenderer = new SelectedBlockRenderer();
         this.raycastRenderer = new RaycastRenderer();
 
-        this.player = new Player();
-        player.camera = camera;
-        player.world = world;
+        this.player = new Player(world);
 
         this.input = Input.getInstance();
         this.window = Window.getInstance();
@@ -62,7 +62,9 @@ public class WorldScene implements IScene {
     @Override
     public void render(float delta) {
         camera.update(Window.id, delta);
+        player.setRotation(new Vector3f(camera.getRotationX(), camera.getRotationY(), 0));
         player.update(1 / 20f);
+        camera.setPosition(new Vector3f(player.getPosition().x, player.getPosition().y + 1.75f, player.getPosition().z));
         worldRenderer.updateFrustum(camera);
 
         skyboxRenderer.render(camera);
@@ -83,9 +85,9 @@ public class WorldScene implements IScene {
         hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
 
         if (hitPosition != null) {
-            if (input.isButtonJustPressed(0)) {
+            if (Input.isButtonJustPressed(0)) {
                 world.setBlock(0, hitPosition);
-            } else if (input.isButtonJustPressed(1) && BlockRegistry.getBLock(selectedBlock) != null) {
+            } else if (Input.isButtonJustPressed(1) && BlockRegistry.getBLock(selectedBlock) != null) {
                 var blockToPlacePosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
                 world.setBlock(selectedBlock, blockToPlacePosition);
             }

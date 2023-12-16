@@ -62,18 +62,7 @@ public class Window {
         glfwSetKeyCallback(id, (id, key, scancode, action, mods) -> {
             keyCallbacks.forEach(callback -> callback.invoke(id, key, scancode, action, mods));
         });
-
-        this.buttonCallbacks = new ArrayList<>();
-        glfwSetMouseButtonCallback(id, (id, button, action, mods) -> {
-            buttonCallbacks.forEach(callback -> callback.invoke(id, button, action, mods));
-        });
-
-        this.cursorPosCallbacks = new ArrayList<>();
-        glfwSetCursorPosCallback(id, (id, width, height) -> {
-            cursorPosCallbacks.forEach(callback -> callback.invoke(id, width, height));
-        });
-
-        glfwSetKeyCallback(id, (window, key, scancode, action, mods) -> {
+        keyCallbacks.add((id, key, scancode, action, mods) -> {
             if (key == GLFW_KEY_R && action == GLFW_RELEASE) {
                 wireframe = !wireframe;
                 GL30.glPolygonMode(GL30.GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
@@ -91,6 +80,16 @@ public class Window {
             if (key == GLFW_KEY_P && action == GLFW_RELEASE) {
                 System.gc();
             }
+        });
+
+        this.buttonCallbacks = new ArrayList<>();
+        glfwSetMouseButtonCallback(id, (id, button, action, mods) -> {
+            buttonCallbacks.forEach(callback -> callback.invoke(id, button, action, mods));
+        });
+
+        this.cursorPosCallbacks = new ArrayList<>();
+        glfwSetCursorPosCallback(id, (id, width, height) -> {
+            cursorPosCallbacks.forEach(callback -> callback.invoke(id, width, height));
         });
 
         try (MemoryStack stack = stackPush()) {
