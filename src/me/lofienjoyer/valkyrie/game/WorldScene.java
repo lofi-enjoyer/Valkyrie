@@ -81,7 +81,7 @@ public class WorldScene implements IScene {
         world.update(1 / 20f, camera);
 
 //        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
-        hitPosition = world.raycast(camera.getPosition(), camera.getDirection(), 10);
+        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
 
         if (hitPosition != null) {
             if (Input.isButtonJustPressed(0)) {

@@ -36,7 +36,12 @@ public class TerrainPopulator extends Populator {
                     for (int y = 0; y < 40; y++) {
                         if (chunk.getBlock(x, y, z) == 0)
                             chunk.setBlock(7, x, y, z, false);
-                        else if (chunk.getBlock(x, y, z) == 1)
+                    }
+                }
+
+                if (maxHeight < 45) {
+                    for (int y = 0; y < 45; y++) {
+                        if (chunk.getBlock(x, y, z) == 1)
                             chunk.setBlock(11, x, y, z, false);
                     }
                 }
