@@ -94,7 +94,7 @@ public class World {
         Valkyrie.LOG.info("World generation seed set to " + noise.getSeed());
     }
 
-    public void update(float delta, Camera camera) {
+    public synchronized void update(float delta, Camera camera) {
         checkGeneratingChunks();
 
         int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);

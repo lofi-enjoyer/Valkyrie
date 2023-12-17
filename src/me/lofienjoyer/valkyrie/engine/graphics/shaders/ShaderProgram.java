@@ -21,7 +21,7 @@ public abstract class ShaderProgram {
 
     private final FloatBuffer buffer;
 
-    public ShaderProgram(String vertexFile,String fragmentFile){
+    public ShaderProgram(String vertexFile, String fragmentFile) {
         buffer = BufferUtils.createFloatBuffer(16);
 
         vertexShaderID = loadShader(vertexFile,GL20.GL_VERTEX_SHADER);

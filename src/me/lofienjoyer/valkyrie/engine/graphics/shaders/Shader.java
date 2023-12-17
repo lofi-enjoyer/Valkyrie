@@ -18,7 +18,7 @@ public class Shader {
 
     private final FloatBuffer buffer;
 
-    public Shader(String name, String vertexSource, String fragmentSource){
+    public Shader(String name, String vertexSource, String fragmentSource) {
         this.name = name;
         this.buffer = BufferUtils.createFloatBuffer(16);
 

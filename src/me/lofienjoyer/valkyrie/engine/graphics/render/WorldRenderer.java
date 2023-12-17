@@ -7,8 +7,13 @@ import me.lofienjoyer.valkyrie.engine.events.world.ChunkUnloadEvent;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.MeshBundle;
+import me.lofienjoyer.valkyrie.engine.graphics.mesh.QuadMesh;
+import me.lofienjoyer.valkyrie.engine.graphics.shaders.FboShader;
+import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
 import me.lofienjoyer.valkyrie.engine.graphics.shaders.SolidsShader;
 import me.lofienjoyer.valkyrie.engine.graphics.shaders.TransparencyShader;
+import me.lofienjoyer.valkyrie.engine.graphics.texture.Texture;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import me.lofienjoyer.valkyrie.engine.world.Chunk;
@@ -16,6 +21,7 @@ import me.lofienjoyer.valkyrie.engine.world.ChunkState;
 import me.lofienjoyer.valkyrie.engine.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
@@ -50,6 +56,10 @@ public class WorldRenderer {
     private final Map<Vector3i, MeshBundle> meshesToUpload;
     private final Map<Vector3i, Chunk> chunksToUpdate;
 
+    private final int crosshairTexture;
+    private final QuadMesh quadMesh;
+    private final Shader fboShader;
+
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
         this.solidsShader = new SolidsShader();
@@ -70,6 +80,13 @@ public class WorldRenderer {
         transparencyShader.start();
         transparencyShader.loadLeavesId(BlockRegistry.getBLock(6).getTopTexture());
         transparencyShader.loadWaterId(BlockRegistry.getBLock(7).getTopTexture());
+
+        this.crosshairTexture = Valkyrie.LOADER.loadTexture("res/textures/crosshair.png");
+        this.quadMesh = new QuadMesh();
+        this.fboShader = ResourceLoader.loadShader("crosshair-shader", "res/shaders/crosshair_vertex.glsl", "res/shaders/crosshair_fragment.glsl");
+        var crosshairTransform = Maths.createTransformationMatrix(new Vector3f(0), 0);
+        fboShader.bind();
+        fboShader.loadMatrix("transformationMatrix", crosshairTransform);
 
         Valkyrie.LOG.info("World renderer has been setup");
     }
@@ -111,12 +128,14 @@ public class WorldRenderer {
 
         // TODO: 05/02/2022 Make a proper crosshair
         // Renders a point in the middle of the screen
-        glUseProgram(0);
-        glPointSize(5);
-        glBegin(GL_POINTS);
-        glVertex2f(0, 0);
-        glEnd();
-        glPointSize(1);
+        fboShader.bind();
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBindVertexArray(quadMesh.getVaoId());
+        glDisable(GL_DEPTH_TEST);
+        glBindTexture(GL_TEXTURE_2D, crosshairTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDisable(GL_BLEND);
     }
 
     // Renders the solid mesh for all chunks
@@ -206,30 +225,6 @@ public class WorldRenderer {
         chunkMeshes.remove(event.getChunk().getPosition());
     }
 
-    /**
-     * Queues a task to mesh the chunk
-     */
-//    public void generateMesh(Chunk chunk, MeshBundle meshBundle) {
-//        if (!chunk.isLoaded())
-//            return;
-//
-//        var meshFuture = meshFutures.get(chunk.getPosition());
-//
-//        if (meshFuture != null) {
-//            meshFuture.cancel(true);
-//            meshFutures.remove(chunk.getPosition());
-//        }
-//
-//        chunk.cacheNeighbors();
-//        meshFuture = meshService.submit(() -> {
-//            meshBundle.compute();
-//            Nublada.EVENT_HANDLER.process(new MeshGenerationEvent(chunk.getPosition(), meshBundle));
-//            return meshBundle;
-//        });
-//
-//        meshFutures.put(chunk.getPosition(), meshFuture);
-//    }
-
     public void generateMesh(Chunk chunk, MeshBundle meshBundle, int section) {
         if (chunk.getState() == ChunkState.UNLOADED)
             return;
@@ -283,6 +278,12 @@ public class WorldRenderer {
         solidsShader.loadProjectionMatrix(projectionMatrix);
         transparencyShader.start();
         transparencyShader.loadProjectionMatrix(projectionMatrix);
+
+        var crosshairProjection = new Matrix4f();
+        crosshairProjection.ortho(-width / 32f, width / 32f, -height / 32f, height / 32f, -50, 50);
+
+        fboShader.bind();
+        fboShader.loadMatrix("projectionMatrix", crosshairProjection);
     }
 
 }
