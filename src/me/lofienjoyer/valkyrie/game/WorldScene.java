@@ -86,7 +86,7 @@ public class WorldScene implements IScene {
         if (hitPosition != null) {
             if (Input.isButtonJustPressed(0)) {
                 world.setBlock(0, hitPosition);
-            } else if (Input.isButtonJustPressed(1) && BlockRegistry.getBLock(selectedBlock) != null) {
+            } else if (Input.isButtonJustPressed(1) && BlockRegistry.getBlock(selectedBlock) != null) {
                 var blockToPlacePosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
                 world.setBlock(selectedBlock, blockToPlacePosition);
             }

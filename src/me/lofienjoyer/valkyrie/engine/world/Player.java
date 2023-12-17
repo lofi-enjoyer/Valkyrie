@@ -80,7 +80,7 @@ public class Player {
                 for (float z = position.z - dimensions.z; z <= position.z + dimensions.z; z += dimensions.z) {
                     var voxel = world.getBlock(x, y, z);
 
-                    if (voxel != 0) {
+                    if (voxel != 0 && BlockRegistry.getBlock(voxel).hasCollision()) {
                         if (vel.y > 0) {
                             position.y = (int)y - dimensions.y - 1 / 128f;
                             movement.y = 0;

@@ -16,6 +16,8 @@ public class Block {
     private Mesh mesh;
 
     private boolean isTransparent;
+    private boolean shouldDrawBetween;
+    private boolean hasCollision = true;
 
     public Block(int id, int topTexture, int sideTexture) {
         this.id = id;
@@ -150,6 +152,22 @@ public class Block {
 
     public void setTransparent(boolean transparent) {
         isTransparent = transparent;
+    }
+
+    public boolean shouldDrawBetween() {
+        return shouldDrawBetween;
+    }
+
+    public void setShouldDrawBetween(boolean shouldDrawBetween) {
+        this.shouldDrawBetween = shouldDrawBetween;
+    }
+
+    public boolean hasCollision() {
+        return hasCollision;
+    }
+
+    public void setHasCollision(boolean hasCollision) {
+        this.hasCollision = hasCollision;
     }
 
     public Mesh getMesh() {

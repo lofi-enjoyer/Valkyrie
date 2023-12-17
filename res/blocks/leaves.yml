@@ -1,3 +1,4 @@
 id: 6
 texture: 'leaves'
 transparent: true
+drawBetween: true

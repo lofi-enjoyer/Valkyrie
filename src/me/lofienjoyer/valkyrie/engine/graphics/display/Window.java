@@ -2,6 +2,7 @@ package me.lofienjoyer.valkyrie.engine.graphics.display;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
 import me.lofienjoyer.valkyrie.engine.graphics.render.WorldRenderer;
+import me.lofienjoyer.valkyrie.engine.world.World;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
@@ -69,9 +70,11 @@ public class Window {
             }
             if (key == GLFW_KEY_T && action == GLFW_RELEASE) {
                 WorldRenderer.VIEW_DISTANCE--;
+                World.LOAD_DISTANCE--;
             }
             if (key == GLFW_KEY_Y && action == GLFW_RELEASE) {
                 WorldRenderer.VIEW_DISTANCE++;
+                World.LOAD_DISTANCE++;
             }
             if (key == GLFW_KEY_H && action == GLFW_RELEASE) {
                 vsync = !vsync;

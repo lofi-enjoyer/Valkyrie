@@ -8,11 +8,9 @@ import me.lofienjoyer.valkyrie.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.MeshBundle;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.QuadMesh;
-import me.lofienjoyer.valkyrie.engine.graphics.shaders.FboShader;
 import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
 import me.lofienjoyer.valkyrie.engine.graphics.shaders.SolidsShader;
 import me.lofienjoyer.valkyrie.engine.graphics.shaders.TransparencyShader;
-import me.lofienjoyer.valkyrie.engine.graphics.texture.Texture;
 import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
@@ -78,8 +76,8 @@ public class WorldRenderer {
         Valkyrie.EVENT_HANDLER.registerListener(MeshGenerationEvent.class, this::handleMeshGeneration);
 
         transparencyShader.start();
-        transparencyShader.loadLeavesId(BlockRegistry.getBLock(6).getTopTexture());
-        transparencyShader.loadWaterId(BlockRegistry.getBLock(7).getTopTexture());
+        transparencyShader.loadLeavesId(BlockRegistry.getBlock(6).getTopTexture());
+        transparencyShader.loadWaterId(BlockRegistry.getBlock(7).getTopTexture());
 
         this.crosshairTexture = Valkyrie.LOADER.loadTexture("res/textures/crosshair.png");
         this.quadMesh = new QuadMesh();
@@ -169,6 +167,7 @@ public class WorldRenderer {
     private void renderTransparentMeshes(Camera camera, int headBlock) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_CULL_FACE);
 
         transparencyShader.start();
         transparencyShader.loadViewMatrix(camera);

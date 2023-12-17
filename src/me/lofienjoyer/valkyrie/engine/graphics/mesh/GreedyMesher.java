@@ -118,11 +118,11 @@ public class GreedyMesher implements Mesher {
                             voxelFace  = chunkData.getBlock(x[0], x[1] + CHUNK_SECTION_HEIGHT * section, x[2]);
                             voxelFace1 = chunkData.getBlock((x[0] + q[0]), (x[1] + q[1]) + CHUNK_SECTION_HEIGHT * section, (x[2] + q[2]));
 
-                            if (voxelFace != 0 && BlockRegistry.getBLock(voxelFace).isTransparent()) {
+                            if (voxelFace != 0 && BlockRegistry.getBlock(voxelFace).isTransparent()) {
                                 voxelFace = 0;
                             }
 
-                            if (voxelFace1 != 0 && BlockRegistry.getBLock(voxelFace1).isTransparent()) {
+                            if (voxelFace1 != 0 && BlockRegistry.getBlock(voxelFace1).isTransparent()) {
                                 voxelFace1 = 0;
                             }
 
@@ -170,7 +170,7 @@ public class GreedyMesher implements Mesher {
                                     dv[2] = 0;
                                     dv[v] = h;
 
-                                    Block block = BlockRegistry.getBLock(mask[n]);
+                                    Block block = BlockRegistry.getBlock(mask[n]);
 
                                     int [] indexes = backFace ? indexes1 : indexes2;
 

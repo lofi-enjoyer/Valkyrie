@@ -55,7 +55,7 @@ public class SelectedBlockRenderer {
     }
 
     public void render(int id) {
-        Block block = BlockRegistry.getBLock(id);
+        Block block = BlockRegistry.getBlock(id);
         if (block == null) return;
 
         GL30.glEnable(GL30.GL_BLEND);

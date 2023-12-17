@@ -79,6 +79,16 @@ public class BlockRegistry {
                 block.setTransparent(isTransparent);
             }
 
+            Boolean shouldDrawBetween = (Boolean) data.get("drawBetween");
+            if (shouldDrawBetween != null) {
+                block.setShouldDrawBetween(shouldDrawBetween);
+            }
+
+            Boolean hasCollision = (Boolean) data.get("collision");
+            if (hasCollision != null) {
+                block.setHasCollision(hasCollision);
+            }
+
             blocksToLoad.add(block);
         }
 
@@ -96,7 +106,7 @@ public class BlockRegistry {
         Valkyrie.LOG.info("Block registry has been setup (" + ((System.nanoTime() - timer) / 1000000f) + "ms)");
     }
 
-    public static Block getBLock(int id) {
+    public static Block getBlock(int id) {
         return BLOCKS[id];
     }
 
