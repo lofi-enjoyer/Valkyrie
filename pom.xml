@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.aurgiyalgo</groupId>
-    <artifactId>Nublada</artifactId>
-    <version>1.0.0</version>
+    <groupId>me.lofienjoyer</groupId>
+    <artifactId>Valkyrie</artifactId>
+    <version>0.1</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -70,10 +70,10 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.5.5</version>
                 <configuration>
-                    <finalName>Nublada_${project.version}_${maven.build.timestamp}</finalName>
+                    <finalName>Valkyrie_${project.version}_${maven.build.timestamp}</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>me.lofienjoyer.nublada.game.Application</mainClass>
+                            <mainClass>me.lofienjoyer.valkyrie.game.Application</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
