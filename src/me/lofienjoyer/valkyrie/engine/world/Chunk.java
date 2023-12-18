@@ -190,8 +190,8 @@ public class Chunk {
         if (x == CHUNK_WIDTH - 1) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x + 1, position.y), blockPosition));
         if (z == 0) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y - 1), blockPosition));
         if (z == CHUNK_WIDTH - 1) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y + 1), blockPosition));
-        if (y % CHUNK_SECTION_HEIGHT == 0) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y), blockPosition));
-        if ((y + 1) % CHUNK_SECTION_HEIGHT == 0) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y), blockPosition));
+        if (y % CHUNK_SECTION_HEIGHT == 0) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y), new Vector3i(blockPosition.x, blockPosition.y - 1, blockPosition.z)));
+        if ((y + 1) % CHUNK_SECTION_HEIGHT == 0) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y), new Vector3i(blockPosition.x, blockPosition.y + 1, blockPosition.z)));
     }
 
     public void onDestroy() {
