@@ -69,14 +69,15 @@ public class Player {
         position.y += movement.y;
         checkCollisions(new Vector3f(0, movement.y, 0));
 
-        if ((movement.y == 0f) && Input.isKeyPressed(GLFW_KEY_SPACE)) {
+        if (contact && Input.isKeyPressed(GLFW_KEY_SPACE)) {
             movement.y = 0.25f;
+            contact = false;
         }
     }
 
     private void checkCollisions(Vector3f vel) {
         for (float x = position.x - dimensions.x; x <= position.x + dimensions.x; x += dimensions.x) {
-            for (float y = position.y; y <= position.y + dimensions.y; y += dimensions.y) {
+            for (float y = position.y; y <= position.y + dimensions.y; y += dimensions.y / 2f) {
                 for (float z = position.z - dimensions.z; z <= position.z + dimensions.z; z += dimensions.z) {
                     var voxel = world.getBlock(x, y, z);
 
