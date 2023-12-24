@@ -1,6 +1,7 @@
 package me.lofienjoyer.valkyrie.engine.world;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
+import me.lofienjoyer.valkyrie.engine.config.Config;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkLoadEvent;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkUnloadEvent;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkUpdateEvent;
@@ -57,6 +58,10 @@ public class World {
         this.playerPosition = new Vector2i();
 
         Valkyrie.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdate);
+
+        var config = Config.getInstance();
+        LOAD_DISTANCE = config.get("load_distance", Integer.class);
+        FULLY_LOAD_DISTANCE = config.get("fully_load_distance", Integer.class);
 
         // TODO: 22/9/22 Temporary code (replace with proper world loading)
         this.seed = new Random().nextGaussian() * 255;

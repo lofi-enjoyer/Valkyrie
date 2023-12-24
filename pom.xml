@@ -75,6 +75,9 @@
                         <manifest>
                             <mainClass>me.lofienjoyer.valkyrie.game.Application</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Built-By></Built-By>
+                        </manifestEntries>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -92,6 +95,11 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>res</directory>
+            </resource>
+        </resources>
     </build>
 
     <dependencyManagement>

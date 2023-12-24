@@ -1,6 +1,7 @@
 package me.lofienjoyer.valkyrie.engine.graphics.render;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
+import me.lofienjoyer.valkyrie.engine.config.Config;
 import me.lofienjoyer.valkyrie.engine.events.mesh.MeshGenerationEvent;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkLoadEvent;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkUnloadEvent;
@@ -74,6 +75,9 @@ public class WorldRenderer {
         Valkyrie.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdating);
         Valkyrie.EVENT_HANDLER.registerListener(ChunkUnloadEvent.class, this::handleChunkUnloading);
         Valkyrie.EVENT_HANDLER.registerListener(MeshGenerationEvent.class, this::handleMeshGeneration);
+
+        var config = Config.getInstance();
+        VIEW_DISTANCE = config.get("view_distance", Integer.class);
 
         transparencyShader.start();
         transparencyShader.loadLeavesId(BlockRegistry.getBlock(6).getTopTexture());

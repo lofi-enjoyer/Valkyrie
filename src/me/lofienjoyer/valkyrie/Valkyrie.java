@@ -1,5 +1,6 @@
 package me.lofienjoyer.valkyrie;
 
+import me.lofienjoyer.valkyrie.engine.config.Config;
 import me.lofienjoyer.valkyrie.engine.events.EventHandler;
 import me.lofienjoyer.valkyrie.engine.events.global.StartupEvent;
 import me.lofienjoyer.valkyrie.engine.graphics.display.Window;
@@ -30,6 +31,7 @@ public class Valkyrie {
 
     private final Window window;
     private final Input input;
+    private final Config config;
     public static long WINDOW_ID;
     private Framebuffer framebuffer;
 
@@ -37,6 +39,8 @@ public class Valkyrie {
 
     public Valkyrie() {
         LOG.setLevel(Level.INFO);
+
+        this.config = Config.getInstance();
 
         // FIXME: 09/01/2022 Make this customizable
         this.window = Window.getInstance();
