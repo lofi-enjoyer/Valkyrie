@@ -10,7 +10,7 @@ import me.lofienjoyer.valkyrie.engine.graphics.loader.Loader;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.QuadMesh;
 import me.lofienjoyer.valkyrie.engine.graphics.shaders.FboShader;
 import me.lofienjoyer.valkyrie.engine.input.Input;
-import me.lofienjoyer.valkyrie.engine.log.NubladaLogHandler;
+import me.lofienjoyer.valkyrie.engine.log.ValkyrieLogHandler;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import org.lwjgl.glfw.GLFW;
@@ -23,7 +23,7 @@ import static org.lwjgl.opengl.GL45.*;
 
 public class Valkyrie {
 
-    public static final Logger LOG = NubladaLogHandler.initLogs();
+    public static final Logger LOG = ValkyrieLogHandler.initLogs();
     public static final Loader LOADER = new Loader();
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
@@ -42,10 +42,9 @@ public class Valkyrie {
 
         this.config = Config.getInstance();
 
-        // FIXME: 09/01/2022 Make this customizable
         this.window = Window.getInstance();
-        window.setSize(1280, 720);
-        window.setTitle("Nublada");
+        window.setSize(config.get("window_width", Integer.class), config.get("window_height", Integer.class));
+        window.setTitle("Valkyrie");
 
         this.input = Input.getInstance();
 
@@ -119,7 +118,7 @@ public class Valkyrie {
             GLFW.glfwSetWindowTitle(
                     window.getId(),
                     String.format(
-                            "Nublada | FPS: %.1f (delta: %.4fs) | Memory usage: %.2f/%.2f MB",
+                            "Valkyrie | FPS: %.1f (delta: %.4fs) | Memory usage: %.2f/%.2f MB",
                             1f / delta,
                             delta,
                             (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),

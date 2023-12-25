@@ -2,15 +2,13 @@ package me.lofienjoyer.valkyrie.engine.log;
 
 import java.util.logging.*;
 
-public class NubladaLogHandler extends Handler {
-
-    // FIXME: 09/01/2022 make this useful
+public class ValkyrieLogHandler extends Handler {
 
     public static Logger initLogs() {
         Logger logger;
         LogManager.getLogManager().reset();
-        logger = Logger.getLogger("Nublada");
-        logger.addHandler(new NubladaLogHandler());
+        logger = Logger.getLogger("Valkyrie");
+        logger.addHandler(new ValkyrieLogHandler());
         return logger;
     }
 

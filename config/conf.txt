@@ -1,3 +1,5 @@
+window_width: 1280
+window_height: 720
 load_distance: 6
 fully_load_distance: 2
 view_distance: 6
