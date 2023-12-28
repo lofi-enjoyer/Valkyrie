@@ -3,17 +3,29 @@ package me.lofienjoyer.valkyrie.game;
 import me.lofienjoyer.valkyrie.Valkyrie;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.graphics.display.Window;
+import me.lofienjoyer.valkyrie.engine.graphics.font.ValkyrieFont;
+import me.lofienjoyer.valkyrie.engine.graphics.render.FontRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.RaycastRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.SkyboxRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.WorldRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.gui.SelectedBlockRenderer;
+import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
 import me.lofienjoyer.valkyrie.engine.input.Input;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
+import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import me.lofienjoyer.valkyrie.engine.world.Player;
 import me.lofienjoyer.valkyrie.engine.world.World;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class WorldScene implements IScene {
 
@@ -27,6 +39,9 @@ public class WorldScene implements IScene {
     private Vector3f hitPosition;
     private Input input;
     private Window window;
+    private ValkyrieFont font;
+    private FontRenderer fontRenderer;
+    private Shader fontShader;
 
     @Override
     public void init() {
@@ -36,6 +51,14 @@ public class WorldScene implements IScene {
         this.skyboxRenderer = new SkyboxRenderer();
         this.selectedBlockRenderer = new SelectedBlockRenderer();
         this.raycastRenderer = new RaycastRenderer();
+        this.font = new ValkyrieFont("res/fonts/Silkscreen-Regular.ttf", 16);
+        this.fontRenderer = new FontRenderer(font);
+        this.fontShader = ResourceLoader.loadShader("fontShader", "res/shaders/font/font_vertex.glsl", "res/shaders/font/font_fragment.glsl");
+        var projMatrix = new Matrix4f();
+        projMatrix.ortho(-8, 8, -8, 8, -50, 50);
+        fontShader.bind();
+        fontShader.loadMatrix("projMatrix", projMatrix);
+        fontShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(-7.75f, -6.5f), 32));
 
         this.player = new Player(world);
 
@@ -74,6 +97,20 @@ public class WorldScene implements IScene {
         }
 
         selectedBlockRenderer.render(selectedBlock);
+
+        fontShader.bind();
+        GL30.glDisable(GL30.GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        GL30.glBindTexture(GL11.GL_TEXTURE_2D, font.getTextureId());
+        fontRenderer.render(String.format(
+                "Valkyrie | FPS: %04.1f (delta: %06.4fs)\nMemory usage: %06.2f/%06.2f MB",
+                1f / delta,
+                delta,
+                (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),
+                Runtime.getRuntime().totalMemory() / (1024 * 1024f)
+        ));
+        GL30.glEnable(GL30.GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
     }
 
     @Override

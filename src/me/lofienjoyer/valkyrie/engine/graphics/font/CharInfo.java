@@ -20,8 +20,8 @@ public class CharInfo {
     public void calculateTextureCoords(int fontWidth, int fontHeight) {
         float x0 = (float) sourceX / (float) fontWidth;
         float x1 = (float) (sourceX + width) / (float) fontWidth;
-        float y0 = (float) sourceY / (float) fontHeight;
-        float y1 = (float) (sourceY + height) / (float) fontHeight;
+        float y0 = (float) (sourceY - height) / (float) fontHeight;
+        float y1 = (float) (sourceY) / (float) fontHeight;
 
         textureCoords[0] = new Vector2f(x0, y0);
         textureCoords[1] = new Vector2f(x0, y1);
@@ -43,6 +43,10 @@ public class CharInfo {
 
     public int getHeight() {
         return height;
+    }
+
+    public Vector2f[] getTextureCoords() {
+        return textureCoords;
     }
 
 }

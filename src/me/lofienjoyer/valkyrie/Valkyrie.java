@@ -114,16 +114,6 @@ public class Valkyrie {
 
             delta = (System.nanoTime() - timer) / 1000000000f;
             timer = System.nanoTime();
-
-            GLFW.glfwSetWindowTitle(
-                    window.getId(),
-                    String.format(
-                            "Valkyrie | FPS: %.1f (delta: %.4fs) | Memory usage: %.2f/%.2f MB",
-                            1f / delta,
-                            delta,
-                            (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),
-                            Runtime.getRuntime().totalMemory() / (1024 * 1024f)
-            ));
         }
 
         currentScene.onClose();

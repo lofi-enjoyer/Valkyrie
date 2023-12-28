@@ -22,10 +22,10 @@ public class Maths {
         return matrix;
     }
 
-    public static Matrix4f createTransformationMatrix(Vector2i position, int scale) {
+    public static Matrix4f createTransformationMatrix(Vector2f position, float scale) {
         Matrix4f matrix = new Matrix4f();
         matrix.identity();
-        matrix.translate(position.x * World.CHUNK_WIDTH, 0, position.y * World.CHUNK_WIDTH);
+        matrix.translate(position.x, position.y, 0);
         matrix.scale(scale);
         return matrix;
     }

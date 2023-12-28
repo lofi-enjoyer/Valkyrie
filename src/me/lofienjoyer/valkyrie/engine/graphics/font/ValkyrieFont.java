@@ -85,4 +85,12 @@ public class ValkyrieFont {
         return characterMap.get(character);
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
 }
