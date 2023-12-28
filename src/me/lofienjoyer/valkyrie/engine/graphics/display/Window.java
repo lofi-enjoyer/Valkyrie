@@ -68,13 +68,8 @@ public class Window {
                 wireframe = !wireframe;
                 GL30.glPolygonMode(GL30.GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             }
-            if (key == GLFW_KEY_T && action == GLFW_RELEASE) {
-                WorldRenderer.VIEW_DISTANCE--;
-                World.LOAD_DISTANCE--;
-            }
-            if (key == GLFW_KEY_Y && action == GLFW_RELEASE) {
-                WorldRenderer.VIEW_DISTANCE++;
-                World.LOAD_DISTANCE++;
+            if (key == GLFW_KEY_F3 && action == GLFW_RELEASE) {
+                Valkyrie.DEBUG_MODE = !Valkyrie.DEBUG_MODE;
             }
             if (key == GLFW_KEY_H && action == GLFW_RELEASE) {
                 vsync = !vsync;

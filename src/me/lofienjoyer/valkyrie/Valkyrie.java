@@ -28,6 +28,7 @@ public class Valkyrie {
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
     public static float FOV = (float) Math.toRadians(80.0);
+    public static boolean DEBUG_MODE = false;
 
     private final Window window;
     private final Input input;
