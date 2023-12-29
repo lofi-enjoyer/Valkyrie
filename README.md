@@ -33,10 +33,9 @@ Valkyrie is a project with the objective of putting together a basic Hytale-like
 - [Greedy Meshing](https://0fps.net/2012/07/07/meshing-minecraft-part-2/)
 - Chunk-based world loading
 - Procedurally generated environment using [Perlin Noise](https://en.wikipedia.org/wiki/Perlin_noise)
-- Transparent textures support using depth sorting
-- [Scripting using JavaScript](https://docs.oracle.com/en/java/javase/12/nashorn/introduction.html)
 - Dynamic data loading with YAML, allowing to add new blocks and textures easily
 - Multithreaded mesh building and world generation
+- Font rendering
 - Frustum culling
 - Skybox
 - Fog effect
