@@ -17,6 +17,8 @@ import me.lofienjoyer.valkyrie.engine.world.World;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class WorldScene implements IScene {
 
     private Camera camera;
@@ -30,6 +32,7 @@ public class WorldScene implements IScene {
     private Input input;
     private Window window;
     private FontRenderer fontRenderer;
+    private String gpuInfo;
 
     @Override
     public void init() {
@@ -55,6 +58,8 @@ public class WorldScene implements IScene {
                 selectedBlock = BlockRegistry.getBlockCount() - 1;
             }
         });
+
+        this.gpuInfo = glGetString(GL_VENDOR) + " - " + glGetString(GL_RENDERER);
     }
 
     int selectedBlock = 0;
@@ -81,6 +86,7 @@ public class WorldScene implements IScene {
             fontRenderer.render(String.format(
                     "Valkyrie | FPS: %04.1f (delta: %06.4fs)" +
                             "\nMemory usage: %06.2f/%06.2f MB" +
+                            "\n" + gpuInfo +
                             "\n\nWASD: Movement" +
                             "\nSpace: Jump" +
                             "\nH: Toggle VSync" +
@@ -89,7 +95,7 @@ public class WorldScene implements IScene {
                     delta,
                     (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),
                     Runtime.getRuntime().totalMemory() / (1024 * 1024f)
-            ));
+            ), 50, 50);
         }
     }
 
@@ -97,7 +103,6 @@ public class WorldScene implements IScene {
     public void fixedUpdate() {
         world.update(1 / 20f, camera);
 
-//        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
         hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
 
         if (hitPosition != null) {
@@ -116,6 +121,7 @@ public class WorldScene implements IScene {
         skyboxRenderer.setupProjectionMatrix(width, height);
         selectedBlockRenderer.setupProjectionMatrix(width, height);
         raycastRenderer.setupProjectionMatrix(width, height);
+        fontRenderer.setupProjectionMatrix(width, height);
     }
 
     @Override

@@ -30,11 +30,12 @@ public class FontRenderer {
         projMatrix.ortho(-8, 8, -8, 8, -50, 50);
         shader.bind();
         shader.loadMatrix("projMatrix", projMatrix);
-        shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(-7.75f, 7.25f), 32));
+        shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(0, 0), 32));
     }
 
-    public void render(String text) {
+    public void render(String text, int x, int y) {
         shader.bind();
+        shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(x, y), 2048));
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
         glBindTexture(GL_TEXTURE_2D, font.getTextureId());
@@ -80,6 +81,13 @@ public class FontRenderer {
 
         glBindVertexArray(batchMesh.getVaoId());
         glDrawArrays(GL_TRIANGLES, 0, dataArray.length / 4);
+    }
+
+    public void setupProjectionMatrix(int width, int height) {
+        var projMatrix = new Matrix4f();
+        projMatrix.ortho(0, width, height, 0, -50, 50);
+        shader.bind();
+        shader.loadMatrix("projMatrix", projMatrix);
     }
 
 }

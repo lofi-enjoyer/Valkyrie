@@ -10,6 +10,6 @@ uniform sampler2D fontTexture;
 
 void main()
 {
-    gl_Position = projMatrix * transformationMatrix * vec4(aPos.x, -aPos.y, 0.0, 1.0);
+    gl_Position = projMatrix * transformationMatrix * vec4(aPos.x, aPos.y, 0.0, 1.0);
     TexCoords = aTexCoords;
 }
