@@ -46,6 +46,7 @@ public class Valkyrie {
         this.window = Window.getInstance();
         window.setSize(config.get("window_width", Integer.class), config.get("window_height", Integer.class));
         window.setTitle("Valkyrie");
+        FOV = (float) Math.toRadians(config.get("fov", Double.class));
 
         this.input = Input.getInstance();
 

@@ -42,6 +42,10 @@ public class Config {
         return (T) data.get(key);
     }
 
+    public Object get(String key) {
+        return data.get(key);
+    }
+
     public static Config getInstance() {
         if (instance == null)
             instance = new Config();
