@@ -1,4 +1,4 @@
-# Nublada ⛅
+# Valkyrie ⛅
 
 #### OpenGL &amp; Java 11 Voxel Engine
 
@@ -20,7 +20,7 @@
 
 ## About the project 📝
 
-Nublada is a personal project I'm working on with the objective of learning more about Java, OpenGL, graphics rendering and the technologies needed to put together a basic Minecraft-like game engine.
+Valkyrie is a project with the objective of putting together a basic Hytale-like game engine, to be used as a foundation for a bigger game.
 
 ![2022-02-21 15-52-14 (5)](https://user-images.githubusercontent.com/25750692/155811531-ac8be712-774b-420f-b6e2-2bbdf0e50922.gif)
 
@@ -49,8 +49,8 @@ _Prerequisites: Java Development Kit 11 or newer and Maven_
 
 1. Clone the repository and access the directory
 ```sh
-git clone https://github.com/lofi-enjoyer/Nublada
-cd Nublada/
+git clone https://github.com/lofi-enjoyer/Valkyrie
+cd Valkyrie/
 ```
 
 2. Build the project with Maven
@@ -63,4 +63,4 @@ mvn package
 
 ## License 📜 
 
-This project is under a GPL-3.0 license. Check [`LICENSE`](https://github.com/lofi-enjoyer/Nublada/blob/master/LICENSE) for more information.
+This project is under a GPL-3.0 license. Check [`LICENSE`](https://github.com/lofi-enjoyer/Valkyrie/blob/master/LICENSE) for more information.
