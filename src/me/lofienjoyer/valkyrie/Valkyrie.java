@@ -13,7 +13,6 @@ import me.lofienjoyer.valkyrie.engine.input.Input;
 import me.lofienjoyer.valkyrie.engine.log.ValkyrieLogHandler;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
 import java.util.logging.Level;
@@ -28,7 +27,7 @@ public class Valkyrie {
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
     public static float FOV = (float) Math.toRadians(80.0);
-    public static boolean DEBUG_MODE = true;
+    public static boolean DEBUG_MODE = false;
 
     private final Window window;
     private final Input input;
