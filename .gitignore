@@ -2,4 +2,4 @@
 /target
 Build and run.bat
 /world
-export.sh
+/*.sh
