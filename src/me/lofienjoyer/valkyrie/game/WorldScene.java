@@ -8,6 +8,7 @@ import me.lofienjoyer.valkyrie.engine.graphics.render.FontRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.RaycastRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.SkyboxRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.WorldRenderer;
+import me.lofienjoyer.valkyrie.engine.graphics.render.gui.CrosshairRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.gui.SelectedBlockRenderer;
 import me.lofienjoyer.valkyrie.engine.input.Input;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
@@ -27,6 +28,7 @@ public class WorldScene implements IScene {
     private SkyboxRenderer skyboxRenderer;
     private SelectedBlockRenderer selectedBlockRenderer;
     private RaycastRenderer raycastRenderer;
+    private CrosshairRenderer crosshairRenderer;
     private Player player;
     private Vector3f hitPosition;
     private Input input;
@@ -42,6 +44,7 @@ public class WorldScene implements IScene {
         this.skyboxRenderer = new SkyboxRenderer();
         this.selectedBlockRenderer = new SelectedBlockRenderer();
         this.raycastRenderer = new RaycastRenderer();
+        this.crosshairRenderer = new CrosshairRenderer();
         var font = new ValkyrieFont("res/fonts/Silkscreen-Regular.ttf", 16);
         this.fontRenderer = new FontRenderer(font);
 
@@ -81,6 +84,7 @@ public class WorldScene implements IScene {
         }
 
         selectedBlockRenderer.render(selectedBlock);
+        crosshairRenderer.render();
 
         if (Valkyrie.DEBUG_MODE) {
             fontRenderer.render(String.format(
@@ -118,6 +122,7 @@ public class WorldScene implements IScene {
         selectedBlockRenderer.setupProjectionMatrix(width, height);
         raycastRenderer.setupProjectionMatrix(width, height);
         fontRenderer.setupProjectionMatrix(width, height);
+        crosshairRenderer.setupProjectionMatrix(width, height);
     }
 
     @Override

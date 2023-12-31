@@ -26,8 +26,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static org.lwjgl.opengl.GL45.*;
 
@@ -45,10 +43,6 @@ public class WorldRenderer {
     private final Map<Vector3i, Future<MeshBundle>> meshFutures;
     private final Map<Vector3i, MeshBundle> meshesToUpload;
     private final Map<Vector3i, Chunk> chunksToUpdate;
-
-    private final int crosshairTexture;
-    private final QuadMesh quadMesh;
-    private final Shader fboShader;
 
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
@@ -74,13 +68,6 @@ public class WorldRenderer {
         transparencyShader.loadLeavesId(BlockRegistry.getBlock(6).getTopTexture());
         transparencyShader.loadWaterId(BlockRegistry.getBlock(7).getTopTexture());
 
-        this.crosshairTexture = Valkyrie.LOADER.loadTexture("res/textures/crosshair.png");
-        this.quadMesh = new QuadMesh();
-        this.fboShader = ResourceLoader.loadShader("crosshair-shader", "res/shaders/crosshair_vertex.glsl", "res/shaders/crosshair_fragment.glsl");
-        var crosshairTransform = Maths.createTransformationMatrix(new Vector3f(0), 0);
-        fboShader.bind();
-        fboShader.loadMatrix("transformationMatrix", crosshairTransform);
-
         Valkyrie.LOG.info("World renderer has been setup");
     }
 
@@ -100,16 +87,6 @@ public class WorldRenderer {
         });
         chunksToUpdate.clear();
 
-        /*
-            Checks the chunk the player is in, and if it changed
-            from the last frame it unloads the chunks that are not in view,
-            sets to load the new chunks that entered the view distance and if
-            new chunks are added for rendering sorts the list of chunks to
-            render them from back to front
-        */
-
-//        updateChunksToRenderList(world, playerX, playerZ);
-
         // Get the block the camera is in (for in-water effects)
         int headBlock = world.getBlock(camera.getPosition());
 
@@ -118,17 +95,6 @@ public class WorldRenderer {
         renderSolidMeshes(camera, headBlock);
 
         renderTransparentMeshes(camera, headBlock);
-
-        // TODO: 05/02/2022 Make a proper crosshair
-        // Renders a point in the middle of the screen
-        fboShader.bind();
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glBindVertexArray(quadMesh.getVaoId());
-        glDisable(GL_DEPTH_TEST);
-        glBindTexture(GL_TEXTURE_2D, crosshairTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDisable(GL_BLEND);
     }
 
     // Renders the solid mesh for all chunks
@@ -272,12 +238,6 @@ public class WorldRenderer {
         solidsShader.loadProjectionMatrix(projectionMatrix);
         transparencyShader.start();
         transparencyShader.loadProjectionMatrix(projectionMatrix);
-
-        var crosshairProjection = new Matrix4f();
-        crosshairProjection.ortho(-width / 32f, width / 32f, -height / 32f, height / 32f, -50, 50);
-
-        fboShader.bind();
-        fboShader.loadMatrix("projectionMatrix", crosshairProjection);
     }
 
 }
