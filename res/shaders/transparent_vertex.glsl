@@ -44,6 +44,16 @@ void main() {
     int light = 5;
 
     vec3 newPosition = vec3(x, y, z);
+    if (zUv == leavesId) {
+        newPosition.x += sin(y + time) / leavesMovement;
+        newPosition.z += cos(x + time + 2) / leavesMovement;
+        newPosition.y += sin(z + time + 5) / leavesMovement;
+    }
+
+    if (zUv == waterId) {
+        newPosition.y -= 1 / 8.0;
+        newPosition.y += sin(time) * (1 / 16.0);
+    }
 
     vec4 worldPosition = transformationMatrix * vec4(newPosition, 1.0);
     vec4 positionRelativeToCam = viewMatrix * worldPosition;
