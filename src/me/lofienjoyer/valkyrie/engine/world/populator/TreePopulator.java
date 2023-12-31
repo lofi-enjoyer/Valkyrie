@@ -10,6 +10,11 @@ import static me.lofienjoyer.valkyrie.engine.world.World.CHUNK_WIDTH;
 
 public class TreePopulator extends Populator {
 
+    private static final int TREE_SIDE = 3;
+    private static final int TREE_MIN_HEIGHT = 4;
+    private static final int TREE_MAX_HEIGHT = 15;
+    private static final int LEAVES_HEIGHT = 11;
+
     public TreePopulator(PerlinNoise noise) {
         super(noise);
     }
@@ -17,12 +22,12 @@ public class TreePopulator extends Populator {
     @Override
     public void populate(Chunk chunk) {
         Random random = new Random();
-        var treeAmount = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32) * 50;
+        var treeAmount = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32) * 20;
         for (int i = 0; i < treeAmount; i++) {
             int treeX = random.nextInt(CHUNK_WIDTH);
             int treeZ = random.nextInt(CHUNK_WIDTH);
 
-            int height = random.nextInt(8) + 3;
+            int height = random.nextInt(TREE_MAX_HEIGHT - TREE_MIN_HEIGHT) + TREE_MIN_HEIGHT;
 
             int treeY = 0;
             for (int y = 1; y < CHUNK_HEIGHT - 15; y++) {
@@ -34,18 +39,17 @@ public class TreePopulator extends Populator {
 
             if (treeY == 0) continue;
 
-            for (int x = 0; x < 5; x++) {
-                for (int y = 0; y < 3; y++) {
-                    for (int z = 0; z < 5; z++) {
-                        if (chunk.getBlock(x + treeX - 2, y + treeY + height, z + treeZ - 2) == 0)
-                            chunk.setBlock(6, x + treeX - 2, y + treeY + height, z + treeZ - 2, false);
+            for (int x = -TREE_SIDE; x <= TREE_SIDE; x++) {
+                for (int z = -TREE_SIDE; z <= TREE_SIDE; z++) {
+                    for (int y = 0; y < LEAVES_HEIGHT; y++) {
+                        var distance = x * x + z * z;
+                        if (random.nextFloat() < (1.25 - y/14f - distance/16f) && chunk.getBlock(x + treeX, y + treeY + height, z + treeZ) == 0)
+                            chunk.setBlock(6, x + treeX, y + treeY + height, z + treeZ, false);
                     }
                 }
             }
 
-            chunk.setBlock(6, treeX, treeY + height + 3, treeZ, false);
-
-            for (int y = 0; y < height + 2; y++) {
+            for (int y = 0; y < height + 5; y++) {
                 chunk.setBlock(3, treeX, y + treeY, treeZ, false);
             }
 
