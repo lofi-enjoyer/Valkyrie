@@ -19,6 +19,8 @@ public class Block {
     private boolean shouldDrawBetween;
     private boolean hasCollision = true;
 
+    private float movementResistance = 0f;
+
     public Block(int id, int topTexture, int sideTexture) {
         this.id = id;
         this.topTexture = topTexture;
@@ -168,6 +170,14 @@ public class Block {
 
     public void setHasCollision(boolean hasCollision) {
         this.hasCollision = hasCollision;
+    }
+
+    public float getMovementResistance() {
+        return movementResistance;
+    }
+
+    public void setMovementResistance(float movementResistance) {
+        this.movementResistance = movementResistance;
     }
 
     public Mesh getMesh() {

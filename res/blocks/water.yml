@@ -2,3 +2,4 @@ id: 7
 texture: 'water'
 transparent: true
 collision: false
+movementResistance: 0.5
