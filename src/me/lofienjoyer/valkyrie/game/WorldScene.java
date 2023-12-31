@@ -90,7 +90,10 @@ public class WorldScene implements IScene {
             fontRenderer.render(String.format(
                     "Valkyrie | FPS: %04.1f (delta: %06.4fs)" +
                             "\nMemory usage: %06.2f/%06.2f MB" +
-                            "\n" + gpuInfo,
+                            "\n" + gpuInfo +
+                            "\n\nH: Toggle VSync" +
+                            "\nR: Toggle wireframe" +
+                            "\nP: Garbage collector",
                     1f / delta,
                     delta,
                     (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),
