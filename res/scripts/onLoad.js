@@ -1,1 +1,0 @@
-print('Scripting load succesfully!');
