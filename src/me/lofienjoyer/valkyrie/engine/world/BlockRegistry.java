@@ -89,6 +89,11 @@ public class BlockRegistry {
                 block.setHasCollision(hasCollision);
             }
 
+            Double movementResistance = (Double) data.get("movementResistance");
+            if (movementResistance != null) {
+                block.setMovementResistance((float) (double)movementResistance);
+            }
+
             blocksToLoad.add(block);
         }
 

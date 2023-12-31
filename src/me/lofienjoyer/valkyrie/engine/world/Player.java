@@ -60,6 +60,10 @@ public class Player {
 
         movement.y += -1 / 64f;
 
+        var highestMovementResistance = getCollidingBlockWithHighestMovementResistance();
+
+        movement.mul(1 - highestMovementResistance);
+
         position.x += movement.x;
         checkCollisions(new Vector3f(movement.x, 0, 0));
 
@@ -69,8 +73,8 @@ public class Player {
         position.y += movement.y;
         checkCollisions(new Vector3f(0, movement.y, 0));
 
-        if (contact && Input.isKeyPressed(GLFW_KEY_SPACE)) {
-            movement.y = 0.25f;
+        if ((contact || highestMovementResistance != 0) && Input.isKeyPressed(GLFW_KEY_SPACE)) {
+            movement.y = 0.25f * (1 - highestMovementResistance);
             contact = false;
         }
     }
@@ -111,22 +115,25 @@ public class Player {
         }
     }
 
-    private boolean isColliding(float delta) {
-        int[] blocks = new int[4];
-        blocks[0] = world.getBlock((int)(Math.floor(position.x - WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z - WIDTH / 2f)));
-        blocks[1] = world.getBlock((int)(Math.floor(position.x + WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z - WIDTH / 2f)));
-        blocks[2] = world.getBlock((int)(Math.floor(position.x - WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z + WIDTH / 2f)));
-        blocks[3] = world.getBlock((int)(Math.floor(position.x + WIDTH / 2f)), (int)(position.y - verticalSpeed * delta), (int)(Math.floor(position.z + WIDTH / 2f)));
-        if (blocks[0] != 0 && blocks[0] != 7) {
-            return true;
-        } else if (blocks[1] != 0 && blocks[1] != 7) {
-            return true;
-        } else if (blocks[2] != 0 && blocks[2] != 7) {
-            return true;
-        } else if (blocks[3] != 0 && blocks[3] != 7) {
-            return true;
+    private float getCollidingBlockWithHighestMovementResistance() {
+        var highestFriction = 0f;
+
+        for (float x = position.x - dimensions.x; x <= position.x + dimensions.x; x += dimensions.x) {
+            for (float y = position.y; y <= position.y + dimensions.y; y += dimensions.y / 2f) {
+                for (float z = position.z - dimensions.z; z <= position.z + dimensions.z; z += dimensions.z) {
+                    var voxel = world.getBlock(x, y, z);
+
+                    if (voxel == 0)
+                        continue;
+
+                    var movementResistance = BlockRegistry.getBlock(voxel).getMovementResistance();
+                    if (movementResistance > highestFriction)
+                        highestFriction = movementResistance;
+                }
+            }
         }
-        return false;
+
+        return highestFriction;
     }
 
     public Vector3f getPosition() {
