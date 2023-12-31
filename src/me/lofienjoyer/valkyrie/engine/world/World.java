@@ -35,12 +35,6 @@ public class World {
 
     private final List<Populator> populators;
 
-    private static final ScheduledExecutorService generationService = new ScheduledThreadPoolExecutor(1, r -> {
-        Thread thread = new Thread(r, "Generation Thread");
-        thread.setDaemon(true);
-        return thread;
-    });
-
     private final Map<Vector2i, Chunk> chunks;
     private final Map<Vector2i, FutureChunk> futureChunks;
 
@@ -162,7 +156,7 @@ public class World {
 
         chunks.put(position, chunk);
 
-        Future<Chunk> future = generationService.submit(() -> {
+        Future<Chunk> future = Valkyrie.getGenerationService().submit(() -> {
             chunk.loadChunk(this);
             loadFutureChunk(chunk);
             return chunk;

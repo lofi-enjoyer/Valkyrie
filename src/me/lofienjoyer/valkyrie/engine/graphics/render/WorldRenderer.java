@@ -35,15 +35,6 @@ public class WorldRenderer {
 
     public static int VIEW_DISTANCE = 8;
 
-    // TODO: 24/03/2022 Make the core count customizable
-    private static final ScheduledExecutorService meshService =
-            new ScheduledThreadPoolExecutor(4, r -> {
-                Thread thread = new Thread(r, "Meshing Thread");
-                thread.setDaemon(true);
-
-                return thread;
-            });
-
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
 
@@ -242,7 +233,7 @@ public class WorldRenderer {
         }
 
         chunk.cacheNeighbors();
-        meshFuture = meshService.submit(() -> {
+        meshFuture = Valkyrie.getMeshingService().submit(() -> {
             meshBundle.compute(section);
             Valkyrie.EVENT_HANDLER.process(new MeshGenerationEvent(meshPosition, meshBundle));
             return meshBundle;
