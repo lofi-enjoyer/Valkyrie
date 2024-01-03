@@ -91,13 +91,17 @@ public class WorldScene implements IScene {
                     "Valkyrie | FPS: %04.1f (delta: %06.4fs)" +
                             "\nMemory usage: %06.2f/%06.2f MB" +
                             "\n" + gpuInfo +
+                            "\nX: %.2f | Y: %.2f | Z: %.2f" +
                             "\n\nH: Toggle VSync" +
                             "\nR: Toggle wireframe" +
                             "\nP: Garbage collector",
                     1f / delta,
                     delta,
                     (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),
-                    Runtime.getRuntime().totalMemory() / (1024 * 1024f)
+                    Runtime.getRuntime().totalMemory() / (1024 * 1024f),
+                    player.getPosition().x,
+                    player.getPosition().y,
+                    player.getPosition().z
             ), 50, 50);
         }
     }
