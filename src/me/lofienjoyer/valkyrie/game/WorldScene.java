@@ -31,8 +31,6 @@ public class WorldScene implements IScene {
     private CrosshairRenderer crosshairRenderer;
     private Player player;
     private Vector3f hitPosition;
-    private Input input;
-    private Window window;
     private FontRenderer fontRenderer;
     private String gpuInfo;
 
@@ -49,9 +47,6 @@ public class WorldScene implements IScene {
         this.fontRenderer = new FontRenderer(font);
 
         this.player = new Player(world);
-
-        this.input = Input.getInstance();
-        this.window = Window.getInstance();
 
         GLFW.glfwSetScrollCallback(Valkyrie.WINDOW_ID, (id, xOffset, yOffset) -> {
             selectedBlock += yOffset;
@@ -88,7 +83,7 @@ public class WorldScene implements IScene {
 
         if (Valkyrie.DEBUG_MODE) {
             fontRenderer.render(String.format(
-                    "Valkyrie | FPS: %04.1f (delta: %06.4fs)" +
+                    "Valkyrie 0.1.1 | FPS: %04.1f (delta: %06.4fs)" +
                             "\nMemory usage: %06.2f/%06.2f MB" +
                             "\n" + gpuInfo +
                             "\nX: %.2f | Y: %.2f | Z: %.2f" +
