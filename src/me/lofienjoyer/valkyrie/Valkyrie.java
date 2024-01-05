@@ -15,6 +15,8 @@ import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import org.lwjgl.opengl.GL;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
@@ -91,7 +93,7 @@ public class Valkyrie {
     }
 
     public void loop() {
-        long timer = System.nanoTime();
+        long lastFrame = System.nanoTime();
         float delta = 0f;
 
         framebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
@@ -100,25 +102,8 @@ public class Valkyrie {
 
         EVENT_HANDLER.process(new StartupEvent());
 
-        new Thread(() -> {
-            float fixedUpdateTimer = 0f;
-            float worldDelta = 0f;
-            long lastTime = System.nanoTime();
-
-            while (window.keepOpen()) {
-                fixedUpdateTimer += worldDelta;
-                while (fixedUpdateTimer >= 1 / 20f) {
-                    currentScene.fixedUpdate();
-                    input.update();
-                    fixedUpdateTimer -= 1 / 20f;
-                }
-
-                worldDelta = (System.nanoTime() - lastTime) / 1000000000f;
-                lastTime = System.nanoTime();
-            }
-        }).start();
-
         while (window.keepOpen()) {
+
 
             framebuffer.bind();
             glClearColor(0.125f, 0f, 1.0f, 0.5f);
@@ -141,11 +126,11 @@ public class Valkyrie {
             glBindTexture(GL_TEXTURE_2D, framebuffer.getColorTextureId());
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
+            input.update();
             window.update();
-//            EVENT_HANDLER.update();
 
-            delta = (System.nanoTime() - timer) / 1000000000f;
-            timer = System.nanoTime();
+            delta = (System.nanoTime() - lastFrame) / 1000000000f;
+            lastFrame = System.nanoTime();
         }
 
         currentScene.onClose();

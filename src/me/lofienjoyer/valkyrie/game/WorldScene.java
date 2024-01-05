@@ -18,6 +18,11 @@ import me.lofienjoyer.valkyrie.engine.world.World;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldScene implements IScene {
@@ -33,6 +38,10 @@ public class WorldScene implements IScene {
     private Vector3f hitPosition;
     private FontRenderer fontRenderer;
     private String gpuInfo;
+    private Timer worldTimer;
+
+    int selectedBlock = 0;
+    private final Map<Vector3f, Integer> blocksToSet = new HashMap<>();
 
     @Override
     public void init() {
@@ -58,9 +67,17 @@ public class WorldScene implements IScene {
         });
 
         this.gpuInfo = glGetString(GL_VENDOR) + " - " + glGetString(GL_RENDERER);
-    }
 
-    int selectedBlock = 0;
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                fixedUpdate();
+            }
+        };
+
+        this.worldTimer = new Timer("World timer");
+        worldTimer.scheduleAtFixedRate(task, 0, 50);
+    }
 
     @Override
     public void render(float delta) {
@@ -74,8 +91,18 @@ public class WorldScene implements IScene {
 
         worldRenderer.render(world, camera);
 
+        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
         if (hitPosition != null) {
             raycastRenderer.render(camera, hitPosition);
+
+            synchronized (blocksToSet) {
+                if (Input.isButtonJustPressed(0)) {
+                    blocksToSet.put(new Vector3f(hitPosition), 0);
+                } else if (Input.isButtonJustPressed(1) && BlockRegistry.getBlock(selectedBlock) != null) {
+                    var blockToPlacePosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
+                    blocksToSet.put(new Vector3f(blockToPlacePosition), selectedBlock);
+                }
+            }
         }
 
         selectedBlockRenderer.render(selectedBlock);
@@ -101,19 +128,14 @@ public class WorldScene implements IScene {
         }
     }
 
-    @Override
     public void fixedUpdate() {
         world.update(1 / 20f, camera);
 
-        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
-
-        if (hitPosition != null) {
-            if (Input.isButtonJustPressed(0)) {
-                world.setBlock(0, hitPosition);
-            } else if (Input.isButtonJustPressed(1) && BlockRegistry.getBlock(selectedBlock) != null) {
-                var blockToPlacePosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, true);
-                world.setBlock(selectedBlock, blockToPlacePosition);
-            }
+        synchronized (blocksToSet) {
+            blocksToSet.forEach((position, voxel) -> {
+                world.setBlock(voxel, position);
+            });
+            blocksToSet.clear();
         }
     }
 
@@ -129,7 +151,7 @@ public class WorldScene implements IScene {
 
     @Override
     public void onClose() {
-
+        worldTimer.cancel();
     }
 
     @Override

@@ -91,7 +91,6 @@ public class WorldRenderer {
                         return;
 
                     chunksToUpdate.put(new Vector3i(chunkUpdateEvent.getChunk().getPosition().x, chunkUpdateEvent.getUpdatePosition().y / World.CHUNK_SECTION_HEIGHT, chunkUpdateEvent.getChunk().getPosition().y), chunkUpdateEvent.getChunk());
-                    meshesToUpload.remove(new Vector3i(chunkUpdateEvent.getChunk().getPosition().x, chunkUpdateEvent.getUpdatePosition().y / World.CHUNK_SECTION_HEIGHT, chunkUpdateEvent.getChunk().getPosition().y));
                 } else if (event instanceof ChunkUnloadEvent) {
                     var chunkUnloadEvent = (ChunkUnloadEvent) event;
                     for (int i = 0; i < 8; i++) {

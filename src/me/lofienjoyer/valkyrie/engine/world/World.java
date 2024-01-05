@@ -94,7 +94,7 @@ public class World {
     }
 
     public synchronized void update(float delta, Camera camera) {
-        checkGeneratingChunks();
+//        checkGeneratingChunks();
 
         int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) World.CHUNK_WIDTH);
@@ -156,13 +156,12 @@ public class World {
 
         chunks.put(position, chunk);
 
-        Future<Chunk> future = Valkyrie.getGenerationService().submit(() -> {
+        Valkyrie.getGenerationService().submit(() -> {
             chunk.loadChunk(this);
             loadFutureChunk(chunk);
+            initializeChunk(chunk);
             return chunk;
         });
-
-        chunkGenerationFutures.add(future);
     }
 
     /**
