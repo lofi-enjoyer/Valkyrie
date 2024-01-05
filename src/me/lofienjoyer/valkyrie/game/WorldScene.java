@@ -83,7 +83,7 @@ public class WorldScene implements IScene {
 
         if (Valkyrie.DEBUG_MODE) {
             fontRenderer.render(String.format(
-                    "Valkyrie 0.1.1 | FPS: %04.1f (delta: %06.4fs)" +
+                    "Valkyrie 0.1.2 | FPS: %04.1f (delta: %06.4fs)" +
                             "\nMemory usage: %06.2f/%06.2f MB" +
                             "\n" + gpuInfo +
                             "\nX: %.2f | Y: %.2f | Z: %.2f" +
