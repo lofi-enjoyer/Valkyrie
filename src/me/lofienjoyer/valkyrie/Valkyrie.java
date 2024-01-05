@@ -30,7 +30,6 @@ public class Valkyrie {
     public static final Loader LOADER = new Loader();
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
-    private static ScheduledExecutorService generationService;
     private static ScheduledExecutorService meshingService;
 
     public static float FOV = (float) Math.toRadians(80.0);
@@ -56,14 +55,7 @@ public class Valkyrie {
 
         this.input = Input.getInstance();
 
-        int generationThreadCount = config.get("generation_thread_count", Integer.class);
         int meshingThreadCount = config.get("meshing_thread_count", Integer.class);
-
-        generationService = new ScheduledThreadPoolExecutor(config.get("generation_thread_count", Integer.class), r -> {
-            Thread thread = new Thread(r, "Generation Thread");
-            thread.setDaemon(true);
-            return thread;
-        });
 
         meshingService = new ScheduledThreadPoolExecutor(config.get("meshing_thread_count", Integer.class), r -> {
             Thread thread = new Thread(r, "Meshing Thread");
@@ -75,7 +67,6 @@ public class Valkyrie {
         WINDOW_ID = window.getId();
         EVENT_HANDLER.registerListener(StartupEvent.class, (event) -> {
             LOG.info("Successful startup!");
-            LOG.info("Generation thread count: " + generationThreadCount);
             LOG.info("Meshing thread count: " + meshingThreadCount);
         });
     }
@@ -151,10 +142,6 @@ public class Valkyrie {
 
     public void dispose() {
         LOADER.dispose();
-    }
-
-    public static ScheduledExecutorService getGenerationService() {
-        return generationService;
     }
 
     public static ScheduledExecutorService getMeshingService() {
