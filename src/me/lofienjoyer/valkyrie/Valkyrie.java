@@ -100,16 +100,25 @@ public class Valkyrie {
 
         EVENT_HANDLER.process(new StartupEvent());
 
-        float fixedUpdateTimer = 0f;
+        new Thread(() -> {
+            float fixedUpdateTimer = 0f;
+            float worldDelta = 0f;
+            long lastTime = System.nanoTime();
+
+            while (window.keepOpen()) {
+                fixedUpdateTimer += worldDelta;
+                while (fixedUpdateTimer >= 1 / 20f) {
+                    currentScene.fixedUpdate();
+                    input.update();
+                    fixedUpdateTimer -= 1 / 20f;
+                }
+
+                worldDelta = (System.nanoTime() - lastTime) / 1000000000f;
+                lastTime = System.nanoTime();
+            }
+        }).start();
 
         while (window.keepOpen()) {
-
-            fixedUpdateTimer += delta;
-            while (fixedUpdateTimer >= 1 / 20f) {
-                currentScene.fixedUpdate();
-                input.update();
-                fixedUpdateTimer -= 1 / 20f;
-            }
 
             framebuffer.bind();
             glClearColor(0.125f, 0f, 1.0f, 0.5f);
@@ -133,7 +142,7 @@ public class Valkyrie {
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             window.update();
-            EVENT_HANDLER.update();
+//            EVENT_HANDLER.update();
 
             delta = (System.nanoTime() - timer) / 1000000000f;
             timer = System.nanoTime();
