@@ -43,12 +43,12 @@ public class World {
     private final PerlinNoise noise;
     private double seed;
 
-    private final List<Future<Chunk>> chunkGenerationFutures;
+    private final List<Chunk> chunksToGenerate;
 
     public World() {
         this.chunks = new HashMap<>();
         this.futureChunks = new HashMap<>();
-        this.chunkGenerationFutures = new ArrayList<>();
+        this.chunksToGenerate = new ArrayList<>();
         this.playerPosition = new Vector2i();
 
         Valkyrie.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdate);
@@ -94,7 +94,8 @@ public class World {
     }
 
     public synchronized void update(float delta, Camera camera) {
-        checkGeneratingChunks();
+//        checkGeneratingChunks();
+        generateChunkIfPending();
 
         int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) World.CHUNK_WIDTH);
@@ -156,13 +157,7 @@ public class World {
 
         chunks.put(position, chunk);
 
-        Future<Chunk> future = Valkyrie.getGenerationService().submit(() -> {
-            chunk.loadChunk(this);
-            loadFutureChunk(chunk);
-            return chunk;
-        });
-
-        chunkGenerationFutures.add(future);
+        chunksToGenerate.add(chunk);
     }
 
     /**
@@ -193,25 +188,14 @@ public class World {
 
     }
 
-    /**
-     * Checks the chunks in the generation queue and adds those which finished
-     */
-    private void checkGeneratingChunks() {
-        var iterator = chunkGenerationFutures.iterator();
-
-        while (iterator.hasNext()) {
-            var future = iterator.next();
-
-            if (!future.isDone())
-                return;
-
+    private void generateChunkIfPending() {
+        var iterator = chunksToGenerate.iterator();
+        if (iterator.hasNext()) {
+            var chunk = iterator.next();
+            chunk.loadChunk(this);
+            loadFutureChunk(chunk);
+            initializeChunk(chunk);
             iterator.remove();
-
-            try {
-                initializeChunk(future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e.getCause());
-            }
         }
     }
 

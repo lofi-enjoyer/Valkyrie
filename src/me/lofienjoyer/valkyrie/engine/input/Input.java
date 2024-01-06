@@ -34,7 +34,7 @@ public class Input {
         setup();
     }
 
-    public void update() {
+    public synchronized void update() {
         for (int i = 0; i < KEY_COUNT; i++) {
             justPressedKeys[i] = false;
         }
@@ -73,35 +73,35 @@ public class Input {
         cursorPosition.y = posY;
     }
 
-    public static boolean isKeyPressed(int key) {
+    public synchronized static boolean isKeyPressed(int key) {
         return instance.pressedKeys[key];
     }
 
-    public static boolean isKeyJustPressed(int key) {
+    public synchronized static boolean isKeyJustPressed(int key) {
         return instance.justPressedKeys[key];
     }
 
-    public static boolean isButtonPressed(int button) {
+    public synchronized static boolean isButtonPressed(int button) {
         return instance.pressedMouseButtons[button];
     }
 
-    public static boolean isButtonJustPressed(int button) {
+    public synchronized static boolean isButtonJustPressed(int button) {
         return instance.justPressedMouseButtons[button];
     }
 
-    public static double getCursorX() {
+    public synchronized static double getCursorX() {
         return instance.cursorPosition.x;
     }
 
-    public static double getCursorY() {
+    public synchronized static double getCursorY() {
         return instance.cursorPosition.y;
     }
 
-    public static double getCursorMovementX() {
+    public synchronized static double getCursorMovementX() {
         return (int)instance.cursorMovement.x;
     }
 
-    public static double getCursorMovementY() {
+    public synchronized static double getCursorMovementY() {
         return (int)instance.cursorMovement.y;
     }
 

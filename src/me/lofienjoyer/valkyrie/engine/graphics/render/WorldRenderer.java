@@ -2,6 +2,7 @@ package me.lofienjoyer.valkyrie.engine.graphics.render;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
 import me.lofienjoyer.valkyrie.engine.config.Config;
+import me.lofienjoyer.valkyrie.engine.events.Event;
 import me.lofienjoyer.valkyrie.engine.events.mesh.MeshGenerationEvent;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkLoadEvent;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkUnloadEvent;
@@ -44,6 +45,8 @@ public class WorldRenderer {
     private final Map<Vector3i, MeshBundle> meshesToUpload;
     private final Map<Vector3i, Chunk> chunksToUpdate;
 
+    private final List<Event> eventsToProcess;
+
     public WorldRenderer() {
         this.projectionMatrix = new Matrix4f();
         this.solidsShader = new SolidsShader();
@@ -55,6 +58,7 @@ public class WorldRenderer {
         this.meshFutures = new HashMap<>();
         this.meshesToUpload = new HashMap<>();
         this.chunksToUpdate = new HashMap<>();
+        this.eventsToProcess = new ArrayList<>();
 
         Valkyrie.EVENT_HANDLER.registerListener(ChunkLoadEvent.class, this::handleChunkLoading);
         Valkyrie.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdating);
@@ -72,6 +76,41 @@ public class WorldRenderer {
     }
 
     public void render(World world, Camera camera) {
+        synchronized (eventsToProcess) {
+            eventsToProcess.forEach(event -> {
+                if (event instanceof ChunkLoadEvent) {
+                    var chunkLoadEvent = (ChunkLoadEvent) event;
+                    var meshBundle = new MeshBundle(chunkLoadEvent.getChunk());
+                    chunkMeshes.put(chunkLoadEvent.getChunk().getPosition(), meshBundle);
+                    for (int i = 0; i < 8; i++) {
+                        chunksToUpdate.put(new Vector3i(chunkLoadEvent.getChunk().getPosition().x, i, chunkLoadEvent.getChunk().getPosition().y), chunkLoadEvent.getChunk());
+                    }
+                } else if (event instanceof ChunkUpdateEvent) {
+                    var chunkUpdateEvent = (ChunkUpdateEvent) event;
+                    if (chunkUpdateEvent.getChunk() == null)
+                        return;
+
+                    chunksToUpdate.put(new Vector3i(chunkUpdateEvent.getChunk().getPosition().x, chunkUpdateEvent.getUpdatePosition().y / World.CHUNK_SECTION_HEIGHT, chunkUpdateEvent.getChunk().getPosition().y), chunkUpdateEvent.getChunk());
+                } else if (event instanceof ChunkUnloadEvent) {
+                    var chunkUnloadEvent = (ChunkUnloadEvent) event;
+                    for (int i = 0; i < 8; i++) {
+                        var meshPosition = new Vector3i(chunkUnloadEvent.getChunk().getPosition().x, i, chunkUnloadEvent.getChunk().getPosition().y);
+                        var meshFuture = meshFutures.get(meshPosition);
+                        if (meshFuture != null) {
+                            meshFuture.cancel(true);
+                            meshFutures.remove(meshPosition);
+                        }
+                    }
+
+                    chunkMeshes.remove(chunkUnloadEvent.getChunk().getPosition());
+                } else if (event instanceof MeshGenerationEvent) {
+                    var meshGenerationEvent = (MeshGenerationEvent) event;
+                    meshesToUpload.put(meshGenerationEvent.getPosition(), meshGenerationEvent.getMeshBundle());
+                }
+            });
+
+            eventsToProcess.clear();
+        }
 
         var meshesToUploadIterator = meshesToUpload.entrySet().iterator();
         while (meshesToUploadIterator.hasNext()) {
@@ -153,36 +192,27 @@ public class WorldRenderer {
     }
 
     private void handleChunkLoading(ChunkLoadEvent event) {
-        var meshBundle = new MeshBundle(event.getChunk());
-        chunkMeshes.put(event.getChunk().getPosition(), meshBundle);
-        for (int i = 0; i < 8; i++) {
-            chunksToUpdate.put(new Vector3i(event.getChunk().getPosition().x, i, event.getChunk().getPosition().y), event.getChunk());
+        synchronized (eventsToProcess) {
+            eventsToProcess.add(event);
         }
     }
 
     private void handleChunkUpdating(ChunkUpdateEvent event) {
-        if (event.getChunk() == null)
-            return;
-
-        chunksToUpdate.put(new Vector3i(event.getChunk().getPosition().x, event.getUpdatePosition().y / World.CHUNK_SECTION_HEIGHT, event.getChunk().getPosition().y), event.getChunk());
-        meshesToUpload.remove(new Vector3i(event.getChunk().getPosition().x, event.getUpdatePosition().y / World.CHUNK_SECTION_HEIGHT, event.getChunk().getPosition().y));
+        synchronized (eventsToProcess) {
+            eventsToProcess.add(event);
+        }
     }
 
     private void handleMeshGeneration(MeshGenerationEvent event) {
-        meshesToUpload.put(event.getPosition(), event.getMeshBundle());
+        synchronized (eventsToProcess) {
+            eventsToProcess.add(event);
+        }
     }
 
     private void handleChunkUnloading(ChunkUnloadEvent event) {
-        for (int i = 0; i < 8; i++) {
-            var meshPosition = new Vector3i(event.getChunk().getPosition().x, i, event.getChunk().getPosition().y);
-            var meshFuture = meshFutures.get(meshPosition);
-            if (meshFuture != null) {
-                meshFuture.cancel(true);
-                meshFutures.remove(meshPosition);
-            }
+        synchronized (eventsToProcess) {
+            eventsToProcess.add(event);
         }
-
-        chunkMeshes.remove(event.getChunk().getPosition());
     }
 
     public void generateMesh(Chunk chunk, MeshBundle meshBundle, int section) {

@@ -15,6 +15,8 @@ import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import org.lwjgl.opengl.GL;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
@@ -28,7 +30,6 @@ public class Valkyrie {
     public static final Loader LOADER = new Loader();
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
-    private static ScheduledExecutorService generationService;
     private static ScheduledExecutorService meshingService;
 
     public static float FOV = (float) Math.toRadians(80.0);
@@ -54,14 +55,7 @@ public class Valkyrie {
 
         this.input = Input.getInstance();
 
-        int generationThreadCount = config.get("generation_thread_count", Integer.class);
         int meshingThreadCount = config.get("meshing_thread_count", Integer.class);
-
-        generationService = new ScheduledThreadPoolExecutor(config.get("generation_thread_count", Integer.class), r -> {
-            Thread thread = new Thread(r, "Generation Thread");
-            thread.setDaemon(true);
-            return thread;
-        });
 
         meshingService = new ScheduledThreadPoolExecutor(config.get("meshing_thread_count", Integer.class), r -> {
             Thread thread = new Thread(r, "Meshing Thread");
@@ -73,7 +67,6 @@ public class Valkyrie {
         WINDOW_ID = window.getId();
         EVENT_HANDLER.registerListener(StartupEvent.class, (event) -> {
             LOG.info("Successful startup!");
-            LOG.info("Generation thread count: " + generationThreadCount);
             LOG.info("Meshing thread count: " + meshingThreadCount);
         });
     }
@@ -91,7 +84,7 @@ public class Valkyrie {
     }
 
     public void loop() {
-        long timer = System.nanoTime();
+        long lastFrame = System.nanoTime();
         float delta = 0f;
 
         framebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
@@ -100,16 +93,8 @@ public class Valkyrie {
 
         EVENT_HANDLER.process(new StartupEvent());
 
-        float fixedUpdateTimer = 0f;
-
         while (window.keepOpen()) {
 
-            fixedUpdateTimer += delta;
-            while (fixedUpdateTimer >= 1 / 20f) {
-                currentScene.fixedUpdate();
-                input.update();
-                fixedUpdateTimer -= 1 / 20f;
-            }
 
             framebuffer.bind();
             glClearColor(0.125f, 0f, 1.0f, 0.5f);
@@ -132,11 +117,11 @@ public class Valkyrie {
             glBindTexture(GL_TEXTURE_2D, framebuffer.getColorTextureId());
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
+            input.update();
             window.update();
-            EVENT_HANDLER.update();
 
-            delta = (System.nanoTime() - timer) / 1000000000f;
-            timer = System.nanoTime();
+            delta = (System.nanoTime() - lastFrame) / 1000000000f;
+            lastFrame = System.nanoTime();
         }
 
         currentScene.onClose();
@@ -157,10 +142,6 @@ public class Valkyrie {
 
     public void dispose() {
         LOADER.dispose();
-    }
-
-    public static ScheduledExecutorService getGenerationService() {
-        return generationService;
     }
 
     public static ScheduledExecutorService getMeshingService() {
