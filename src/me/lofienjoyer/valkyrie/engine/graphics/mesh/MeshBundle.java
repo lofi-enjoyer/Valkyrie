@@ -54,7 +54,7 @@ public class MeshBundle {
 
         greedyMesher[section] = null;
         dynamicMesher[section] = null;
-        this.loaded = true;
+        setLoaded(true);
 
         if (solidMesh[section].getVertexCount() == 0 && transparentMesh[section].getVertexCount() == 0)
             return false;
@@ -70,8 +70,12 @@ public class MeshBundle {
         return transparentMesh[section];
     }
 
-    public boolean isLoaded() {
+    public synchronized boolean isLoaded() {
         return loaded;
+    }
+
+    private synchronized void setLoaded(boolean loaded) {
+        this.loaded = loaded;
     }
 
 }

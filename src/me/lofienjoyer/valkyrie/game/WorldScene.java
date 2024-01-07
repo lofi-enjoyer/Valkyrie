@@ -47,7 +47,7 @@ public class WorldScene implements IScene {
     public void init() {
         this.camera = new Camera();
         this.world = new World();
-        this.worldRenderer = new WorldRenderer();
+        this.worldRenderer = new WorldRenderer(world);
         this.skyboxRenderer = new SkyboxRenderer();
         this.selectedBlockRenderer = new SelectedBlockRenderer();
         this.raycastRenderer = new RaycastRenderer();
@@ -85,11 +85,11 @@ public class WorldScene implements IScene {
         player.setRotation(new Vector3f(camera.getRotationX(), camera.getRotationY(), 0));
         player.update(delta);
         camera.setPosition(new Vector3f(player.getPosition().x, player.getPosition().y + 1.5f, player.getPosition().z));
-        worldRenderer.updateFrustum(camera);
+        worldRenderer.update();
 
         skyboxRenderer.render(camera);
 
-        worldRenderer.render(world, camera);
+        worldRenderer.render(camera);
 
         hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
         if (hitPosition != null) {

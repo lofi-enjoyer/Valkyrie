@@ -95,7 +95,7 @@ public class Valkyrie {
 
         while (window.keepOpen()) {
 
-
+            // Render current scene to the framebuffer
             framebuffer.bind();
             glClearColor(0.125f, 0f, 1.0f, 0.5f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -109,8 +109,8 @@ public class Valkyrie {
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
+            // Draw the framebuffer to the window
             shader.start();
-
             glViewport(0, 0, window.getWidth(), window.getHeight());
             glBindVertexArray(quadMesh.getVaoId());
             glDisable(GL_DEPTH_TEST);
