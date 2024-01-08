@@ -8,15 +8,13 @@ import me.lofienjoyer.valkyrie.engine.graphics.framebuffer.ColorFramebuffer;
 import me.lofienjoyer.valkyrie.engine.graphics.framebuffer.Framebuffer;
 import me.lofienjoyer.valkyrie.engine.graphics.loader.Loader;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.QuadMesh;
-import me.lofienjoyer.valkyrie.engine.graphics.shaders.FboShader;
 import me.lofienjoyer.valkyrie.engine.input.Input;
 import me.lofienjoyer.valkyrie.engine.log.ValkyrieLogHandler;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import org.lwjgl.opengl.GL;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
@@ -47,15 +45,13 @@ public class Valkyrie {
         LOG.setLevel(Level.INFO);
 
         this.config = Config.getInstance();
-
-        this.window = Window.getInstance();
-        window.setSize(config.get("window_width", Integer.class), config.get("window_height", Integer.class));
-        window.setTitle("Valkyrie");
-        FOV = (float) Math.toRadians(config.get("fov", Double.class));
-
         this.input = Input.getInstance();
+        this.window = Window.getInstance();
+        WINDOW_ID = window.getId();
+    }
 
-        int meshingThreadCount = config.get("meshing_thread_count", Integer.class);
+    public void init() {
+        var meshingThreadCount = config.get("meshing_thread_count", Integer.class);
 
         meshingService = new ScheduledThreadPoolExecutor(config.get("meshing_thread_count", Integer.class), r -> {
             Thread thread = new Thread(r, "Meshing Thread");
@@ -64,22 +60,22 @@ public class Valkyrie {
             return thread;
         });
 
-        WINDOW_ID = window.getId();
         EVENT_HANDLER.registerListener(StartupEvent.class, (event) -> {
             LOG.info("Successful startup!");
             LOG.info("Meshing thread count: " + meshingThreadCount);
         });
-    }
 
-    public void init() {
+        FOV = (float) Math.toRadians(config.get("fov", Double.class));
+
         GL.createCapabilities();
 
         BlockRegistry.setup();
 
+        window.setSize(config.get("window_width", Integer.class), config.get("window_height", Integer.class));
+        window.setTitle("Valkyrie");
         window.setClearColor(0.45f, 0.71f, 1.00f, 1f);
         window.registerResizeCallback((windowId, width, height) -> glViewport(0, 0, width, height));
         window.registerResizeCallback(this::onResize);
-
         window.show();
     }
 
@@ -88,13 +84,12 @@ public class Valkyrie {
         float delta = 0f;
 
         framebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
-        FboShader shader = new FboShader();
-        QuadMesh quadMesh = new QuadMesh();
+        var fboShader = ResourceLoader.loadShader("FBO Shader", "res/shaders/fbo/fbo_vert.glsl", "res/shaders/fbo/fbo_frag.glsl");
+        var quadMesh = new QuadMesh();
 
         EVENT_HANDLER.process(new StartupEvent());
 
         while (window.keepOpen()) {
-
             // Render current scene to the framebuffer
             framebuffer.bind();
             glClearColor(0.125f, 0f, 1.0f, 0.5f);
@@ -110,7 +105,7 @@ public class Valkyrie {
             glClear(GL_COLOR_BUFFER_BIT);
 
             // Draw the framebuffer to the window
-            shader.start();
+            fboShader.bind();
             glViewport(0, 0, window.getWidth(), window.getHeight());
             glBindVertexArray(quadMesh.getVaoId());
             glDisable(GL_DEPTH_TEST);
