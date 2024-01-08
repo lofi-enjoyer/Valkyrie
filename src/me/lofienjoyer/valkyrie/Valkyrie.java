@@ -131,8 +131,6 @@ public class Valkyrie {
             delta = (System.nanoTime() - lastFrame) / 1000000000f;
             lastFrame = System.nanoTime();
         }
-
-        currentScene.onClose();
     }
 
     /**
@@ -148,12 +146,16 @@ public class Valkyrie {
     }
 
     private void onResize(long windowId, int width, int height) {
+        if (currentScene != null)
+            currentScene.onResize(width, height);
+
         mainFramebuffer.resize(width, height);
-        currentScene.onResize(width, height);
     }
 
     public void dispose() {
-        currentScene.dispose();
+        if (currentScene != null)
+            currentScene.dispose();
+
         LOADER.dispose();
     }
 

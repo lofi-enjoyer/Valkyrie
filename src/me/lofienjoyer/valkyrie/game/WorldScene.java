@@ -150,13 +150,8 @@ public class WorldScene implements IScene {
     }
 
     @Override
-    public void onClose() {
-        worldTimer.cancel();
-    }
-
-    @Override
     public void dispose() {
-
+        worldTimer.cancel();
     }
 
 }
