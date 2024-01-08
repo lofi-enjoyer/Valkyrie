@@ -30,16 +30,16 @@ public class Valkyrie {
 
     private static ScheduledExecutorService meshingService;
 
+    public static long WINDOW_ID;
     public static float FOV = (float) Math.toRadians(80.0);
     public static boolean DEBUG_MODE = false;
 
     private final Window window;
     private final Input input;
     private final Config config;
-    public static long WINDOW_ID;
-    private Framebuffer framebuffer;
 
     private IScene currentScene;
+    private Framebuffer mainFramebuffer;
 
     public Valkyrie() {
         LOG.setLevel(Level.INFO);
@@ -50,9 +50,12 @@ public class Valkyrie {
         WINDOW_ID = window.getId();
     }
 
+    /**
+     * Sets up the basic resources for the engine
+     */
     public void init() {
+        // Sets up the meshing service
         var meshingThreadCount = config.get("meshing_thread_count", Integer.class);
-
         meshingService = new ScheduledThreadPoolExecutor(config.get("meshing_thread_count", Integer.class), r -> {
             Thread thread = new Thread(r, "Meshing Thread");
             thread.setDaemon(true);
@@ -69,38 +72,45 @@ public class Valkyrie {
 
         GL.createCapabilities();
 
+        this.mainFramebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
+
+        // Sets up the block registry
         BlockRegistry.setup();
 
+        // Sets up the window properties and callbacks, and then shows it
         window.setSize(config.get("window_width", Integer.class), config.get("window_height", Integer.class));
         window.setTitle("Valkyrie");
         window.setClearColor(0.45f, 0.71f, 1.00f, 1f);
         window.registerResizeCallback((windowId, width, height) -> glViewport(0, 0, width, height));
         window.registerResizeCallback(this::onResize);
         window.show();
+
+        // Sends an startup event
+        EVENT_HANDLER.process(new StartupEvent());
     }
 
+    /**
+     * Starts the engine main loop
+     */
     public void loop() {
         long lastFrame = System.nanoTime();
         float delta = 0f;
 
-        framebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
         var fboShader = ResourceLoader.loadShader("FBO Shader", "res/shaders/fbo/fbo_vert.glsl", "res/shaders/fbo/fbo_frag.glsl");
         var quadMesh = new QuadMesh();
 
-        EVENT_HANDLER.process(new StartupEvent());
-
         while (window.keepOpen()) {
             // Render current scene to the framebuffer
-            framebuffer.bind();
+            mainFramebuffer.bind();
             glClearColor(0.125f, 0f, 1.0f, 0.5f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
-            glViewport(0, 0, framebuffer.getWidth(), framebuffer.getHeight());
+            glViewport(0, 0, mainFramebuffer.getWidth(), mainFramebuffer.getHeight());
 
             if (currentScene != null)
                 currentScene.render(delta);
 
-            framebuffer.unbind();
+            mainFramebuffer.unbind();
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
@@ -109,9 +119,12 @@ public class Valkyrie {
             glViewport(0, 0, window.getWidth(), window.getHeight());
             glBindVertexArray(quadMesh.getVaoId());
             glDisable(GL_DEPTH_TEST);
-            glBindTexture(GL_TEXTURE_2D, framebuffer.getColorTextureId());
+            glBindTexture(GL_TEXTURE_2D, mainFramebuffer.getColorTextureId());
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
+            // Updates the input handler and window
+            // IMPORTANT: the window must be always updated after the input handler,
+            // so it registers properly all the key and button updates
             input.update();
             window.update();
 
@@ -122,6 +135,10 @@ public class Valkyrie {
         currentScene.onClose();
     }
 
+    /**
+     * Disposes the current scene, sets up the new one and calls its {@code onResize} method once
+     * @param scene New scene
+     */
     public void setCurrentScene(IScene scene) {
         if (currentScene != null)
             currentScene.dispose();
@@ -131,11 +148,12 @@ public class Valkyrie {
     }
 
     private void onResize(long windowId, int width, int height) {
-        framebuffer.resize(width, height);
+        mainFramebuffer.resize(width, height);
         currentScene.onResize(width, height);
     }
 
     public void dispose() {
+        currentScene.dispose();
         LOADER.dispose();
     }
 
