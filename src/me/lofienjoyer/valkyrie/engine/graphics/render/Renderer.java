@@ -32,4 +32,8 @@ public class Renderer {
         glDisable(GL_BLEND);
     }
 
+    public static void bindTexture2D(int textureId) {
+        glBindTexture(GL_TEXTURE_2D, textureId);
+    }
+
 }

@@ -9,8 +9,8 @@ import me.lofienjoyer.valkyrie.engine.events.world.ChunkUnloadEvent;
 import me.lofienjoyer.valkyrie.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.MeshBundle;
-import me.lofienjoyer.valkyrie.engine.graphics.shaders.SolidsShader;
-import me.lofienjoyer.valkyrie.engine.graphics.shaders.TransparencyShader;
+import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import me.lofienjoyer.valkyrie.engine.world.Chunk;
@@ -21,7 +21,10 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import static org.lwjgl.opengl.GL45.*;
@@ -35,8 +38,8 @@ public class WorldRenderer {
     private Matrix4f projectionMatrix;
     private final FrustumCullingTester tester;
 
-    private final SolidsShader solidsShader;
-    private final TransparencyShader transparencyShader;
+    private final Shader solidsShader;
+    private final Shader transparencyShader;
 
     private final Map<Vector2i, MeshBundle> chunkMeshes;
     private final Map<Vector3i, Future<MeshBundle>> meshFutures;
@@ -49,8 +52,8 @@ public class WorldRenderer {
         this.world = world;
 
         this.projectionMatrix = new Matrix4f();
-        this.solidsShader = new SolidsShader();
-        this.transparencyShader = new TransparencyShader();
+        this.solidsShader = ResourceLoader.loadShader("Solid Mesh Shader", "res/shaders/world/solid_vert.glsl", "res/shaders/world/solid_frag.glsl");
+        this.transparencyShader = ResourceLoader.loadShader("Transparent Mesh Shader", "res/shaders/world/transparent_vert.glsl", "res/shaders/world/transparent_frag.glsl");
 
         this.tester = new FrustumCullingTester();
 
@@ -68,9 +71,9 @@ public class WorldRenderer {
         var config = Config.getInstance();
         VIEW_DISTANCE = config.get("view_distance", Integer.class);
 
-        transparencyShader.start();
-        transparencyShader.loadLeavesId(BlockRegistry.getBlock(6).getTopTexture());
-        transparencyShader.loadWaterId(BlockRegistry.getBlock(7).getTopTexture());
+        transparencyShader.bind();
+        transparencyShader.loadInt("leavesId", BlockRegistry.getBlock(6).getTopTexture());
+        transparencyShader.loadInt("waterId", BlockRegistry.getBlock(7).getTopTexture());
 
         Valkyrie.LOG.info("World renderer has been setup");
     }
@@ -92,7 +95,7 @@ public class WorldRenderer {
             chunksToRender.put(position, mesh);
         });
 
-        glBindTexture(GL_TEXTURE_2D, BlockRegistry.TILESET_ID);
+        Renderer.bindTexture2D(BlockRegistry.TILESET_TEXTURE_ID);
         // TODO: Move to a single draw call
         renderSolidMeshes(camera, headBlock, chunksToRender);
         renderTransparentMeshes(camera, headBlock, chunksToRender);
@@ -119,14 +122,15 @@ public class WorldRenderer {
         Renderer.setCullFace(false);
 
         // Renders the solid mesh for all chunks
-        solidsShader.start();
-        solidsShader.loadViewMatrix(camera);
-        solidsShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
-        solidsShader.setInWater(headBlock == 7);
+        solidsShader.bind();
+        solidsShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
+        solidsShader.loadVector("cameraPosition", camera.getPosition());
+        solidsShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
+        solidsShader.loadBoolean("inWater", headBlock == 7);
 
         chunksToRender.forEach((position, mesh) -> {
             for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
-                solidsShader.loadTransformationMatrix(Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
+                solidsShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
                 glBindVertexArray(mesh.getSolidMeshes(y).getVaoId());
                 glEnableVertexAttribArray(0);
@@ -146,15 +150,16 @@ public class WorldRenderer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Renderer.disableCullFace();
 
-        transparencyShader.start();
-        transparencyShader.loadViewMatrix(camera);
-        transparencyShader.loadTime((float) GLFW.glfwGetTime());
-        transparencyShader.loadViewDistance(VIEW_DISTANCE * 32 - 32);
-        transparencyShader.setInWater(headBlock == 7);
+        transparencyShader.bind();
+        transparencyShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
+        transparencyShader.loadVector("cameraPosition", camera.getPosition());
+        transparencyShader.loadFloat("time", (float) GLFW.glfwGetTime());
+        transparencyShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
+        transparencyShader.loadBoolean("inWater", headBlock == 7);
 
         chunksToRender.forEach((position, mesh) -> {
             for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
-                transparencyShader.loadTransformationMatrix(Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
+                transparencyShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
                 glBindVertexArray(mesh.getTransparentMeshes(y).getVaoId());
                 glEnableVertexAttribArray(0);
@@ -283,10 +288,10 @@ public class WorldRenderer {
         this.projectionMatrix = new Matrix4f();
         this.projectionMatrix.perspective(Valkyrie.FOV, width / (float)height, 0.01f, 5000f);
 
-        solidsShader.start();
-        solidsShader.loadProjectionMatrix(projectionMatrix);
-        transparencyShader.start();
-        transparencyShader.loadProjectionMatrix(projectionMatrix);
+        solidsShader.bind();
+        solidsShader.loadMatrix("projectionMatrix", projectionMatrix);
+        transparencyShader.bind();
+        transparencyShader.loadMatrix("projectionMatrix", projectionMatrix);
     }
 
 }
