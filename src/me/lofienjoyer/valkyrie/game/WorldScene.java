@@ -30,15 +30,10 @@ public class WorldScene implements IScene {
     private Camera camera;
     private World world;
     private WorldRenderer worldRenderer;
-    private SkyboxRenderer skyboxRenderer;
-    private SelectedBlockRenderer selectedBlockRenderer;
-    private RaycastRenderer raycastRenderer;
-    private CrosshairRenderer crosshairRenderer;
     private Player player;
-    private Vector3f hitPosition;
-    private FontRenderer fontRenderer;
     private String gpuInfo;
     private Timer worldTimer;
+    private ValkyrieFont font;
 
     int selectedBlock = 0;
     private final Map<Vector3f, Integer> blocksToSet = new HashMap<>();
@@ -48,13 +43,13 @@ public class WorldScene implements IScene {
         this.camera = new Camera();
         this.world = new World();
         this.worldRenderer = new WorldRenderer(world);
-        this.skyboxRenderer = new SkyboxRenderer();
-        skyboxRenderer.setFogColor(0.45f, 0.71f, 1.00f);
-        this.selectedBlockRenderer = new SelectedBlockRenderer();
-        this.raycastRenderer = new RaycastRenderer();
-        this.crosshairRenderer = new CrosshairRenderer();
-        var font = new ValkyrieFont("res/fonts/Silkscreen-Regular.ttf", 16);
-        this.fontRenderer = new FontRenderer(font);
+        SkyboxRenderer.init();
+        SelectedBlockRenderer.init();
+        RaycastRenderer.init();
+        CrosshairRenderer.init();
+        FontRenderer.init();
+
+        this.font = new ValkyrieFont("res/fonts/Silkscreen-Regular.ttf", 16);
 
         this.player = new Player(world);
 
@@ -89,13 +84,14 @@ public class WorldScene implements IScene {
         camera.setPosition(new Vector3f(player.getPosition().x, player.getPosition().y + 1.5f, player.getPosition().z));
         worldRenderer.update();
 
-        skyboxRenderer.render(camera);
+        SkyboxRenderer.setFogColor(0.45f, 0.71f, 1.00f);
+        SkyboxRenderer.render(camera);
 
         worldRenderer.render(camera);
 
-        hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
+        Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
         if (hitPosition != null) {
-            raycastRenderer.render(camera, hitPosition);
+            RaycastRenderer.render(camera, hitPosition);
 
             synchronized (blocksToSet) {
                 if (Input.isButtonJustPressed(0)) {
@@ -107,11 +103,11 @@ public class WorldScene implements IScene {
             }
         }
 
-        selectedBlockRenderer.render(selectedBlock);
-        crosshairRenderer.render();
+        SelectedBlockRenderer.render(selectedBlock);
+        CrosshairRenderer.render();
 
         if (Valkyrie.DEBUG_MODE) {
-            fontRenderer.render(String.format(
+            FontRenderer.render(String.format(
                     "Valkyrie 0.1.2 | FPS: %04.1f (delta: %06.4fs)" +
                             "\nMemory usage: %06.2f/%06.2f MB" +
                             "\n" + gpuInfo +
@@ -126,7 +122,7 @@ public class WorldScene implements IScene {
                     player.getPosition().x,
                     player.getPosition().y,
                     player.getPosition().z
-            ), 50, 50);
+            ), 50, 50, font);
         }
     }
 
@@ -144,15 +140,19 @@ public class WorldScene implements IScene {
     @Override
     public void onResize(int width, int height) {
         worldRenderer.setupProjectionMatrix(width, height);
-        skyboxRenderer.setupProjectionMatrix(width, height);
-        selectedBlockRenderer.setupProjectionMatrix(width, height);
-        raycastRenderer.setupProjectionMatrix(width, height);
-        fontRenderer.setupProjectionMatrix(width, height);
-        crosshairRenderer.setupProjectionMatrix(width, height);
+        SkyboxRenderer.setupProjectionMatrix(width, height);
+        SelectedBlockRenderer.setupProjectionMatrix(width, height);
+        RaycastRenderer.setupProjectionMatrix(width, height);
+        FontRenderer.setupProjectionMatrix(width, height);
+        CrosshairRenderer.setupProjectionMatrix(width, height);
     }
 
     @Override
     public void dispose() {
+        SkyboxRenderer.dispose();
+        SelectedBlockRenderer.dispose();
+        RaycastRenderer.dispose();
+        CrosshairRenderer.dispose();
         worldTimer.cancel();
     }
 

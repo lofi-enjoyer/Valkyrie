@@ -17,62 +17,75 @@ import static org.lwjgl.opengl.GL45.*;
 
 public class RaycastRenderer {
 
-    private final Mesh mesh;
-    private final Shader selectorShader;
-
-    int[] indirectData = {
+    private static final int[] indirectData = {
             36, 1, 0, 0, 0
     };
 
-    public RaycastRenderer() {
-        float[] positions = {
-                0, 0, 0,
-                0, 1, 0,
-                0, 1, 1,
-                0, 0, 1,
-                1, 0, 0,
-                1, 1, 0,
-                1, 1, 1,
-                1, 0, 1
-        };
+    private static final float[] positions = {
+            0, 0, 0,
+            0, 1, 0,
+            0, 1, 1,
+            0, 0, 1,
+            1, 0, 0,
+            1, 1, 0,
+            1, 1, 1,
+            1, 0, 1
+    };
 
-        int[] indices = {
-                0, 1, 2,
-                2, 3, 0,
+    private static final int[] indices = {
+            0, 1, 2,
+            2, 3, 0,
 
-                4, 5, 1,
-                1, 0, 4,
+            4, 5, 1,
+            1, 0, 4,
 
-                1, 5, 6,
-                6, 2, 1,
+            1, 5, 6,
+            6, 2, 1,
 
-                7, 6, 5,
-                5, 4, 7,
+            7, 6, 5,
+            5, 4, 7,
 
-                7, 4, 0,
-                0, 3, 7,
+            7, 4, 0,
+            0, 3, 7,
 
-                3, 2, 6,
-                6, 7, 3
-        };
+            3, 2, 6,
+            6, 7, 3
+    };
 
-        int iboId = glGenBuffers();
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, iboId);
+    private static Mesh mesh;
+    private static Shader shader;
+    private static int iboId;
 
-        IntBuffer ibuf = BufferUtils.createIntBuffer(indirectData.length);
-        ibuf.put(indirectData).flip();
-        glBufferData(GL_DRAW_INDIRECT_BUFFER, ibuf, GL_STATIC_DRAW);
+    private static boolean loaded;
 
-        this.mesh = new Mesh(positions, indices);
+    private RaycastRenderer() {
 
-        this.selectorShader = ResourceLoader.loadShader("Raycast Shader", "res/shaders/world/raycast_vert.glsl", "res/shaders/world/raycast_frag.glsl");
     }
 
-    public void render(Camera camera, Vector3f hitPosition) {
-        selectorShader.bind();
-        selectorShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
-        selectorShader.loadFloat("time", (float) GLFW.glfwGetTime());
-        selectorShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(hitPosition, 0));
+    public static void init() {
+        if (loaded)
+            return;
+
+        iboId = glGenBuffers();
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, iboId);
+
+        IntBuffer cmdBuffer = BufferUtils.createIntBuffer(indirectData.length);
+        cmdBuffer.put(indirectData).flip();
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, cmdBuffer, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+        mesh = new Mesh(positions, indices);
+        shader = ResourceLoader.loadShader("Raycast Shader", "res/shaders/world/raycast_vert.glsl", "res/shaders/world/raycast_frag.glsl");
+
+        loaded = true;
+    }
+
+    public static void render(Camera camera, Vector3f hitPosition) {
+        shader.bind();
+        shader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
+        shader.loadFloat("time", (float) GLFW.glfwGetTime());
+        shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(hitPosition, 0));
 
         glLineWidth(4);
         glDisable(GL_DEPTH_TEST);
@@ -82,7 +95,7 @@ public class RaycastRenderer {
         glBindVertexArray(mesh.getVaoId());
         glEnableVertexAttribArray(0);
 
-        glFinish();
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, iboId);
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, GL_ZERO, indirectData.length / 5, GL_ZERO);
 
         glBindVertexArray(0);
@@ -93,17 +106,27 @@ public class RaycastRenderer {
         glEnable(GL_CULL_FACE);
     }
 
+    public static void dispose() {
+        if (!loaded)
+            return;
+
+        iboId = 0;
+        shader.dispose();
+
+        loaded = false;
+    }
+
     /**
      * Updates the projection matrix based on the screen resolution
      * @param width Screen width
      * @param height Screen height
      */
-    public void setupProjectionMatrix(int width, int height) {
+    public static void setupProjectionMatrix(int width, int height) {
         Matrix4f projectionMatrix = new Matrix4f();
         projectionMatrix.perspective(Valkyrie.FOV, width / (float)height, 0.01f, 5000f);
 
-        selectorShader.bind();
-        selectorShader.loadMatrix("projectionMatrix", projectionMatrix);
+        shader.bind();
+        shader.loadMatrix("projectionMatrix", projectionMatrix);
     }
 
 }

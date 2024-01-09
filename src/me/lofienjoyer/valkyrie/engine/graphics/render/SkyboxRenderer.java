@@ -13,6 +13,8 @@ import static org.lwjgl.opengl.GL45.*;
 
 public class SkyboxRenderer {
 
+    private static SkyboxRenderer instance;
+
     private static final float SIZE = 10f;
 
     private static final float[] VERTICES = {
@@ -61,19 +63,31 @@ public class SkyboxRenderer {
 
     private static final String[] TEXTURE_FILES = { "right", "left", "top", "bottom", "back", "front" };
 
-    private final Mesh mesh;
-    private final int texture;
-    private final Shader shader;
-    private final Vector3f fogColor;
+    private static Mesh mesh;
+    private static int texture;
+    private static Shader shader;
+    private static Vector3f fogColor;
 
-    public SkyboxRenderer() {
-        this.mesh = new Mesh(VERTICES);
-        this.texture = Valkyrie.LOADER.loadCubeMap(TEXTURE_FILES);
-        this.shader = ResourceLoader.loadShader("Skybox Shader", "res/shaders/skybox/skybox_vert.glsl", "res/shaders/skybox/skybox_frag.glsl");
-        this.fogColor = new Vector3f();
+    private static boolean loaded;
+
+    private SkyboxRenderer() {
+
     }
 
-    public void render(Camera camera) {
+    public static void init() {
+        if (loaded)
+            return;
+
+        // TODO: 9/1/24 Dispose mesh and texture
+        mesh = new Mesh(VERTICES);
+        texture = Valkyrie.LOADER.loadCubeMap(TEXTURE_FILES);
+        shader = ResourceLoader.loadShader("Skybox Shader", "res/shaders/skybox/skybox_vert.glsl", "res/shaders/skybox/skybox_frag.glsl");
+        fogColor = new Vector3f();
+
+        loaded = true;
+    }
+
+    public static void render(Camera camera) {
         Renderer.disableDepthTest();
 
         shader.bind();
@@ -92,22 +106,31 @@ public class SkyboxRenderer {
         Renderer.enableDepthTest();
     }
 
-    public void setFogColor(float r, float g, float b) {
+    public static void dispose() {
+        if (!loaded)
+            return;
+
+        shader.dispose();
+        fogColor = null;
+
+        loaded = false;
+    }
+
+    public static void setFogColor(float r, float g, float b) {
         fogColor.x = r;
         fogColor.y = g;
         fogColor.z = b;
     }
 
-    public void setFogColor(Vector3f color) {
+    public static void setFogColor(Vector3f color) {
         setFogColor(color.x, color.y, color.z);
     }
 
-    public void setupProjectionMatrix(int width, int height) {
+    public static void setupProjectionMatrix(int width, int height) {
         Matrix4f projectionMatrix = new Matrix4f();
         projectionMatrix.perspective(Valkyrie.FOV, width / (float)height, 0.01f, 5000f);
 
         shader.bind();
         shader.loadMatrix("projectionMatrix", projectionMatrix);
     }
-
 }

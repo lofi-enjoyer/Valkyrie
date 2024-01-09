@@ -14,53 +14,65 @@ import org.lwjgl.opengl.GL30;
 
 public class SelectedBlockRenderer {
 
-    private final Mesh mesh;
-    private final Matrix4f transformationMatrix;
-    private final Shader shader;
+    // TODO: 9/1/24 Change this to use a QuadMesh
+    private static final float[] positions = {
+            0, 0, 0,
+            0, 1, 0,
+            0, 1, 1,
+            0, 0, 1,
+            1, 0, 0,
+            1, 1, 0,
+            1, 1, 1,
+            1, 0, 1
+    };
 
-    public SelectedBlockRenderer() {
-        // TODO: 9/1/24 Change this to use a QuadMesh
-        float[] positions = {
-                0, 0, 0,
-                0, 1, 0,
-                0, 1, 1,
-                0, 0, 1,
-                1, 0, 0,
-                1, 1, 0,
-                1, 1, 1,
-                1, 0, 1
-        };
+    private static final int[] indices = {
+            0, 1, 2,
+            2, 3, 0,
 
-        int[] indices = {
-                0, 1, 2,
-                2, 3, 0,
+            4, 5, 1,
+            1, 0, 4,
 
-                4, 5, 1,
-                1, 0, 4,
+            1, 5, 6,
+            6, 2, 1,
 
-                1, 5, 6,
-                6, 2, 1,
+            7, 6, 5,
+            5, 4, 7,
 
-                7, 6, 5,
-                5, 4, 7,
+            7, 4, 0,
+            0, 3, 7,
 
-                7, 4, 0,
-                0, 3, 7,
+            3, 2, 6,
+            6, 7, 3
+    };
 
-                3, 2, 6,
-                6, 7, 3
-        };
+    private static Mesh mesh;
+    private static Matrix4f transformationMatrix;
+    private static Shader shader;
 
-        this.mesh = new Mesh(positions, indices);
-        this.shader = ResourceLoader.loadShader("Selected Block Shader",
-                "res/shaders/gui/selected_block_vert.glsl",
-                "res/shaders/gui/selected_block_frag.glsl");
-        this.transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 45, 0));
+    private static boolean loaded;
+
+    private SelectedBlockRenderer() {
+
     }
 
-    public void render(int id) {
+    public static void init() {
+        if (loaded)
+            return;
+
+        mesh = new Mesh(positions, indices);
+        shader = ResourceLoader.loadShader("Selected Block Shader",
+           "res/shaders/gui/selected_block_vert.glsl",
+           "res/shaders/gui/selected_block_frag.glsl");
+        transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 45, 0));
+
+        loaded = true;
+    }
+
+    public static void render(int id) {
         Block block = BlockRegistry.getBlock(id);
-        if (block == null) return;
+        if (block == null)
+            return;
 
         Renderer.enableBlend();
 
@@ -79,7 +91,17 @@ public class SelectedBlockRenderer {
         Renderer.disableBlend();
     }
 
-    public void setupProjectionMatrix(int width, int height) {
+    public static void dispose() {
+        if (!loaded)
+            return;
+
+        shader.dispose();
+        transformationMatrix = null;
+
+        loaded = false;
+    }
+
+    public static void setupProjectionMatrix(int width, int height) {
         float relation = width / (float)height;
 
         Matrix4f projectionMatrix = new Matrix4f();
