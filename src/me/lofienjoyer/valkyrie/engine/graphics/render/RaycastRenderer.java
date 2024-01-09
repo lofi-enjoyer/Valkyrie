@@ -3,7 +3,8 @@ package me.lofienjoyer.valkyrie.engine.graphics.render;
 import me.lofienjoyer.valkyrie.Valkyrie;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.Mesh;
-import me.lofienjoyer.valkyrie.engine.graphics.shaders.SelectorShader;
+import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -17,9 +18,7 @@ import static org.lwjgl.opengl.GL45.*;
 public class RaycastRenderer {
 
     private final Mesh mesh;
-    private final SelectorShader selectorShader;
-
-    private Matrix4f projectionMatrix;
+    private final Shader selectorShader;
 
     int[] indirectData = {
             36, 1, 0, 0, 0
@@ -66,15 +65,14 @@ public class RaycastRenderer {
 
         this.mesh = new Mesh(positions, indices);
 
-        this.selectorShader = new SelectorShader();
+        this.selectorShader = ResourceLoader.loadShader("Raycast Shader", "res/shaders/world/raycast_vert.glsl", "res/shaders/world/raycast_frag.glsl");
     }
 
     public void render(Camera camera, Vector3f hitPosition) {
-        // Highlights the voxel the player is looking at
-        selectorShader.start();
-        selectorShader.loadViewMatrix(camera);
-        selectorShader.loadTime((float) GLFW.glfwGetTime());
-        selectorShader.loadTransformationMatrix(Maths.createTransformationMatrix(hitPosition, 0));
+        selectorShader.bind();
+        selectorShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
+        selectorShader.loadFloat("time", (float) GLFW.glfwGetTime());
+        selectorShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(hitPosition, 0));
 
         glLineWidth(4);
         glDisable(GL_DEPTH_TEST);
@@ -86,7 +84,6 @@ public class RaycastRenderer {
 
         glFinish();
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, GL_ZERO, indirectData.length / 5, GL_ZERO);
-//        glDrawElements(GL_TRIANGLES, mesh.getVertexCount(), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);
 
@@ -102,11 +99,11 @@ public class RaycastRenderer {
      * @param height Screen height
      */
     public void setupProjectionMatrix(int width, int height) {
-        this.projectionMatrix = new Matrix4f();
-        this.projectionMatrix.perspective(Valkyrie.FOV, width / (float)height, 0.01f, 5000f);
+        Matrix4f projectionMatrix = new Matrix4f();
+        projectionMatrix.perspective(Valkyrie.FOV, width / (float)height, 0.01f, 5000f);
 
-        selectorShader.start();
-        selectorShader.loadProjectionMatrix(projectionMatrix);
+        selectorShader.bind();
+        selectorShader.loadMatrix("projectionMatrix", projectionMatrix);
     }
 
 }
