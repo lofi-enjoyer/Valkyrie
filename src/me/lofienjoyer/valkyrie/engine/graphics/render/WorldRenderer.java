@@ -63,6 +63,7 @@ public class WorldRenderer {
         this.chunksToUpdate = new HashMap<>();
         this.eventsToProcess = new ArrayList<>();
 
+        // TODO: 9/1/24 Dispose this when the instance is destroyed
         Valkyrie.EVENT_HANDLER.registerListener(ChunkLoadEvent.class, this::handleChunkLoading);
         Valkyrie.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdating);
         Valkyrie.EVENT_HANDLER.registerListener(ChunkUnloadEvent.class, this::handleChunkUnloading);

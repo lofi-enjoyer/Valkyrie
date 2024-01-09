@@ -49,6 +49,7 @@ public class WorldScene implements IScene {
         this.world = new World();
         this.worldRenderer = new WorldRenderer(world);
         this.skyboxRenderer = new SkyboxRenderer();
+        skyboxRenderer.setFogColor(0.45f, 0.71f, 1.00f);
         this.selectedBlockRenderer = new SelectedBlockRenderer();
         this.raycastRenderer = new RaycastRenderer();
         this.crosshairRenderer = new CrosshairRenderer();
@@ -57,6 +58,7 @@ public class WorldScene implements IScene {
 
         this.player = new Player(world);
 
+        // TODO: 9/1/24 Move scroll callback to the Input class
         GLFW.glfwSetScrollCallback(Valkyrie.WINDOW_ID, (id, xOffset, yOffset) -> {
             selectedBlock += yOffset;
             if (selectedBlock > BlockRegistry.getBlockCount() - 1) {

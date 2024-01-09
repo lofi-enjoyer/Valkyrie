@@ -17,7 +17,7 @@ public class CrosshairRenderer {
     private final Shader fboShader;
 
     public CrosshairRenderer() {
-        this.crosshairTexture = Valkyrie.LOADER.loadTexture("res/textures/crosshair.png");
+        this.crosshairTexture = Valkyrie.LOADER.loadTexture("res/textures/gui/crosshair.png");
         this.quadMesh = new QuadMesh();
         this.fboShader = ResourceLoader.loadShader("crosshair-shader", "res/shaders/crosshair_vertex.glsl", "res/shaders/crosshair_fragment.glsl");
 

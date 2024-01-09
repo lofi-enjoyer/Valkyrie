@@ -116,10 +116,10 @@ public class BlockRegistry {
     }
 
     private static int getTextureId(String textureName) {
-        int textureId = texturesList.indexOf("res/textures/" + textureName + ".png");
+        int textureId = texturesList.indexOf("res/textures/blocks/" + textureName + ".png");
 
         if (textureId == -1) {
-            texturesList.add("res/textures/" + textureName + ".png");
+            texturesList.add("res/textures/blocks/" + textureName + ".png");
             textureId = texturesList.size() - 1;
         }
 
