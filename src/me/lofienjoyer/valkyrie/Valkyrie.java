@@ -29,6 +29,7 @@ public class Valkyrie {
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
     private static ScheduledExecutorService meshingService;
+    private static Framebuffer mainFramebuffer;
 
     public static long WINDOW_ID;
     public static float FOV = (float) Math.toRadians(80.0);
@@ -39,7 +40,6 @@ public class Valkyrie {
     private final Config config;
 
     private IScene currentScene;
-    private Framebuffer mainFramebuffer;
 
     public Valkyrie() {
         LOG.setLevel(Level.INFO);
@@ -72,7 +72,7 @@ public class Valkyrie {
 
         GL.createCapabilities();
 
-        this.mainFramebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
+        mainFramebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
 
         // Sets up the block registry
         BlockRegistry.setup();
@@ -161,6 +161,10 @@ public class Valkyrie {
 
     public static ScheduledExecutorService getMeshingService() {
         return meshingService;
+    }
+
+    public static Framebuffer getMainFramebuffer() {
+        return mainFramebuffer;
     }
 
 }

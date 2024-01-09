@@ -4,13 +4,14 @@ import me.lofienjoyer.valkyrie.Valkyrie;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.graphics.display.Window;
 import me.lofienjoyer.valkyrie.engine.graphics.font.ValkyrieFont;
-import me.lofienjoyer.valkyrie.engine.graphics.render.FontRenderer;
-import me.lofienjoyer.valkyrie.engine.graphics.render.RaycastRenderer;
-import me.lofienjoyer.valkyrie.engine.graphics.render.SkyboxRenderer;
-import me.lofienjoyer.valkyrie.engine.graphics.render.WorldRenderer;
+import me.lofienjoyer.valkyrie.engine.graphics.framebuffer.ColorNormalFramebuffer;
+import me.lofienjoyer.valkyrie.engine.graphics.mesh.QuadMesh;
+import me.lofienjoyer.valkyrie.engine.graphics.render.*;
 import me.lofienjoyer.valkyrie.engine.graphics.render.gui.CrosshairRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.gui.SelectedBlockRenderer;
+import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
 import me.lofienjoyer.valkyrie.engine.input.Input;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import me.lofienjoyer.valkyrie.engine.world.Player;
@@ -23,7 +24,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 public class WorldScene implements IScene {
 
@@ -34,6 +36,9 @@ public class WorldScene implements IScene {
     private String gpuInfo;
     private Timer worldTimer;
     private ValkyrieFont font;
+    private ColorNormalFramebuffer worldFbo;
+    private QuadMesh quadMesh;
+    private Shader shader;
 
     int selectedBlock = 0;
     private final Map<Vector3f, Integer> blocksToSet = new HashMap<>();
@@ -48,6 +53,9 @@ public class WorldScene implements IScene {
         RaycastRenderer.init();
         CrosshairRenderer.init();
         FontRenderer.init();
+        this.worldFbo = new ColorNormalFramebuffer(640, 360);
+        this.quadMesh = new QuadMesh();
+        this.shader = ResourceLoader.loadShader("FBO Shader", "res/shaders/postprocessing/world_vert.glsl", "res/shaders/postprocessing/world_frag.glsl");
 
         this.font = new ValkyrieFont("res/fonts/Silkscreen-Regular.ttf", 16);
 
@@ -87,8 +95,27 @@ public class WorldScene implements IScene {
         SkyboxRenderer.setFogColor(0.45f, 0.71f, 1.00f);
         SkyboxRenderer.render(camera);
 
+        // Activates the world fbo and clears its buffers
+        worldFbo.bind();
+        Renderer.setClearColor(0, 0, 0, 0);
+        Renderer.clearColorBuffer();
+        Renderer.clearDepthBuffer();
+
         worldRenderer.render(camera);
 
+        // Draw the world fbo to the main fbo
+        var mainFbo = Valkyrie.getMainFramebuffer();
+        mainFbo.bind();
+        shader.bind();
+        glViewport(0, 0, mainFbo.getWidth(), mainFbo.getHeight());
+        glBindVertexArray(quadMesh.getVaoId());
+        Renderer.disableDepthTest();
+        Renderer.enableBlend();
+        Renderer.bindTexture2D(worldFbo.getColorTextureId());
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        Renderer.disableBlend();
+
+        // Casts a ray and, if found a block, renders a cube highlighting its position
         Vector3f hitPosition = world.rayCast(camera.getPosition(), camera.getDirection(), 10, false);
         if (hitPosition != null) {
             RaycastRenderer.render(camera, hitPosition);
@@ -106,6 +133,7 @@ public class WorldScene implements IScene {
         SelectedBlockRenderer.render(selectedBlock);
         CrosshairRenderer.render();
 
+        // Prints debug information to the screen if the debug mode is enabled
         if (Valkyrie.DEBUG_MODE) {
             FontRenderer.render(String.format(
                     "Valkyrie 0.1.2 | FPS: %04.1f (delta: %06.4fs)" +
@@ -145,6 +173,7 @@ public class WorldScene implements IScene {
         RaycastRenderer.setupProjectionMatrix(width, height);
         FontRenderer.setupProjectionMatrix(width, height);
         CrosshairRenderer.setupProjectionMatrix(width, height);
+        worldFbo.resize(width, height);
     }
 
     @Override

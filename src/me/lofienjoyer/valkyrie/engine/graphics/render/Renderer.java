@@ -36,4 +36,16 @@ public class Renderer {
         glBindTexture(GL_TEXTURE_2D, textureId);
     }
 
+    public static void clearColorBuffer() {
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    public static void clearDepthBuffer() {
+        glClear(GL_DEPTH_BUFFER_BIT);
+    }
+
+    public static void setClearColor(float red, float green, float blue, float alpha) {
+        glClearColor(red, green, blue, alpha);
+    }
+
 }
