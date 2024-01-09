@@ -32,7 +32,7 @@ void main() {
         textureColour *= vec4(0.5, 0.5, 1, 1);
     }
 
-    gl_FragColor = textureColour * faceLight;
+    gl_FragColor = textureColour * vec4(vec3(faceLight), 1.0);
     gl_FragColor = mix(vec4(skyColor, 1.0), gl_FragColor, visibility);
 
 }

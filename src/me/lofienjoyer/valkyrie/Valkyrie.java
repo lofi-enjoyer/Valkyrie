@@ -8,15 +8,13 @@ import me.lofienjoyer.valkyrie.engine.graphics.framebuffer.ColorFramebuffer;
 import me.lofienjoyer.valkyrie.engine.graphics.framebuffer.Framebuffer;
 import me.lofienjoyer.valkyrie.engine.graphics.loader.Loader;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.QuadMesh;
-import me.lofienjoyer.valkyrie.engine.graphics.shaders.FboShader;
 import me.lofienjoyer.valkyrie.engine.input.Input;
 import me.lofienjoyer.valkyrie.engine.log.ValkyrieLogHandler;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import org.lwjgl.opengl.GL;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
@@ -31,15 +29,15 @@ public class Valkyrie {
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
     private static ScheduledExecutorService meshingService;
+    private static Framebuffer mainFramebuffer;
 
+    public static long WINDOW_ID;
     public static float FOV = (float) Math.toRadians(80.0);
     public static boolean DEBUG_MODE = false;
 
     private final Window window;
     private final Input input;
     private final Config config;
-    public static long WINDOW_ID;
-    private Framebuffer framebuffer;
 
     private IScene currentScene;
 
@@ -47,16 +45,17 @@ public class Valkyrie {
         LOG.setLevel(Level.INFO);
 
         this.config = Config.getInstance();
-
-        this.window = Window.getInstance();
-        window.setSize(config.get("window_width", Integer.class), config.get("window_height", Integer.class));
-        window.setTitle("Valkyrie");
-        FOV = (float) Math.toRadians(config.get("fov", Double.class));
-
         this.input = Input.getInstance();
+        this.window = Window.getInstance();
+        WINDOW_ID = window.getId();
+    }
 
-        int meshingThreadCount = config.get("meshing_thread_count", Integer.class);
-
+    /**
+     * Sets up the basic resources for the engine
+     */
+    public void init() {
+        // Sets up the meshing service
+        var meshingThreadCount = config.get("meshing_thread_count", Integer.class);
         meshingService = new ScheduledThreadPoolExecutor(config.get("meshing_thread_count", Integer.class), r -> {
             Thread thread = new Thread(r, "Meshing Thread");
             thread.setDaemon(true);
@@ -64,69 +63,80 @@ public class Valkyrie {
             return thread;
         });
 
-        WINDOW_ID = window.getId();
         EVENT_HANDLER.registerListener(StartupEvent.class, (event) -> {
             LOG.info("Successful startup!");
             LOG.info("Meshing thread count: " + meshingThreadCount);
         });
-    }
 
-    public void init() {
+        FOV = (float) Math.toRadians(config.get("fov", Double.class));
+
         GL.createCapabilities();
 
+        mainFramebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
+
+        // Sets up the block registry
         BlockRegistry.setup();
 
+        // Sets up the window properties and callbacks, and then shows it
+        window.setSize(config.get("window_width", Integer.class), config.get("window_height", Integer.class));
+        window.setTitle("Valkyrie");
         window.setClearColor(0.45f, 0.71f, 1.00f, 1f);
         window.registerResizeCallback((windowId, width, height) -> glViewport(0, 0, width, height));
         window.registerResizeCallback(this::onResize);
-
         window.show();
+
+        // Sends an startup event
+        EVENT_HANDLER.process(new StartupEvent());
     }
 
+    /**
+     * Starts the engine main loop
+     */
     public void loop() {
         long lastFrame = System.nanoTime();
         float delta = 0f;
 
-        framebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
-        FboShader shader = new FboShader();
-        QuadMesh quadMesh = new QuadMesh();
-
-        EVENT_HANDLER.process(new StartupEvent());
+        var fboShader = ResourceLoader.loadShader("FBO Shader", "res/shaders/fbo/fbo_vert.glsl", "res/shaders/fbo/fbo_frag.glsl");
+        var quadMesh = new QuadMesh();
 
         while (window.keepOpen()) {
-
-
-            framebuffer.bind();
+            // Render current scene to the framebuffer
+            mainFramebuffer.bind();
             glClearColor(0.125f, 0f, 1.0f, 0.5f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
-            glViewport(0, 0, framebuffer.getWidth(), framebuffer.getHeight());
+            glViewport(0, 0, mainFramebuffer.getWidth(), mainFramebuffer.getHeight());
 
             if (currentScene != null)
                 currentScene.render(delta);
 
-            framebuffer.unbind();
+            mainFramebuffer.unbind();
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            shader.start();
-
+            // Draw the framebuffer to the window
+            fboShader.bind();
             glViewport(0, 0, window.getWidth(), window.getHeight());
             glBindVertexArray(quadMesh.getVaoId());
             glDisable(GL_DEPTH_TEST);
-            glBindTexture(GL_TEXTURE_2D, framebuffer.getColorTextureId());
+            glBindTexture(GL_TEXTURE_2D, mainFramebuffer.getColorTextureId());
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
+            // Updates the input handler and window
+            // IMPORTANT: the window must be always updated after the input handler,
+            // so it registers properly all the key and button updates
             input.update();
             window.update();
 
             delta = (System.nanoTime() - lastFrame) / 1000000000f;
             lastFrame = System.nanoTime();
         }
-
-        currentScene.onClose();
     }
 
+    /**
+     * Disposes the current scene, sets up the new one and calls its {@code onResize} method once
+     * @param scene New scene
+     */
     public void setCurrentScene(IScene scene) {
         if (currentScene != null)
             currentScene.dispose();
@@ -136,16 +146,25 @@ public class Valkyrie {
     }
 
     private void onResize(long windowId, int width, int height) {
-        framebuffer.resize(width, height);
-        currentScene.onResize(width, height);
+        if (currentScene != null)
+            currentScene.onResize(width, height);
+
+        mainFramebuffer.resize(width, height);
     }
 
     public void dispose() {
+        if (currentScene != null)
+            currentScene.dispose();
+
         LOADER.dispose();
     }
 
     public static ScheduledExecutorService getMeshingService() {
         return meshingService;
+    }
+
+    public static Framebuffer getMainFramebuffer() {
+        return mainFramebuffer;
     }
 
 }

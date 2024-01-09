@@ -10,6 +10,4 @@ public interface IScene {
 
     void onResize(int width, int height );
 
-    void onClose();
-
 }

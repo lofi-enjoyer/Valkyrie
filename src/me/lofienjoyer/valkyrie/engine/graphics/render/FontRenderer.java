@@ -17,23 +17,30 @@ public class FontRenderer {
 
     private static final int BATCH_SIZE = 1024 * 32;
 
-    private final ValkyrieFont font;
-    private final BatchMesh batchMesh;
-    private final Shader shader;
+    private static BatchMesh batchMesh;
+    private static Shader shader;
 
-    public FontRenderer(ValkyrieFont font) {
-        this.font = font;
-        this.batchMesh = new BatchMesh(BATCH_SIZE);
+    private static boolean loaded;
 
-        this.shader = ResourceLoader.loadShader("fontShader", "res/shaders/font/font_vertex.glsl", "res/shaders/font/font_fragment.glsl");
+    private FontRenderer(ValkyrieFont font) {
+    }
+
+    public static void init() {
+        if (loaded)
+            return;
+        batchMesh = new BatchMesh(BATCH_SIZE);
+
+        shader = ResourceLoader.loadShader("fontShader", "res/shaders/font/font_vertex.glsl", "res/shaders/font/font_fragment.glsl");
         var projMatrix = new Matrix4f();
         projMatrix.ortho(-8, 8, -8, 8, -50, 50);
         shader.bind();
         shader.loadMatrix("projMatrix", projMatrix);
         shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(0, 0), 32));
+
+        loaded = true;
     }
 
-    public void render(String text, int x, int y) {
+    public static void render(String text, int x, int y, ValkyrieFont font) {
         shader.bind();
         shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(x, y), 2048));
         glDisable(GL_DEPTH_TEST);
@@ -70,7 +77,7 @@ public class FontRenderer {
         glEnable(GL_CULL_FACE);
     }
 
-    private void draw(List<Float> data) {
+    private static void draw(List<Float> data) {
         var dataArray = new float[data.size()];
         for (int i = 0; i < dataArray.length; i++) {
             dataArray[i] = data.get(i);
@@ -83,7 +90,7 @@ public class FontRenderer {
         glDrawArrays(GL_TRIANGLES, 0, dataArray.length / 4);
     }
 
-    public void setupProjectionMatrix(int width, int height) {
+    public static void setupProjectionMatrix(int width, int height) {
         var projMatrix = new Matrix4f();
         projMatrix.ortho(0, width, height, 0, -50, 50);
         shader.bind();

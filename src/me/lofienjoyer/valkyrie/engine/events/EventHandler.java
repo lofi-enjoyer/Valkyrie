@@ -5,12 +5,9 @@ import java.util.*;
 public class EventHandler {
 
     private final Map<Class<? extends Event>, Set<EventConsumer>> listeners;
-    private List<Event> eventsToProcess;
-    private final List<Event> nextTickEvents;
 
     public EventHandler() {
         this.listeners = new HashMap<>();
-        this.nextTickEvents = new ArrayList<>();
     }
 
     /**
@@ -21,24 +18,6 @@ public class EventHandler {
         var eventListeners = listeners.get(event.getClass());
         if (eventListeners != null)
             eventListeners.forEach(consumer -> consumer.consume(event));
-//        synchronized (nextTickEvents) {
-//            nextTickEvents.add(event);
-//        }
-    }
-
-    /**
-     * Processes the list of pending events and then clears it.
-     */
-    public synchronized void update() {
-        synchronized (nextTickEvents) {
-            eventsToProcess = new ArrayList<>(nextTickEvents);
-            nextTickEvents.clear();
-        }
-        eventsToProcess.forEach(event -> {
-            var eventListeners = listeners.get(event.getClass());
-            if (eventListeners != null)
-                eventListeners.forEach(consumer -> consumer.consume(event));
-        });
     }
 
     /**

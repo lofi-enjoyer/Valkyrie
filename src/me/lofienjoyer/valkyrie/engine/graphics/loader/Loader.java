@@ -228,7 +228,8 @@ public class Loader {
                 IntBuffer h = stack.mallocInt(1);
                 IntBuffer channels = stack.mallocInt(1);
 
-                buf = stbi_load("res/skybox/" + textureFiles[i] + ".png", w, h, channels, 4);
+                // TODO: 9/1/24 Change this to not be a hardcoded path
+                buf = stbi_load("res/textures/skybox/" + textureFiles[i] + ".png", w, h, channels, 4);
                 if (buf == null) {
                     Valkyrie.LOG.severe("Image file [" + textureFiles[i]  + "] not loaded: " + stbi_failure_reason());
                     return -1;

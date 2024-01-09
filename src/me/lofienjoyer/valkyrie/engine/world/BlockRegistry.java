@@ -14,7 +14,7 @@ import java.util.Map;
 public class BlockRegistry {
 
     private static Block[] BLOCKS;
-    public static int TILESET_ID;
+    public static int TILESET_TEXTURE_ID;
     private static List<String> texturesList;
 
     public static void setup() {
@@ -99,7 +99,7 @@ public class BlockRegistry {
 
         blocksToLoad.sort(Comparator.comparingInt(Block::getId));
 
-        TILESET_ID = Valkyrie.LOADER.loadTileset(texturesList.toArray(new String[0]));
+        TILESET_TEXTURE_ID = Valkyrie.LOADER.loadTileset(texturesList.toArray(new String[0]));
 
         blocksToLoad.forEach(Block::setupMesh);
 
@@ -116,10 +116,10 @@ public class BlockRegistry {
     }
 
     private static int getTextureId(String textureName) {
-        int textureId = texturesList.indexOf("res/textures/" + textureName + ".png");
+        int textureId = texturesList.indexOf("res/textures/blocks/" + textureName + ".png");
 
         if (textureId == -1) {
-            texturesList.add("res/textures/" + textureName + ".png");
+            texturesList.add("res/textures/blocks/" + textureName + ".png");
             textureId = texturesList.size() - 1;
         }
 

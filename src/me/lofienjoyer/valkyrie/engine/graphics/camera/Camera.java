@@ -46,7 +46,7 @@ public class Camera {
 
     // FIXME: 09/01/2022 replace the camera update with a playercontroller
     public void update(long window, float delta) {
-
+        // TODO: 9/1/24 Change this to use the Input class
         if (GLFW.glfwGetKey(window, GLFW_KEY_ESCAPE) == 1) {
             mouseLocked = false;
             GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW_CURSOR_NORMAL);
