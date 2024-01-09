@@ -13,7 +13,7 @@ import static org.lwjgl.opengl.GL45.*;
 
 public class SkyboxRenderer {
 
-    private static final float SIZE = 1f;
+    private static final float SIZE = 10f;
 
     private static final float[] VERTICES = {
             -SIZE,  SIZE, -SIZE,
@@ -105,6 +105,9 @@ public class SkyboxRenderer {
     public void setupProjectionMatrix(int width, int height) {
         Matrix4f projectionMatrix = new Matrix4f();
         projectionMatrix.perspective(Valkyrie.FOV, width / (float)height, 0.01f, 5000f);
+
+        shader.bind();
+        shader.loadMatrix("projectionMatrix", projectionMatrix);
     }
 
 }
