@@ -1,7 +1,9 @@
 package me.lofienjoyer.valkyrie.engine.graphics.render.gui;
 
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.Mesh;
-import me.lofienjoyer.valkyrie.engine.graphics.shaders.gui.SelectedBlockShader;
+import me.lofienjoyer.valkyrie.engine.graphics.render.Renderer;
+import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import me.lofienjoyer.valkyrie.engine.world.Block;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
@@ -13,11 +15,11 @@ import org.lwjgl.opengl.GL30;
 public class SelectedBlockRenderer {
 
     private final Mesh mesh;
-    private Matrix4f projectionMatrix;
-    private Matrix4f transformationMatrix;
-    private SelectedBlockShader shader;
+    private final Matrix4f transformationMatrix;
+    private final Shader shader;
 
     public SelectedBlockRenderer() {
+        // TODO: 9/1/24 Change this to use a QuadMesh
         float[] positions = {
                 0, 0, 0,
                 0, 1, 0,
@@ -50,7 +52,9 @@ public class SelectedBlockRenderer {
         };
 
         this.mesh = new Mesh(positions, indices);
-        this.shader = new SelectedBlockShader();
+        this.shader = ResourceLoader.loadShader("Selected Block Shader",
+                "res/shaders/gui/selected_block_vert.glsl",
+                "res/shaders/gui/selected_block_frag.glsl");
         this.transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 45, 0));
     }
 
@@ -58,11 +62,11 @@ public class SelectedBlockRenderer {
         Block block = BlockRegistry.getBlock(id);
         if (block == null) return;
 
-        GL30.glEnable(GL30.GL_BLEND);
+        Renderer.enableBlend();
 
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, BlockRegistry.TILESET_TEXTURE_ID);
+        Renderer.bindTexture2D(BlockRegistry.TILESET_TEXTURE_ID);
 
-        shader.start();
+        shader.bind();
 
         GL30.glBindVertexArray(block.getMesh().getVaoId());
         GL30.glEnableVertexAttribArray(0);
@@ -72,18 +76,18 @@ public class SelectedBlockRenderer {
 
         GL30.glBindVertexArray(0);
 
-        GL30.glDisable(GL30.GL_BLEND);
+        Renderer.disableBlend();
     }
 
     public void setupProjectionMatrix(int width, int height) {
         float relation = width / (float)height;
 
-        this.projectionMatrix = new Matrix4f();
-        this.projectionMatrix.ortho(0, 9 * relation, 0, 9, -50, 50);
+        Matrix4f projectionMatrix = new Matrix4f();
+        projectionMatrix.ortho(0, 9 * relation, 0, 9, -50, 50);
 
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.loadTransformationMatrix(transformationMatrix);
+        shader.bind();
+        shader.loadMatrix("projectionMatrix", projectionMatrix);
+        shader.loadMatrix("transformationMatrix", transformationMatrix);
     }
 
 }
