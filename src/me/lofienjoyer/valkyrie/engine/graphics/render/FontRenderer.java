@@ -49,7 +49,7 @@ public class FontRenderer {
         for (byte aByte : text.getBytes()) {
             var charInfo = font.getGlyph(aByte);
             if (aByte == '\n') {
-                yOffset += charInfo.getHeight() + 4;
+                yOffset += font.getLineHeight() + 4;
                 xOffset = 0;
                 continue;
             }
