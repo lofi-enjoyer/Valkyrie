@@ -120,6 +120,7 @@ public class World {
         playerPosition.x = playerX;
         playerPosition.y = playerZ;
 
+        boolean sortGenerationOrder = false;
         for (int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++) {
             for (int z = -LOAD_DISTANCE; z <= LOAD_DISTANCE; z++) {
                 int chunkX = playerX + x;
@@ -128,6 +129,7 @@ public class World {
                 var chunk = getChunk(chunkX, chunkZ);
                 if (chunk == null) {
                     addChunk(chunkX, chunkZ);
+                    sortGenerationOrder = true;
                 } else {
                     if (chunk.getState() == ChunkState.UNLOADED)
                         continue;
@@ -140,6 +142,12 @@ public class World {
                 }
 
             }
+        }
+
+        if (sortGenerationOrder) {
+            chunksToGenerate.sort((chunk1, chunk2) -> {
+                return (int) (chunk1.getPosition().distanceSquared(playerPosition) - chunk2.getPosition().distanceSquared(playerPosition));
+            });
         }
     }
 
