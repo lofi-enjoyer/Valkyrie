@@ -4,10 +4,12 @@ import me.lofienjoyer.valkyrie.engine.config.Config;
 import me.lofienjoyer.valkyrie.engine.events.EventHandler;
 import me.lofienjoyer.valkyrie.engine.events.global.StartupEvent;
 import me.lofienjoyer.valkyrie.engine.graphics.display.Window;
+import me.lofienjoyer.valkyrie.engine.graphics.font.ValkyrieFont;
 import me.lofienjoyer.valkyrie.engine.graphics.framebuffer.ColorFramebuffer;
 import me.lofienjoyer.valkyrie.engine.graphics.framebuffer.Framebuffer;
 import me.lofienjoyer.valkyrie.engine.graphics.loader.Loader;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.QuadMesh;
+import me.lofienjoyer.valkyrie.engine.graphics.render.FontRenderer;
 import me.lofienjoyer.valkyrie.engine.input.Input;
 import me.lofienjoyer.valkyrie.engine.log.ValkyrieLogHandler;
 import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
@@ -24,12 +26,15 @@ import static org.lwjgl.opengl.GL45.*;
 
 public class Valkyrie {
 
+    public static final String VALKYRIE_VERSION = "0.2";
+
     public static final Logger LOG = ValkyrieLogHandler.initLogs();
     public static final Loader LOADER = new Loader();
     public static final EventHandler EVENT_HANDLER = new EventHandler();
 
     private static ScheduledExecutorService meshingService;
     private static Framebuffer mainFramebuffer;
+    private static ValkyrieFont defaultFont;
 
     public static long WINDOW_ID;
     public static float FOV = (float) Math.toRadians(80.0);
@@ -73,6 +78,7 @@ public class Valkyrie {
         GL.createCapabilities();
 
         mainFramebuffer = new ColorFramebuffer(window.getWidth(), window.getHeight());
+        defaultFont = new ValkyrieFont("res/fonts/Silkscreen-Regular.ttf", 16);
 
         // Sets up the block registry
         BlockRegistry.setup();
@@ -109,6 +115,9 @@ public class Valkyrie {
 
             if (currentScene != null)
                 currentScene.render(delta);
+
+            FontRenderer.setupProjectionMatrix(mainFramebuffer.getWidth(), mainFramebuffer.getHeight());
+            FontRenderer.render("Valkyrie v" + VALKYRIE_VERSION, 10, mainFramebuffer.getHeight() - 10, defaultFont);
 
             mainFramebuffer.unbind();
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -165,6 +174,10 @@ public class Valkyrie {
 
     public static Framebuffer getMainFramebuffer() {
         return mainFramebuffer;
+    }
+
+    public static ValkyrieFont getDefaultFont() {
+        return defaultFont;
     }
 
 }

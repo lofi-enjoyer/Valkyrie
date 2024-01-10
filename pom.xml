@@ -15,6 +15,7 @@
         <joml.version>1.10.4</joml.version>
         <maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
         <platform>unspecified</platform>
+        <freetype.version>3.3.3</freetype.version>
     </properties>
 
     <profiles>
@@ -143,6 +144,15 @@
         </dependencies>
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.lwjgl</groupId>
@@ -212,6 +222,17 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.30</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-freetype</artifactId>
+            <version>${freetype.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-freetype</artifactId>
+            <version>${freetype.version}</version>
+            <classifier>${lwjgl.natives}</classifier>
         </dependency>
     </dependencies>
 

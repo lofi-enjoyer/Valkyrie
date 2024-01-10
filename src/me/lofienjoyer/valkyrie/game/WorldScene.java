@@ -136,7 +136,7 @@ public class WorldScene implements IScene {
         // Prints debug information to the screen if the debug mode is enabled
         if (Valkyrie.DEBUG_MODE) {
             FontRenderer.render(String.format(
-                    "Valkyrie 0.1.2 | FPS: %04.1f (delta: %06.4fs)" +
+                    "FPS: %04.1f (delta: %06.4fs)" +
                             "\nMemory usage: %06.2f/%06.2f MB" +
                             "\n" + gpuInfo +
                             "\nX: %.2f | Y: %.2f | Z: %.2f" +
