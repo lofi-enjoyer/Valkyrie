@@ -123,20 +123,22 @@ public class WorldRenderer {
         Renderer.setCullFace(false);
 
         // Renders the solid mesh for all chunks
-        solidsShader.bind();
-        solidsShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
-        solidsShader.loadVector("cameraPosition", camera.getPosition());
-        solidsShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
-        solidsShader.loadBoolean("inWater", headBlock == 7);
+        transparencyShader.bind();
+        transparencyShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
+        transparencyShader.loadVector("cameraPosition", camera.getPosition());
+        transparencyShader.loadFloat("time", (float) GLFW.glfwGetTime());
+        transparencyShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
+        transparencyShader.loadBoolean("inWater", headBlock == 7);
+        transparencyShader.loadBoolean("transparent", false);
 
         chunksToRender.forEach((position, mesh) -> {
             for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
-                solidsShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
+                transparencyShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
-                glBindVertexArray(mesh.getSolidMeshes(y).getVaoId());
+                glBindVertexArray(mesh.getTransparentMeshes(y).getVaoId());
                 glEnableVertexAttribArray(0);
 
-                glDrawElements(GL_TRIANGLES, mesh.getSolidMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, mesh.getTransparentMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
             }
         });
     }
@@ -157,6 +159,7 @@ public class WorldRenderer {
         transparencyShader.loadFloat("time", (float) GLFW.glfwGetTime());
         transparencyShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
         transparencyShader.loadBoolean("inWater", headBlock == 7);
+        transparencyShader.loadBoolean("transparent", true);
 
         chunksToRender.forEach((position, mesh) -> {
             for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {

@@ -69,7 +69,7 @@ public class DynamicMesher implements Mesher {
             for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++) {
                 for (int z = 0; z < CHUNK_WIDTH; z++) {
                     currentVoxel = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z);
-                    if (currentVoxel == 0 || !BlockRegistry.getBlock(currentVoxel).isTransparent()) continue;
+                    if (currentVoxel == 0) continue;
 
                     meshBlock(x, y, z, BlockRegistry.getBlock(currentVoxel));
                 }

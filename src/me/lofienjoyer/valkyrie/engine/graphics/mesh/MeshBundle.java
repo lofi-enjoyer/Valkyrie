@@ -13,10 +13,10 @@ public class MeshBundle {
 
     private final Chunk chunk;
 
-    private final Mesh[] solidMesh;
+//    private final Mesh[] solidMesh;
     private final Mesh[] transparentMesh;
 
-    private final Mesher[] greedyMesher;
+//    private final Mesher[] greedyMesher;
     private final Mesher[] dynamicMesher;
 
     private boolean loaded = false;
@@ -24,46 +24,46 @@ public class MeshBundle {
     public MeshBundle(Chunk chunk) {
         this.chunk = chunk;
 
-        this.solidMesh = new Mesh[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
-        for (int i = 0; i < solidMesh.length; i++) {
-            solidMesh[i] = Valkyrie.LOADER.allocateMesh();
-        }
+//        this.solidMesh = new Mesh[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
+//        for (int i = 0; i < solidMesh.length; i++) {
+//            solidMesh[i] = Valkyrie.LOADER.allocateMesh();
+//        }
 
         this.transparentMesh = new Mesh[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
         for (int i = 0; i < transparentMesh.length; i++) {
             transparentMesh[i] = Valkyrie.LOADER.allocateMesh();
         }
 
-        this.greedyMesher = new Mesher[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
+//        this.greedyMesher = new Mesher[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
         this.dynamicMesher = new Mesher[CHUNK_HEIGHT / CHUNK_SECTION_HEIGHT];
     }
 
     public void compute(int section) {
         ChunkPreMeshData chunkPreMeshData = new ChunkPreMeshData(chunk);
 
-        greedyMesher[section] = new GreedyMesher(chunkPreMeshData, section).compute();
+//        greedyMesher[section] = new GreedyMesher(chunkPreMeshData, section).compute();
         dynamicMesher[section] = new DynamicMesher(chunkPreMeshData, section).compute();
     }
 
     public boolean loadMeshToGpu(int section) {
-        if (greedyMesher[section] == null || dynamicMesher[section] == null)
+        if (dynamicMesher[section] == null)
             return false;
 
-        greedyMesher[section].loadToGpu(solidMesh[section]);
+//        greedyMesher[section].loadToGpu(solidMesh[section]);
         dynamicMesher[section].loadToGpu(transparentMesh[section]);
 
-        greedyMesher[section] = null;
+//        greedyMesher[section] = null;
         dynamicMesher[section] = null;
         setLoaded(true);
 
-        if (solidMesh[section].getVertexCount() == 0 && transparentMesh[section].getVertexCount() == 0)
+        if (transparentMesh[section].getVertexCount() == 0)
             return false;
 
         return true;
     }
 
     public Mesh getSolidMeshes(int section) {
-        return solidMesh[section];
+        return null;
     }
 
     public Mesh getTransparentMeshes(int section) {

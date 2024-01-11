@@ -9,6 +9,7 @@ out vec4 outColor;
 uniform sampler2D textureSampler;
 uniform float inWater;
 uniform float viewDistance;
+uniform bool transparent;
 
 const vec3 skyColor = vec3(0.45, 0.71, 1.00);
 
@@ -22,6 +23,10 @@ void main() {
     float yUv = int(passColor.z / texturesPerSide) / texturesPerSide + mod(passColor.y, 1.0) / texturesPerSide;
 
     vec4 textureColour = texture(textureSampler, vec2(xUv, yUv));
+
+    if ((textureColour.a == 1) == transparent) {
+        discard;
+    }
 
     float visibility = 1;
     if (distance > viewDistance - 64) {
