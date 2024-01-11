@@ -2,7 +2,8 @@
 
 #define PI 3.14159265359
 
-in uint vertex;
+layout (location = 0) in vec3 position;
+layout (location = 1) in uint data;
 
 out vec3 passColor;
 out vec3 passLight;
@@ -33,6 +34,7 @@ const float waterSpeed = 0.25;
 
 void main() {
 
+    uint vertex = 0;
     float y = (vertex >> 23u) & 0x1FFu;
     float x = (vertex >> 16u) & 0x7Fu;
     float z = (vertex >> 9u) & 0x7Fu;
@@ -43,7 +45,7 @@ void main() {
     // FIXME: 02/02/2023 Temporary light value
     int light = 5;
 
-    vec3 newPosition = vec3(x, y, z);
+    vec3 newPosition = position;
     if (zUv == leavesId) {
         newPosition.x += sin(y + time) / leavesMovement;
         newPosition.z += cos(x + time + 2) / leavesMovement;

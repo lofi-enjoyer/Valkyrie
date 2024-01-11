@@ -88,6 +88,20 @@ public class Loader {
         bindIndicesBuffer(indices);
     }
 
+    public void updateVAO(int vaoId, float[] positions, int[] indices) {
+        GL30.glBindVertexArray(vaoId);
+        int vboId = GL30.glGenBuffers();
+        vboList.add(vboId);
+        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
+        GL30.glBufferData(GL30.GL_ARRAY_BUFFER, positions, GL30.GL_STATIC_DRAW);
+        GL30.glEnableVertexAttribArray(0);
+        GL30.glVertexAttribPointer(0, 3, GL30.GL_FLOAT, false, 3 * Float.BYTES + Integer.BYTES, 0);
+        GL30.glEnableVertexAttribArray(1);
+        GL30.glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, 3 * Float.BYTES + Integer.BYTES, 3 * Float.BYTES);
+        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
+        bindIndicesBuffer(indices);
+    }
+
     public int loadToVAO(long[] positions, int[] indices) {
         int vao = createVAO();
         storeDataInAttributeList(0, 1, positions);
