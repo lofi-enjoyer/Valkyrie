@@ -1,7 +1,7 @@
 #version 400 core
 
 in vec3 passColor;
-in vec3 passLight;
+in float passLight;
 in float distance;
 
 out vec4 outColor;
@@ -38,7 +38,7 @@ void main() {
         textureColour *= vec4(0.5, 0.5, 1, 1);
     }
 
-    outColor = textureColour;
+    outColor = textureColour * vec4(vec3(passLight), 1.0);
     outColor = mix(vec4(skyColor, 1.0), outColor, visibility);
 
 }
