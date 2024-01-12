@@ -5,7 +5,7 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in float data;
 
-out vec3 passColor;
+out vec4 passColor;
 out float passLight;
 
 uniform mat4 transformationMatrix;
@@ -36,8 +36,9 @@ void main() {
 
     uint xUv = (uint(data) >> 0u) & 0x1u;
     uint yUv = (uint(data) >> 1u) &0x1u;
-    uint zUv = (uint(data) >> 5u);
+    uint zUv = (uint(data) >> 6u);
     uint light = (uint(data) >> 2u) &0x7u;
+    uint cull = (uint(data) >> 5u) &0x1u;
 
     vec3 newPosition = position;
     if (zUv == leavesId) {
@@ -55,7 +56,7 @@ void main() {
     vec4 positionRelativeToCam = viewMatrix * worldPosition;
 
     gl_Position = projectionMatrix * positionRelativeToCam;
-    passColor = vec3(xUv, yUv, zUv);
+    passColor = vec4(xUv, yUv, zUv, cull);
     passLight = lights[light];
 
     distance = length(cameraPosition.xz - worldPosition.xz);

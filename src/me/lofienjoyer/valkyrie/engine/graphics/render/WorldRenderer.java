@@ -119,8 +119,9 @@ public class WorldRenderer {
      */
     private void renderSolidMeshes(Camera camera, int headBlock, Map<Vector2i, MeshBundle> chunksToRender) {
         Renderer.enableDepthTest();
-        Renderer.enableCullFace();
-        Renderer.setCullFace(false);
+//        Renderer.enableCullFace();
+//        Renderer.setCullFace(false);
+        Renderer.disableCullFace();
 
         // Renders the solid mesh for all chunks
         transparencyShader.bind();
@@ -133,6 +134,8 @@ public class WorldRenderer {
 
         chunksToRender.forEach((position, mesh) -> {
             for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
+                if (mesh.getTransparentMeshes(y).getVertexCount() == 0)
+                    continue;
                 transparencyShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
                 glBindVertexArray(mesh.getTransparentMeshes(y).getVaoId());
@@ -163,6 +166,8 @@ public class WorldRenderer {
 
         chunksToRender.forEach((position, mesh) -> {
             for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
+                if (mesh.getTransparentMeshes(y).getVertexCount() == 0)
+                    continue;
                 transparencyShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
                 glBindVertexArray(mesh.getTransparentMeshes(y).getVaoId());

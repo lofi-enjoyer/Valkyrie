@@ -1,0 +1,4 @@
+id: 33
+texture: 'leaves'
+transparent: true
+collision: false

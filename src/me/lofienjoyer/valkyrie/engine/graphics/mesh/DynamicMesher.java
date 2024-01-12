@@ -75,7 +75,11 @@ public class DynamicMesher implements Mesher {
                     currentVoxel = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z);
                     if (currentVoxel == 0) continue;
 
-                    meshBlock(x, y, z, BlockRegistry.getBlock(currentVoxel));
+                    if (currentVoxel == 33) {
+                        meshCustomModel(x, y, z, BlockRegistry.getBlock(currentVoxel));
+                    } else {
+                        meshBlock(x, y, z, BlockRegistry.getBlock(currentVoxel));
+                    }
                 }
             }
         }
@@ -193,12 +197,44 @@ public class DynamicMesher implements Mesher {
         }
     }
 
-    private int getVertex(int x, int y, int z, int xUv, int yUv, int zUv) {
-        return zUv | yUv << 7 | xUv << 8 | z << 9 | x << 16 | y << 23;
+    private void meshCustomModel(int x, int y, int z, Block block) {
+        positions.addAll(List.of(x + 1f, y + 0f, z + 0f, (float)compressData(1, 1, block.getWestTexture(), 4, 1)));
+        positions.addAll(List.of(x + 1f, y + 1f, z + 0f, (float)compressData(1, 0, block.getWestTexture(), 4, 1)));
+        positions.addAll(List.of(x + 0f, y + 1f, z + 1f, (float)compressData(0, 0, block.getWestTexture(), 4, 1)));
+        positions.addAll(List.of(x + 0f, y + 0f, z + 1f, (float)compressData(0, 1, block.getWestTexture(), 4, 1)));
+
+        indices.addAll(List.of(
+                0 + passes,
+                1 + passes,
+                2 + passes,
+                2 + passes,
+                3 + passes,
+                0 + passes
+        ));
+        passes += 4;
+
+        positions.addAll(List.of(x + 0f, y + 0f, z + 0f, (float)compressData(1, 1, block.getEastTexture(), 5, 1)));
+        positions.addAll(List.of(x + 0f, y + 1f, z + 0f, (float)compressData(1, 0, block.getEastTexture(), 5, 1)));
+        positions.addAll(List.of(x + 1f, y + 1f, z + 1f, (float)compressData(0, 0, block.getEastTexture(), 5, 1)));
+        positions.addAll(List.of(x + 1f, y + 0f, z + 1f, (float)compressData(0, 1, block.getEastTexture(), 5, 1)));
+
+        indices.addAll(List.of(
+                2 + passes,
+                1 + passes,
+                0 + passes,
+                0 + passes,
+                3 + passes,
+                2 + passes
+        ));
+        passes += 4;
     }
 
     private int compressData(int xUv, int yUv, int texture, int normal) {
-        return xUv | yUv << 1 | normal << 2 | texture << 5;
+        return xUv | yUv << 1 | normal << 2 | texture << 6;
+    }
+
+    private int compressData(int xUv, int yUv, int texture, int normal, int cull) {
+        return xUv | yUv << 1 | normal << 2 | cull << 5 | texture << 6;
     }
 
 }

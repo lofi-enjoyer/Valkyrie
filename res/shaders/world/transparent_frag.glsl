@@ -1,6 +1,6 @@
 #version 400 core
 
-in vec3 passColor;
+in vec4 passColor;
 in float passLight;
 in float distance;
 
@@ -18,6 +18,10 @@ const int textureSize = 32;
 const int texturesPerSide = atlasSize / textureSize;
 
 void main() {
+
+    if (!gl_FrontFacing && passColor.a == 0) {
+        discard;
+    }
 
     float xUv = mod(passColor.z, texturesPerSide) / texturesPerSide + mod(passColor.x, 1.0) / texturesPerSide;
     float yUv = int(passColor.z / texturesPerSide) / texturesPerSide + mod(passColor.y, 1.0) / texturesPerSide;

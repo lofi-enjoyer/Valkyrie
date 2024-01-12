@@ -58,7 +58,7 @@ public class World {
         FULLY_LOAD_DISTANCE = config.get("fully_load_distance", Integer.class);
 
         // TODO: 22/9/22 Temporary code (replace with proper world loading)
-        this.seed = new Random().nextGaussian() * 255;
+        this.seed = 33;
 
 //        Yaml yaml = new Yaml();
 //        File worldFolder = new File("world");
@@ -233,6 +233,7 @@ public class World {
         float faceZ = 0;
 
         do {
+            // FIXME: 12/1/24 This causes a deadlock sometimes
             if (getBlock((int)xPos, (int)yPos, (int)zPos) != 0) {
                 if (!isPlace) {
                     return new Vector3f(xPos, yPos, zPos);
