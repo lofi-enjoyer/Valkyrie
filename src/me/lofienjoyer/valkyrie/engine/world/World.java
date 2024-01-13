@@ -8,10 +8,7 @@ import me.lofienjoyer.valkyrie.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import me.lofienjoyer.valkyrie.engine.utils.PerlinNoise;
-import me.lofienjoyer.valkyrie.engine.world.populator.CastlePopulator;
-import me.lofienjoyer.valkyrie.engine.world.populator.Populator;
-import me.lofienjoyer.valkyrie.engine.world.populator.TerrainPopulator;
-import me.lofienjoyer.valkyrie.engine.world.populator.TreePopulator;
+import me.lofienjoyer.valkyrie.engine.world.populator.*;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -89,6 +86,7 @@ public class World {
         populators.add(new TerrainPopulator(noise));
         populators.add(new TreePopulator(noise));
         populators.add(new CastlePopulator(noise));
+        populators.add(new TallGrassPopulator(noise));
 
         Valkyrie.LOG.info("World generation seed set to " + noise.getSeed());
     }

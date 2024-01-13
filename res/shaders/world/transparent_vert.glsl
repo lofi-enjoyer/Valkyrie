@@ -2,8 +2,7 @@
 
 #define PI 3.14159265359
 
-layout (location = 0) in vec3 position;
-layout (location = 1) in float data;
+layout (location = 0) in vec4 position;
 
 out vec4 passColor;
 out float passLight;
@@ -34,13 +33,13 @@ const float waterSpeed = 0.25;
 
 void main() {
 
-    uint xUv = (uint(data) >> 0u) & 0x1u;
-    uint yUv = (uint(data) >> 1u) &0x1u;
-    uint zUv = (uint(data) >> 6u);
-    uint light = (uint(data) >> 2u) &0x7u;
-    uint cull = (uint(data) >> 5u) &0x1u;
+    uint xUv = (uint(position.a) >> 0u) & 0x1u;
+    uint yUv = (uint(position.a) >> 1u) &0x1u;
+    uint zUv = (uint(position.a) >> 6u);
+    uint light = (uint(position.a) >> 2u) &0x7u;
+    uint cull = (uint(position.a) >> 5u) &0x1u;
 
-    vec3 newPosition = position;
+    vec3 newPosition = position.xyz;
     if (zUv == leavesId) {
         newPosition.x += sin(position.y + time) / leavesMovement;
         newPosition.z += cos(position.x + time + 2) / leavesMovement;

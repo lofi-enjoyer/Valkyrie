@@ -198,10 +198,10 @@ public class DynamicMesher implements Mesher {
     }
 
     private void meshCustomModel(int x, int y, int z, Block block) {
-        positions.addAll(List.of(x + 1f, y + 0f, z + 0f, (float)compressData(1, 1, block.getWestTexture(), 4, 1)));
-        positions.addAll(List.of(x + 1f, y + 1f, z + 0f, (float)compressData(1, 0, block.getWestTexture(), 4, 1)));
-        positions.addAll(List.of(x + 0f, y + 1f, z + 1f, (float)compressData(0, 0, block.getWestTexture(), 4, 1)));
-        positions.addAll(List.of(x + 0f, y + 0f, z + 1f, (float)compressData(0, 1, block.getWestTexture(), 4, 1)));
+        positions.addAll(List.of(x + 0.875f, y + 0f, z + 0.125f, (float)compressData(1, 1, block.getWestTexture(), 4, 1)));
+        positions.addAll(List.of(x + 0.875f, y + 1.25f, z + 0.125f, (float)compressData(1, 0, block.getWestTexture(), 4, 1)));
+        positions.addAll(List.of(x + 0.125f, y + 1.25f, z + 0.875f, (float)compressData(0, 0, block.getWestTexture(), 4, 1)));
+        positions.addAll(List.of(x + 0.125f, y + 0f, z + 0.875f, (float)compressData(0, 1, block.getWestTexture(), 4, 1)));
 
         indices.addAll(List.of(
                 0 + passes,
@@ -213,10 +213,10 @@ public class DynamicMesher implements Mesher {
         ));
         passes += 4;
 
-        positions.addAll(List.of(x + 0f, y + 0f, z + 0f, (float)compressData(1, 1, block.getEastTexture(), 5, 1)));
-        positions.addAll(List.of(x + 0f, y + 1f, z + 0f, (float)compressData(1, 0, block.getEastTexture(), 5, 1)));
-        positions.addAll(List.of(x + 1f, y + 1f, z + 1f, (float)compressData(0, 0, block.getEastTexture(), 5, 1)));
-        positions.addAll(List.of(x + 1f, y + 0f, z + 1f, (float)compressData(0, 1, block.getEastTexture(), 5, 1)));
+        positions.addAll(List.of(x + 0.125f, y + 0f, z + 0.125f, (float)compressData(1, 1, block.getEastTexture(), 5, 1)));
+        positions.addAll(List.of(x + 0.125f, y + 1.25f, z + 0.125f, (float)compressData(1, 0, block.getEastTexture(), 5, 1)));
+        positions.addAll(List.of(x + 0.875f, y + 1.25f, z + 0.875f, (float)compressData(0, 0, block.getEastTexture(), 5, 1)));
+        positions.addAll(List.of(x + 0.875f, y + 0f, z + 0.875f, (float)compressData(0, 1, block.getEastTexture(), 5, 1)));
 
         indices.addAll(List.of(
                 2 + passes,

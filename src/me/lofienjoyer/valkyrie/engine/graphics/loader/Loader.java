@@ -95,9 +95,7 @@ public class Loader {
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
         GL30.glBufferData(GL30.GL_ARRAY_BUFFER, positions, GL30.GL_STATIC_DRAW);
         GL30.glEnableVertexAttribArray(0);
-        GL30.glVertexAttribPointer(0, 3, GL30.GL_FLOAT, false, 4 * Float.BYTES, 0);
-        GL30.glEnableVertexAttribArray(1);
-        GL30.glVertexAttribPointer(1, 1, GL_FLOAT, false, 4 * Float.BYTES, 3 * Float.BYTES);
+        GL30.glVertexAttribPointer(0, 4, GL30.GL_FLOAT, false, 4 * Float.BYTES, 0);
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
         bindIndicesBuffer(indices);
     }
