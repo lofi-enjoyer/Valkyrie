@@ -94,6 +94,11 @@ public class BlockRegistry {
                 block.setMovementResistance((float) (double)movementResistance);
             }
 
+            Boolean customModel = (Boolean) data.get("customModel");
+            if (customModel != null) {
+                block.setCustomModel(customModel);
+            }
+
             blocksToLoad.add(block);
         }
 

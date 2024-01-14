@@ -24,7 +24,7 @@ public class Player {
     private boolean contact;
 
     public Player(World world) {
-        this.position = new Vector3f(-110, 125, -50);
+        this.position = new Vector3f(0, 60, 0);
         this.rotation = new Vector3f();
         this.movement = new Vector3f();
         this.world = world;

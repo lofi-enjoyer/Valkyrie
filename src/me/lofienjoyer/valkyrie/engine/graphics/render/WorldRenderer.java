@@ -119,29 +119,28 @@ public class WorldRenderer {
      */
     private void renderSolidMeshes(Camera camera, int headBlock, Map<Vector2i, MeshBundle> chunksToRender) {
         Renderer.enableDepthTest();
-//        Renderer.enableCullFace();
-//        Renderer.setCullFace(false);
-        Renderer.disableCullFace();
+        Renderer.enableCullFace();
+        Renderer.setCullFace(false);
 
         // Renders the solid mesh for all chunks
-        transparencyShader.bind();
-        transparencyShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
-        transparencyShader.loadVector("cameraPosition", camera.getPosition());
-        transparencyShader.loadFloat("time", (float) GLFW.glfwGetTime());
-        transparencyShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
-        transparencyShader.loadBoolean("inWater", headBlock == 7);
-        transparencyShader.loadBoolean("transparent", false);
+        solidsShader.bind();
+        solidsShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
+        solidsShader.loadVector("cameraPosition", camera.getPosition());
+        solidsShader.loadFloat("time", (float) GLFW.glfwGetTime());
+        solidsShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
+        solidsShader.loadBoolean("inWater", headBlock == 7);
+        solidsShader.loadBoolean("transparent", false);
 
         chunksToRender.forEach((position, mesh) -> {
             for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
-                if (mesh.getTransparentMeshes(y).getVertexCount() == 0)
+                if (mesh.getSolidMeshes(y).getVertexCount() == 0)
                     continue;
-                transparencyShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
+                solidsShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
-                glBindVertexArray(mesh.getTransparentMeshes(y).getVaoId());
+                glBindVertexArray(mesh.getSolidMeshes(y).getVaoId());
                 glEnableVertexAttribArray(0);
 
-                glDrawElements(GL_TRIANGLES, mesh.getTransparentMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, mesh.getSolidMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
             }
         });
     }
@@ -156,24 +155,24 @@ public class WorldRenderer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Renderer.disableCullFace();
 
-        transparencyShader.bind();
-        transparencyShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
-        transparencyShader.loadVector("cameraPosition", camera.getPosition());
-        transparencyShader.loadFloat("time", (float) GLFW.glfwGetTime());
-        transparencyShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
-        transparencyShader.loadBoolean("inWater", headBlock == 7);
-        transparencyShader.loadBoolean("transparent", true);
+        solidsShader.bind();
+        solidsShader.loadMatrix("viewMatrix", Maths.createViewMatrix(camera));
+        solidsShader.loadVector("cameraPosition", camera.getPosition());
+        solidsShader.loadFloat("time", (float) GLFW.glfwGetTime());
+        solidsShader.loadFloat("viewDistance", VIEW_DISTANCE * 32 - 32);
+        solidsShader.loadBoolean("inWater", headBlock == 7);
+        solidsShader.loadBoolean("transparent", true);
 
         chunksToRender.forEach((position, mesh) -> {
             for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
-                if (mesh.getTransparentMeshes(y).getVertexCount() == 0)
+                if (mesh.getSolidMeshes(y).getVertexCount() == 0)
                     continue;
-                transparencyShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
+                solidsShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
 
-                glBindVertexArray(mesh.getTransparentMeshes(y).getVaoId());
+                glBindVertexArray(mesh.getSolidMeshes(y).getVaoId());
                 glEnableVertexAttribArray(0);
 
-                glDrawElements(GL_TRIANGLES, mesh.getTransparentMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, mesh.getSolidMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
             }
         });
 

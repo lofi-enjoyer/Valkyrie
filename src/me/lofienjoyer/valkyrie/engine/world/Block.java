@@ -18,6 +18,7 @@ public class Block {
     private boolean isTransparent;
     private boolean shouldDrawBetween;
     private boolean hasCollision = true;
+    private boolean customModel;
 
     private float movementResistance = 0f;
 
@@ -187,4 +188,13 @@ public class Block {
     public int getId() {
         return id;
     }
+
+    public boolean isCustomModel() {
+        return customModel;
+    }
+
+    public void setCustomModel(boolean customModel) {
+        this.customModel = customModel;
+    }
+
 }
