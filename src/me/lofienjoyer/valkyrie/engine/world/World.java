@@ -14,10 +14,6 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * Handles the render and data for a world
@@ -86,7 +82,7 @@ public class World {
         populators.add(new TerrainPopulator(noise));
         populators.add(new TreePopulator(noise));
         populators.add(new CastlePopulator(noise));
-        populators.add(new TallGrassPopulator(noise));
+        populators.add(new GrassPopulator(noise));
 
         Valkyrie.LOG.info("World generation seed set to " + noise.getSeed());
     }

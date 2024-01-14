@@ -73,135 +73,24 @@ public class DynamicMesher implements Mesher {
             for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++) {
                 for (int z = 0; z < CHUNK_WIDTH; z++) {
                     currentVoxel = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z);
-                    if (currentVoxel == 0) continue;
+                    if (currentVoxel == 0 || !BlockRegistry.getBlock(currentVoxel).isCustomModel()) continue;
 
-                    if (currentVoxel == 33) {
-                        meshCustomModel(x, y, z, BlockRegistry.getBlock(currentVoxel));
-                    } else {
-                        meshBlock(x, y, z, BlockRegistry.getBlock(currentVoxel));
-                    }
+                    meshCustomModel(x, y, z, BlockRegistry.getBlock(currentVoxel));
                 }
             }
         }
     }
 
     int passes = 0;
-
-    private void meshBlock(int x, int y, int z, Block block) {
-        int westBlock = chunkData.getBlock(x + 1, y + (CHUNK_SECTION_HEIGHT * section), z);
-        if (westBlock == 0 || block.shouldDrawBetween() || (block.getId() != westBlock && BlockRegistry.getBlock(westBlock).isTransparent())) {
-            positions.addAll(List.of(x + 1f, y + 0f, z + 0f, (float)compressData(1, 1, block.getWestTexture(), 4)));
-            positions.addAll(List.of(x + 1f, y + 1f, z + 0f, (float)compressData(1, 0, block.getWestTexture(), 4)));
-            positions.addAll(List.of(x + 1f, y + 1f, z + 1f, (float)compressData(0, 0, block.getWestTexture(), 4)));
-            positions.addAll(List.of(x + 1f, y + 0f, z + 1f, (float)compressData(0, 1, block.getWestTexture(), 4)));
-
-            indices.addAll(List.of(
-                    0 + passes,
-                    1 + passes,
-                    2 + passes,
-                    2 + passes,
-                    3 + passes,
-                    0 + passes
-            ));
-            passes += 4;
-        }
-
-        int eastBlock = chunkData.getBlock(x - 1, y + (CHUNK_SECTION_HEIGHT * section), z);
-        if (eastBlock == 0 || block.shouldDrawBetween() || (block.getId() != eastBlock && BlockRegistry.getBlock(eastBlock).isTransparent())) {
-            positions.addAll(List.of(x + 0f, y + 0f, z + 0f, (float)compressData(1, 1, block.getEastTexture(), 5)));
-            positions.addAll(List.of(x + 0f, y + 1f, z + 0f, (float)compressData(1, 0, block.getEastTexture(), 5)));
-            positions.addAll(List.of(x + 0f, y + 1f, z + 1f, (float)compressData(0, 0, block.getEastTexture(), 5)));
-            positions.addAll(List.of(x + 0f, y + 0f, z + 1f, (float)compressData(0, 1, block.getEastTexture(), 5)));
-
-            indices.addAll(List.of(
-                    2 + passes,
-                    1 + passes,
-                    0 + passes,
-                    0 + passes,
-                    3 + passes,
-                    2 + passes
-            ));
-            passes += 4;
-        }
-
-        int northBlock = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z - 1);
-        if (northBlock == 0 || block.shouldDrawBetween() || (block.getId() != northBlock && BlockRegistry.getBlock(northBlock).isTransparent())) {
-            positions.addAll(List.of(x + 0f, y + 0f, z + 0f, (float)compressData(1, 1, block.getNorthTexture(), 0)));
-            positions.addAll(List.of(x + 0f, y + 1f, z + 0f, (float)compressData(1, 0, block.getNorthTexture(), 0)));
-            positions.addAll(List.of(x + 1f, y + 1f, z + 0f, (float)compressData(0, 0, block.getNorthTexture(), 0)));
-            positions.addAll(List.of(x + 1f, y + 0f, z + 0f, (float)compressData(0, 1, block.getNorthTexture(), 0)));
-
-            indices.addAll(List.of(
-                    0 + passes,
-                    1 + passes,
-                    2 + passes,
-                    2 + passes,
-                    3 + passes,
-                    0 + passes
-            ));
-            passes += 4;
-        }
-
-        int southBlock = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z + 1);
-        if (southBlock == 0 || block.shouldDrawBetween() || (block.getId() != southBlock && BlockRegistry.getBlock(southBlock).isTransparent())) {
-            positions.addAll(List.of(x + 0f, y + 0f, z + 1f, (float)compressData(1, 1, block.getSouthTexture(), 1)));
-            positions.addAll(List.of(x + 0f, y + 1f, z + 1f, (float)compressData(1, 0, block.getSouthTexture(), 1)));
-            positions.addAll(List.of(x + 1f, y + 1f, z + 1f, (float)compressData(0, 0, block.getSouthTexture(), 1)));
-            positions.addAll(List.of(x + 1f, y + 0f, z + 1f, (float)compressData(0, 1, block.getSouthTexture(), 1)));
-
-            indices.addAll(List.of(
-                    2 + passes,
-                    1 + passes,
-                    0 + passes,
-                    0 + passes,
-                    3 + passes,
-                    2 + passes
-            ));
-            passes += 4;
-        }
-
-        int upBlock = chunkData.getBlock(x, y + 1 + (CHUNK_SECTION_HEIGHT * section), z);
-        if (upBlock == 0 || block.shouldDrawBetween() || (block.getId() != upBlock && BlockRegistry.getBlock(upBlock).isTransparent())) {
-            positions.addAll(List.of(x + 0f, y + 1f, z + 0f, (float)compressData(1, 1, block.getTopTexture(), 2)));
-            positions.addAll(List.of(x + 0f, y + 1f, z + 1f, (float)compressData(1, 0, block.getTopTexture(), 2)));
-            positions.addAll(List.of(x + 1f, y + 1f, z + 1f, (float)compressData(0, 0, block.getTopTexture(), 2)));
-            positions.addAll(List.of(x + 1f, y + 1f, z + 0f, (float)compressData(0, 1, block.getTopTexture(), 2)));
-
-            indices.addAll(List.of(
-                    0 + passes,
-                    1 + passes,
-                    2 + passes,
-                    2 + passes,
-                    3 + passes,
-                    0 + passes
-            ));
-            passes += 4;
-        }
-
-        int bottomBlock = chunkData.getBlock(x, y - 1 + (CHUNK_SECTION_HEIGHT * section), z);
-        if (bottomBlock == 0 || block.shouldDrawBetween() || (block.getId() != bottomBlock && BlockRegistry.getBlock(bottomBlock).isTransparent())) {
-            positions.addAll(List.of(x + 0f, y + 0f, z + 0f, (float)compressData(1, 1, block.getBottomTexture(), 3)));
-            positions.addAll(List.of(x + 0f, y + 0f, z + 1f, (float)compressData(1, 0, block.getBottomTexture(), 3)));
-            positions.addAll(List.of(x + 1f, y + 0f, z + 1f, (float)compressData(0, 0, block.getBottomTexture(), 3)));
-            positions.addAll(List.of(x + 1f, y + 0f, z + 0f, (float)compressData(0, 1, block.getBottomTexture(), 3)));
-
-            indices.addAll(List.of(
-                    2 + passes,
-                    1 + passes,
-                    0 + passes,
-                    0 + passes,
-                    3 + passes,
-                    2 + passes
-            ));
-            passes += 4;
-        }
-    }
+    private static final float diagonal = (float) (Math.sqrt(0.5) / 2);
+    private static final float diagonalM = 0.5f + diagonal;
+    private static final float diagonalP = 0.5f - diagonal;
 
     private void meshCustomModel(int x, int y, int z, Block block) {
-        positions.addAll(List.of(x + 0.875f, y + 0f, z + 0.125f, (float)compressData(1, 1, block.getWestTexture(), 4, 1)));
-        positions.addAll(List.of(x + 0.875f, y + 1.25f, z + 0.125f, (float)compressData(1, 0, block.getWestTexture(), 4, 1)));
-        positions.addAll(List.of(x + 0.125f, y + 1.25f, z + 0.875f, (float)compressData(0, 0, block.getWestTexture(), 4, 1)));
-        positions.addAll(List.of(x + 0.125f, y + 0f, z + 0.875f, (float)compressData(0, 1, block.getWestTexture(), 4, 1)));
+        positions.addAll(List.of(x + diagonalP, y + 0f, z + diagonalM, (float)compressData(1, 1, block.getWestTexture(), 4, 1, 0)));
+        positions.addAll(List.of(x + diagonalP, y + 1f, z + diagonalM, (float)compressData(1, 0, block.getWestTexture(), 4, 1, 1)));
+        positions.addAll(List.of(x + diagonalM, y + 1f, z + diagonalP, (float)compressData(0, 0, block.getWestTexture(), 4, 1, 1)));
+        positions.addAll(List.of(x + diagonalM, y + 0f, z + diagonalP, (float)compressData(0, 1, block.getWestTexture(), 4, 1, 0)));
 
         indices.addAll(List.of(
                 0 + passes,
@@ -213,10 +102,10 @@ public class DynamicMesher implements Mesher {
         ));
         passes += 4;
 
-        positions.addAll(List.of(x + 0.125f, y + 0f, z + 0.125f, (float)compressData(1, 1, block.getEastTexture(), 5, 1)));
-        positions.addAll(List.of(x + 0.125f, y + 1.25f, z + 0.125f, (float)compressData(1, 0, block.getEastTexture(), 5, 1)));
-        positions.addAll(List.of(x + 0.875f, y + 1.25f, z + 0.875f, (float)compressData(0, 0, block.getEastTexture(), 5, 1)));
-        positions.addAll(List.of(x + 0.875f, y + 0f, z + 0.875f, (float)compressData(0, 1, block.getEastTexture(), 5, 1)));
+        positions.addAll(List.of(x + diagonalM, y + 0f, z + diagonalM, (float)compressData(1, 1, block.getEastTexture(), 5, 1, 0)));
+        positions.addAll(List.of(x + diagonalM, y + 1f, z + diagonalM, (float)compressData(1, 0, block.getEastTexture(), 5, 1, 1)));
+        positions.addAll(List.of(x + diagonalP, y + 1f, z + diagonalP, (float)compressData(0, 0, block.getEastTexture(), 5, 1, 1)));
+        positions.addAll(List.of(x + diagonalP, y + 0f, z + diagonalP, (float)compressData(0, 1, block.getEastTexture(), 5, 1, 0)));
 
         indices.addAll(List.of(
                 2 + passes,
@@ -233,8 +122,8 @@ public class DynamicMesher implements Mesher {
         return xUv | yUv << 1 | normal << 2 | texture << 6;
     }
 
-    private int compressData(int xUv, int yUv, int texture, int normal, int cull) {
-        return xUv | yUv << 1 | normal << 2 | cull << 5 | texture << 6;
+    private int compressData(int xUv, int yUv, int texture, int normal, int cull, int wave) {
+        return xUv | yUv << 1 | normal << 2 | cull << 5 | wave << 6 | texture << 7;
     }
 
 }

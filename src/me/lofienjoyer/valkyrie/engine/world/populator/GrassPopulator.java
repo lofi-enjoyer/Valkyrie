@@ -8,11 +8,11 @@ import java.util.Random;
 import static me.lofienjoyer.valkyrie.engine.world.World.CHUNK_HEIGHT;
 import static me.lofienjoyer.valkyrie.engine.world.World.CHUNK_WIDTH;
 
-public class TallGrassPopulator extends Populator {
+public class GrassPopulator extends Populator {
 
-    private static final int MAX_PER_CHUNK = 150;
+    private static final int MAX_PER_CHUNK = 450;
 
-    public TallGrassPopulator(PerlinNoise noise) {
+    public GrassPopulator(PerlinNoise noise) {
         super(noise);
     }
 
@@ -34,7 +34,11 @@ public class TallGrassPopulator extends Populator {
 
             if (grassY == 0) continue;
 
-            chunk.setBlock(33, grassX, grassY, grassZ, false);
+            var blockId = 33;
+            if (random.nextFloat() > 0.7)
+                blockId = 34;
+
+            chunk.setBlock(blockId, grassX, grassY, grassZ, false);
         }
     }
 

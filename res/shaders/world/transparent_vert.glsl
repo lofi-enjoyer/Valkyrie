@@ -35,12 +35,13 @@ void main() {
 
     uint xUv = (uint(position.a) >> 0u) & 0x1u;
     uint yUv = (uint(position.a) >> 1u) &0x1u;
-    uint zUv = (uint(position.a) >> 6u);
+    uint zUv = (uint(position.a) >> 7u);
     uint light = (uint(position.a) >> 2u) &0x7u;
     uint cull = (uint(position.a) >> 5u) &0x1u;
+    uint wave = (uint(position.a) >> 6u) &0x1u;
 
     vec3 newPosition = position.xyz;
-    if (zUv == leavesId) {
+    if (wave == 1) {
         newPosition.x += sin(position.y + time) / leavesMovement;
         newPosition.z += cos(position.x + time + 2) / leavesMovement;
         newPosition.y += sin(position.z + time + 5) / leavesMovement;
