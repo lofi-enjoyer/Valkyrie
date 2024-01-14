@@ -119,13 +119,13 @@ public class GreedyMesher implements Mesher {
                             voxelFace1 = chunkData.getBlock((x[0] + q[0]), (x[1] + q[1]) + CHUNK_SECTION_HEIGHT * section, (x[2] + q[2]));
 
                             if (voxelFace != 0 && voxelFace1 != 0) {
-                                if (BlockRegistry.getBlock(voxelFace).isTransparent() && (!BlockRegistry.getBlock(voxelFace1).isTransparent() || BlockRegistry.getBlock(voxelFace1).shouldDrawBetween()))
+                                var blockA = BlockRegistry.getBlock(voxelFace);
+                                var blockB = BlockRegistry.getBlock(voxelFace1);
+                                if (blockA.isTransparent() && (!blockB.isTransparent() || blockB.shouldDrawBetween())) {
                                     voxelFace = 0;
-                            }
-
-                            if (voxelFace1 != 0 && voxelFace != 0) {
-                                if (BlockRegistry.getBlock(voxelFace1).isTransparent() && (!BlockRegistry.getBlock(voxelFace).isTransparent() || BlockRegistry.getBlock(voxelFace).shouldDrawBetween() ))
+                                } else if (blockB.isTransparent() && (!blockA.isTransparent() || blockA.shouldDrawBetween())) {
                                     voxelFace1 = 0;
+                                }
                             }
 
                             mask[n++] = ((voxelFace == 0 || voxelFace1 == 0))
