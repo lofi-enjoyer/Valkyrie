@@ -273,7 +273,7 @@ public class Loader {
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
 
-            buf = stbi_load("res/textures/icon/icon256.png", w, h, channels, 4);
+            buf = stbi_load(imagePath, w, h, channels, 4);
             if (buf == null) {
                 Valkyrie.LOG.severe("Icon not loaded: " + stbi_failure_reason());
                 return null;
