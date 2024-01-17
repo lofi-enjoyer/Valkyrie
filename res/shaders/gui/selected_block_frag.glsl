@@ -1,6 +1,7 @@
 #version 400 core
 
 in vec4 passTexture;
+in float passLight;
 
 out vec4 outColor;
 
@@ -20,6 +21,6 @@ void main() {
     if (color.a == 0)
       discard;
 
-    outColor = color;
+    outColor = color * vec4(vec3(passLight), 1.0);
 
 }
