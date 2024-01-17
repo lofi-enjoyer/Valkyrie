@@ -275,7 +275,7 @@ public class Loader {
 
             buf = stbi_load(imagePath, w, h, channels, 4);
             if (buf == null) {
-                Valkyrie.LOG.severe("Icon not loaded: " + stbi_failure_reason());
+                Valkyrie.LOG.severe("Image not loaded: " + stbi_failure_reason());
                 return null;
             }
 
