@@ -64,7 +64,7 @@ public class SelectedBlockRenderer {
         shader = ResourceLoader.loadShader("Selected Block Shader",
            "res/shaders/gui/selected_block_vert.glsl",
            "res/shaders/gui/selected_block_frag.glsl");
-        transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 45, 0));
+        transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 30, 0));
 
         loaded = true;
     }
@@ -75,6 +75,7 @@ public class SelectedBlockRenderer {
             return;
 
         Renderer.enableBlend();
+        Renderer.enableDepthTest();
 
         Renderer.bindTexture2D(BlockRegistry.TILESET_TEXTURE_ID);
 

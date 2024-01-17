@@ -46,7 +46,7 @@ public class MeshBundle {
     }
 
     public boolean loadMeshToGpu(int section) {
-        if (greedyMesher[section] == null)
+        if (greedyMesher[section] == null || dynamicMesher[section] == null)
             return false;
 
         greedyMesher[section].loadToGpu(solidMesh[section]);
@@ -56,7 +56,7 @@ public class MeshBundle {
         dynamicMesher[section] = null;
         setLoaded(true);
 
-        if (solidMesh[section].getVertexCount() == 0)
+        if (solidMesh[section].getVertexCount() == 0 && transparentMesh[section].getVertexCount() == 0)
             return false;
 
         return true;

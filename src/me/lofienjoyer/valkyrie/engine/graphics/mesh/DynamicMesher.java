@@ -87,39 +87,21 @@ public class DynamicMesher implements Mesher {
     private static final float diagonalP = 0.5f - diagonal;
 
     private void meshCustomModel(int x, int y, int z, Block block) {
-        positions.addAll(List.of(x + diagonalP, y + 0f, z + diagonalM, (float)compressData(1, 1, block.getWestTexture(), 4, 1, 0)));
-        positions.addAll(List.of(x + diagonalP, y + 1f, z + diagonalM, (float)compressData(1, 0, block.getWestTexture(), 4, 1, 1)));
-        positions.addAll(List.of(x + diagonalM, y + 1f, z + diagonalP, (float)compressData(0, 0, block.getWestTexture(), 4, 1, 1)));
-        positions.addAll(List.of(x + diagonalM, y + 0f, z + diagonalP, (float)compressData(0, 1, block.getWestTexture(), 4, 1, 0)));
+        var blockPositions = block.getMesh().getPositions();
+        var blockUvs = block.getMesh().getUvs();
+        for (int i = 0; i < blockPositions.size() / 3; i++) {
+            positions.add(x + blockPositions.get(i * 3));
+            positions.add(y + blockPositions.get(i * 3 + 1));
+            positions.add(z + blockPositions.get(i * 3 + 2));
+            positions.add((float) compressData((int)(float)blockUvs.get(i * 3), (int)(float)blockUvs.get(i * 3 + 1), (int)(float)blockUvs.get(i * 3 + 2), 2, 1, 0));
+        }
 
-        indices.addAll(List.of(
-                0 + passes,
-                1 + passes,
-                2 + passes,
-                2 + passes,
-                3 + passes,
-                0 + passes
-        ));
-        passes += 4;
+        var blockIndices = block.getMesh().getIndices();
+        for (int i = 0; i < blockIndices.size(); i++) {
+            indices.add(blockIndices.get(i) + passes);
+        }
 
-        positions.addAll(List.of(x + diagonalM, y + 0f, z + diagonalM, (float)compressData(1, 1, block.getEastTexture(), 5, 1, 0)));
-        positions.addAll(List.of(x + diagonalM, y + 1f, z + diagonalM, (float)compressData(1, 0, block.getEastTexture(), 5, 1, 1)));
-        positions.addAll(List.of(x + diagonalP, y + 1f, z + diagonalP, (float)compressData(0, 0, block.getEastTexture(), 5, 1, 1)));
-        positions.addAll(List.of(x + diagonalP, y + 0f, z + diagonalP, (float)compressData(0, 1, block.getEastTexture(), 5, 1, 0)));
-
-        indices.addAll(List.of(
-                2 + passes,
-                1 + passes,
-                0 + passes,
-                0 + passes,
-                3 + passes,
-                2 + passes
-        ));
-        passes += 4;
-    }
-
-    private int compressData(int xUv, int yUv, int texture, int normal) {
-        return xUv | yUv << 1 | normal << 2 | texture << 6;
+        passes += blockPositions.size() / 3;
     }
 
     private int compressData(int xUv, int yUv, int texture, int normal, int cull, int wave) {

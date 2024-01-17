@@ -28,7 +28,7 @@ const float[6] lights = float[6](
 
 out float distance;
 
-const float leavesMovement = 32;
+const float leavesMovement = 16;
 const float waterSpeed = 0.25;
 
 void main() {
@@ -41,6 +41,12 @@ void main() {
     uint wave = (uint(position.a) >> 6u) &0x1u;
 
     vec3 newPosition = position.xyz;
+
+    // TODO: fix custom models wave
+    if (yUv == 0) {
+        wave = 1u;
+    }
+
     if (wave == 1) {
         newPosition.x += sin(position.y + time) / leavesMovement;
         newPosition.z += cos(position.x + time + 2) / leavesMovement;
