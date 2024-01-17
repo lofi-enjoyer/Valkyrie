@@ -16,14 +16,14 @@ public class SelectedBlockRenderer {
 
     // TODO: 9/1/24 Change this to use a QuadMesh
     private static final float[] positions = {
-            0, 0, 0,
-            0, 1, 0,
-            0, 1, 1,
-            0, 0, 1,
-            1, 0, 0,
-            1, 1, 0,
-            1, 1, 1,
-            1, 0, 1
+            0, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 1, 1, 0,
+            0, 0, 1, 0,
+            1, 0, 0, 0,
+            1, 1, 0, 0,
+            1, 1, 1, 0,
+            1, 0, 1, 0
     };
 
     private static final int[] indices = {
@@ -64,7 +64,7 @@ public class SelectedBlockRenderer {
         shader = ResourceLoader.loadShader("Selected Block Shader",
            "res/shaders/gui/selected_block_vert.glsl",
            "res/shaders/gui/selected_block_frag.glsl");
-        transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 45, 0));
+        transformationMatrix = Maths.createTransformationMatrix(new Vector2f(1, 0.5f), new Vector3f(30, 30, 0));
 
         loaded = true;
     }
@@ -75,6 +75,7 @@ public class SelectedBlockRenderer {
             return;
 
         Renderer.enableBlend();
+        Renderer.enableDepthTest();
 
         Renderer.bindTexture2D(BlockRegistry.TILESET_TEXTURE_ID);
 
@@ -82,7 +83,6 @@ public class SelectedBlockRenderer {
 
         GL30.glBindVertexArray(block.getMesh().getVaoId());
         GL30.glEnableVertexAttribArray(0);
-        GL30.glEnableVertexAttribArray(1);
 
         GL30.glDrawElements(GL30.GL_TRIANGLES, mesh.getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
 

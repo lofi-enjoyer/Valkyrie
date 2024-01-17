@@ -1,7 +1,7 @@
 #version 400 core
 
-in vec3 passColor;
-in vec3 passLight;
+in vec4 passColor;
+in float passLight;
 in float distance;
 
 out vec4 outColor;
@@ -9,6 +9,7 @@ out vec4 outColor;
 uniform sampler2D textureSampler;
 uniform float inWater;
 uniform float viewDistance;
+uniform bool transparent;
 
 const vec3 skyColor = vec3(0.45, 0.71, 1.00);
 
@@ -18,10 +19,18 @@ const int texturesPerSide = atlasSize / textureSize;
 
 void main() {
 
+    if (!gl_FrontFacing && passColor.a == 0) {
+        discard;
+    }
+
     float xUv = mod(passColor.z, texturesPerSide) / texturesPerSide + mod(passColor.x, 1.0) / texturesPerSide;
     float yUv = int(passColor.z / texturesPerSide) / texturesPerSide + mod(passColor.y, 1.0) / texturesPerSide;
 
     vec4 textureColour = texture(textureSampler, vec2(xUv, yUv));
+
+    if ((textureColour.a == 1) == transparent) {
+        discard;
+    }
 
     float visibility = 1;
     if (distance > viewDistance - 64) {
@@ -33,7 +42,7 @@ void main() {
         textureColour *= vec4(0.5, 0.5, 1, 1);
     }
 
-    outColor = textureColour;
+    outColor = textureColour * vec4(vec3(passLight), 1.0);
     outColor = mix(vec4(skyColor, 1.0), outColor, visibility);
 
 }

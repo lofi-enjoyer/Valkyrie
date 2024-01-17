@@ -8,19 +8,12 @@ import me.lofienjoyer.valkyrie.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import me.lofienjoyer.valkyrie.engine.utils.PerlinNoise;
-import me.lofienjoyer.valkyrie.engine.world.populator.CastlePopulator;
-import me.lofienjoyer.valkyrie.engine.world.populator.Populator;
-import me.lofienjoyer.valkyrie.engine.world.populator.TerrainPopulator;
-import me.lofienjoyer.valkyrie.engine.world.populator.TreePopulator;
+import me.lofienjoyer.valkyrie.engine.world.populator.*;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * Handles the render and data for a world
@@ -58,7 +51,7 @@ public class World {
         FULLY_LOAD_DISTANCE = config.get("fully_load_distance", Integer.class);
 
         // TODO: 22/9/22 Temporary code (replace with proper world loading)
-        this.seed = new Random().nextGaussian() * 255;
+        this.seed = 33;
 
 //        Yaml yaml = new Yaml();
 //        File worldFolder = new File("world");
@@ -89,6 +82,7 @@ public class World {
         populators.add(new TerrainPopulator(noise));
         populators.add(new TreePopulator(noise));
         populators.add(new CastlePopulator(noise));
+        populators.add(new GrassPopulator(noise));
 
         Valkyrie.LOG.info("World generation seed set to " + noise.getSeed());
     }
@@ -233,6 +227,7 @@ public class World {
         float faceZ = 0;
 
         do {
+            // FIXME: 12/1/24 This causes a deadlock sometimes
             if (getBlock((int)xPos, (int)yPos, (int)zPos) != 0) {
                 if (!isPlace) {
                     return new Vector3f(xPos, yPos, zPos);

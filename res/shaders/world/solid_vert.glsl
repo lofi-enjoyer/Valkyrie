@@ -12,6 +12,9 @@ uniform mat4 viewMatrix;
 uniform vec3 cameraPosition;
 uniform float viewDistance;
 uniform float inWater;
+uniform float time;
+uniform int leavesId;
+uniform int waterId;
 
 const vec3[6] normalVectors = vec3[6](
     vec3( 1,  0,  0),
@@ -35,6 +38,8 @@ out float distance;
 out float faceLight;
 out float passViewDistance;
 
+const float leavesMovement = 32;
+
 void main() {
 
     float y = (vertex.x >> 18u) & 0x1FFu;
@@ -49,6 +54,16 @@ void main() {
     int light = 5;
 
     vec3 position = vec3(x, y, z);
+    if (zUv == leavesId) {
+        position.x += sin(position.y + time) / leavesMovement;
+        position.z += cos(position.x + time + 2) / leavesMovement;
+        position.y += sin(position.z + time + 5) / leavesMovement;
+    }
+
+    if (zUv == waterId) {
+        position.y -= 1 / 8.0;
+        position.y += sin(time) * (1 / 16.0);
+    }
 
     vec4 worldPosition = transformationMatrix * vec4(position, 1.0);
     vec4 positionRelativeToCam = viewMatrix * worldPosition;

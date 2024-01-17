@@ -1,6 +1,7 @@
 package me.lofienjoyer.valkyrie.engine.world;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
+import me.lofienjoyer.valkyrie.engine.graphics.mesh.BlockMeshType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -92,6 +93,19 @@ public class BlockRegistry {
             Double movementResistance = (Double) data.get("movementResistance");
             if (movementResistance != null) {
                 block.setMovementResistance((float) (double)movementResistance);
+            }
+
+            String meshType = (String) data.get("model");
+            if (meshType != null) {
+                switch (meshType) {
+                    case "x":
+                        block.setMeshType(BlockMeshType.X);
+                        block.setCustomModel(true);
+                        break;
+                    case "block":
+                    default:
+                        block.setMeshType(BlockMeshType.FULL);
+                }
             }
 
             blocksToLoad.add(block);

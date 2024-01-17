@@ -1,0 +1,6 @@
+id: 34
+texture: 'cornflower'
+transparent: true
+collision: false
+customModel: true
+model: x

@@ -46,6 +46,11 @@ public class Mesh {
         this.vertexCount = indices.length;
     }
 
+    public void updateMesh(float[] positions, int[] indices) {
+        Valkyrie.LOADER.updateVAO(vaoId, positions, indices);
+        this.vertexCount = indices.length;
+    }
+
     public int getVaoId() {
         return vaoId;
     }

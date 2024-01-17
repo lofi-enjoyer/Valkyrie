@@ -1,0 +1,5 @@
+id: 33
+texture: 'tall_grass'
+transparent: true
+collision: false
+model: x

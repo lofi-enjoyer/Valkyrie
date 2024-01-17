@@ -1,5 +1,8 @@
 package me.lofienjoyer.valkyrie.engine.world;
 
+import me.lofienjoyer.valkyrie.engine.graphics.mesh.BlockMesh;
+import me.lofienjoyer.valkyrie.engine.graphics.mesh.BlockMeshBuilder;
+import me.lofienjoyer.valkyrie.engine.graphics.mesh.BlockMeshType;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.Mesh;
 
 public class Block {
@@ -13,11 +16,13 @@ public class Block {
     private int eastTexture;
     private int westTexture;
 
-    private Mesh mesh;
+    private BlockMesh mesh;
+    private BlockMeshType meshType = BlockMeshType.FULL;
 
     private boolean isTransparent;
     private boolean shouldDrawBetween;
     private boolean hasCollision = true;
+    private boolean customModel;
 
     private float movementResistance = 0f;
 
@@ -52,52 +57,14 @@ public class Block {
     }
 
     public void setupMesh() {
-        float[] positions = {
-                0, 0, 0,
-                0, 1, 0,
-                0, 1, 1,
-                0, 0, 1,
-
-                1, 0, 1,
-                1, 1, 1,
-                0, 1, 1,
-                0, 0, 1,
-
-                0, 1, 0,
-                1, 1, 0,
-                1, 1, 1,
-                0, 1, 1
-        };
-
-        float[] uvs = {
-                0, 1, southTexture,
-                0, 0, southTexture,
-                1, 0, southTexture,
-                1, 1, southTexture,
-
-                0, 1, eastTexture,
-                0, 0, eastTexture,
-                1, 0, eastTexture,
-                1, 1, eastTexture,
-
-                1, 1, topTexture,
-                1, 0, topTexture,
-                0, 0, topTexture,
-                0, 1, topTexture
-        };
-
-        int[] indices = {
-                2, 1, 0,
-                0, 3, 2,
-
-                4, 5, 6,
-                6, 7, 4,
-
-                10, 9, 8,
-                8, 11, 10
-        };
-
-        this.mesh = new Mesh(positions, indices, uvs);
+        switch (meshType) {
+            case FULL:
+                this.mesh = BlockMeshBuilder.buildFullBlockMesh(southTexture, eastTexture, topTexture);
+                break;
+            case X:
+                this.mesh = BlockMeshBuilder.buildXMesh(eastTexture);
+                break;
+        }
     }
 
     public void setTopTexture(int topTexture) {
@@ -180,11 +147,28 @@ public class Block {
         this.movementResistance = movementResistance;
     }
 
-    public Mesh getMesh() {
+    public BlockMesh getMesh() {
         return mesh;
     }
 
     public int getId() {
         return id;
     }
+
+    public boolean isCustomModel() {
+        return customModel;
+    }
+
+    public void setCustomModel(boolean customModel) {
+        this.customModel = customModel;
+    }
+
+    public BlockMeshType getMeshType() {
+        return meshType;
+    }
+
+    public void setMeshType(BlockMeshType meshType) {
+        this.meshType = meshType;
+    }
+
 }
