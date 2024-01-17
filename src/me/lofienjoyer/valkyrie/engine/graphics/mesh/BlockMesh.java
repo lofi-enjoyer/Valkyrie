@@ -7,10 +7,9 @@ public class BlockMesh extends Mesh {
 
     private final List<Float> positions;
     private final List<Integer> indices;
-    private final List<Float> uvs;
 
-    public BlockMesh(float[] positions, int[] indices, float[] uvs) {
-        super(positions, indices, uvs);
+    public BlockMesh(float[] positions, int[] indices) {
+        super(positions, indices);
 
         this.positions = new ArrayList<>(positions.length);
         for (float position : positions) {
@@ -21,11 +20,6 @@ public class BlockMesh extends Mesh {
         for (int index : indices) {
             this.indices.add(index);
         }
-
-        this.uvs = new ArrayList<>(uvs.length);
-        for (float uv : uvs) {
-            this.uvs.add(uv);
-        }
     }
 
     public List<Float> getPositions() {
@@ -34,10 +28,6 @@ public class BlockMesh extends Mesh {
 
     public List<Integer> getIndices() {
         return indices;
-    }
-
-    public List<Float> getUvs() {
-        return uvs;
     }
 
 }

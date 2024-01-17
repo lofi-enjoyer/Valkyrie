@@ -16,14 +16,14 @@ public class SelectedBlockRenderer {
 
     // TODO: 9/1/24 Change this to use a QuadMesh
     private static final float[] positions = {
-            0, 0, 0,
-            0, 1, 0,
-            0, 1, 1,
-            0, 0, 1,
-            1, 0, 0,
-            1, 1, 0,
-            1, 1, 1,
-            1, 0, 1
+            0, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 1, 1, 0,
+            0, 0, 1, 0,
+            1, 0, 0, 0,
+            1, 1, 0, 0,
+            1, 1, 1, 0,
+            1, 0, 1, 0
     };
 
     private static final int[] indices = {
@@ -83,7 +83,6 @@ public class SelectedBlockRenderer {
 
         GL30.glBindVertexArray(block.getMesh().getVaoId());
         GL30.glEnableVertexAttribArray(0);
-        GL30.glEnableVertexAttribArray(1);
 
         GL30.glDrawElements(GL30.GL_TRIANGLES, mesh.getVertexCount(), GL30.GL_UNSIGNED_INT, 0);
 

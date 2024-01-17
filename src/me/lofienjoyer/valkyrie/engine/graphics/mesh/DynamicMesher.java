@@ -82,26 +82,22 @@ public class DynamicMesher implements Mesher {
     }
 
     int passes = 0;
-    private static final float diagonal = (float) (Math.sqrt(0.5) / 2);
-    private static final float diagonalM = 0.5f + diagonal;
-    private static final float diagonalP = 0.5f - diagonal;
 
     private void meshCustomModel(int x, int y, int z, Block block) {
         var blockPositions = block.getMesh().getPositions();
-        var blockUvs = block.getMesh().getUvs();
-        for (int i = 0; i < blockPositions.size() / 3; i++) {
-            positions.add(x + blockPositions.get(i * 3));
-            positions.add(y + blockPositions.get(i * 3 + 1));
-            positions.add(z + blockPositions.get(i * 3 + 2));
-            positions.add((float) compressData((int)(float)blockUvs.get(i * 3), (int)(float)blockUvs.get(i * 3 + 1), (int)(float)blockUvs.get(i * 3 + 2), 2, 1, 0));
+        for (int i = 0; i < blockPositions.size() / 4; i++) {
+            positions.add(x + blockPositions.get(i * 4));
+            positions.add(y + blockPositions.get(i * 4 + 1));
+            positions.add(z + blockPositions.get(i * 4 + 2));
+            positions.add(blockPositions.get(i * 4 + 3));
         }
 
         var blockIndices = block.getMesh().getIndices();
-        for (int i = 0; i < blockIndices.size(); i++) {
-            indices.add(blockIndices.get(i) + passes);
+        for (Integer blockIndex : blockIndices) {
+            indices.add(blockIndex + passes);
         }
 
-        passes += blockPositions.size() / 3;
+        passes += blockPositions.size() / 4;
     }
 
     private int compressData(int xUv, int yUv, int texture, int normal, int cull, int wave) {

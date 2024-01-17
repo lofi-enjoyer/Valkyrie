@@ -8,37 +8,20 @@ public class BlockMeshBuilder {
 
     public static BlockMesh buildFullBlockMesh(int southTexture, int eastTexture, int topTexture) {
         float[] positions = {
-                0, 0, 0,
-                0, 1, 0,
-                0, 1, 1,
-                0, 0, 1,
+                0, 0, 0, compressData(0, 1, southTexture, 4, 0, 0),
+                0, 1, 0, compressData(0, 0, southTexture, 4, 0, 0),
+                0, 1, 1, compressData(1, 0, southTexture, 4, 0, 0),
+                0, 0, 1, compressData(1, 1, southTexture, 4, 0, 0),
 
-                1, 0, 1,
-                1, 1, 1,
-                0, 1, 1,
-                0, 0, 1,
+                1, 0, 1, compressData(0, 1, eastTexture, 0, 0, 0),
+                1, 1, 1, compressData(0, 0, eastTexture, 0, 0, 0),
+                0, 1, 1, compressData(1, 0, eastTexture, 0, 0, 0),
+                0, 0, 1, compressData(1, 1, eastTexture, 0, 0, 0),
 
-                0, 1, 0,
-                1, 1, 0,
-                1, 1, 1,
-                0, 1, 1
-        };
-
-        float[] uvs = {
-                0, 1, southTexture,
-                0, 0, southTexture,
-                1, 0, southTexture,
-                1, 1, southTexture,
-
-                0, 1, eastTexture,
-                0, 0, eastTexture,
-                1, 0, eastTexture,
-                1, 1, eastTexture,
-
-                1, 1, topTexture,
-                1, 0, topTexture,
-                0, 0, topTexture,
-                0, 1, topTexture
+                0, 1, 0, compressData(1, 1, topTexture, 2, 0, 0),
+                1, 1, 0, compressData(1, 0, topTexture, 2, 0, 0),
+                1, 1, 1, compressData(0, 0, topTexture, 2, 0, 0),
+                0, 1, 1, compressData(0, 1, topTexture, 2, 0, 0)
         };
 
         int[] indices = {
@@ -52,32 +35,20 @@ public class BlockMeshBuilder {
                 8, 11, 10
         };
 
-        return new BlockMesh(positions, indices, uvs);
+        return new BlockMesh(positions, indices);
     }
 
     public static BlockMesh buildXMesh(int texture) {
         float[] positions = {
-                diagonalP, 0, diagonalM,
-                diagonalP, 1, diagonalM,
-                diagonalM, 1, diagonalP,
-                diagonalM, 0, diagonalP,
+                diagonalP, 0, diagonalM, compressData(0, 1, texture, 2, 1, 0),
+                diagonalP, 1, diagonalM, compressData(0, 0, texture, 2, 1, 1),
+                diagonalM, 1, diagonalP, compressData(1, 0, texture, 2, 1, 1),
+                diagonalM, 0, diagonalP, compressData(1, 1, texture, 2, 1, 0),
 
-                diagonalM, 0, diagonalM,
-                diagonalM, 1, diagonalM,
-                diagonalP, 1, diagonalP,
-                diagonalP, 0, diagonalP
-        };
-
-        float[] uvs = {
-                0, 1, texture,
-                0, 0, texture,
-                1, 0, texture,
-                1, 1, texture,
-
-                0, 1, texture,
-                0, 0, texture,
-                1, 0, texture,
-                1, 1, texture
+                diagonalM, 0, diagonalM, compressData(0, 1, texture, 2, 1, 0),
+                diagonalM, 1, diagonalM, compressData(0, 0, texture, 2, 1, 1),
+                diagonalP, 1, diagonalP, compressData(1, 0, texture, 2, 1, 1),
+                diagonalP, 0, diagonalP, compressData(1, 1, texture, 2, 1, 0),
         };
 
         int[] indices = {
@@ -88,7 +59,11 @@ public class BlockMeshBuilder {
                 6, 7, 4
         };
 
-        return new BlockMesh(positions, indices, uvs);
+        return new BlockMesh(positions, indices);
+    }
+
+    private static float compressData(int xUv, int yUv, int texture, int normal, int cull, int wave) {
+        return (float)(xUv | yUv << 1 | normal << 2 | cull << 5 | wave << 6 | texture << 7);
     }
 
 }

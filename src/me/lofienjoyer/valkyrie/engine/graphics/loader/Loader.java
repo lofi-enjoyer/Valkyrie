@@ -57,7 +57,7 @@ public class Loader {
 
     public int loadToVAO(float[] positions, int[] indices) {
         int vao = createVAO();
-        storeDataInAttributeList(0, 3, positions);
+        storeDataInAttributeList(0, 4, positions);
         bindIndicesBuffer(indices);
         return vao;
     }

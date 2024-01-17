@@ -1,6 +1,6 @@
 #version 400 core
 
-in vec3 passTexture;
+in vec4 passTexture;
 
 out vec4 outColor;
 
