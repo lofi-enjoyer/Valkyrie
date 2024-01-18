@@ -2,6 +2,7 @@ package me.lofienjoyer.valkyrie.engine.graphics.loader;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.Mesh;
+import me.lofienjoyer.valkyrie.engine.graphics.texture.ImageData;
 import me.lofienjoyer.valkyrie.engine.graphics.texture.Texture;
 import me.lofienjoyer.valkyrie.engine.graphics.texture.TextureArray;
 import org.lwjgl.opengl.GL30;
@@ -260,6 +261,29 @@ public class Loader {
         GL30.glTexParameteri(GL30.GL_TEXTURE_CUBE_MAP, GL30.GL_TEXTURE_WRAP_T, GL30.GL_CLAMP_TO_EDGE);
         textureList.add(textureId);
         return textureId;
+    }
+
+    public ImageData loadImageData(String imagePath) {
+        ByteBuffer buf;
+        int width;
+        int height;
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer channels = stack.mallocInt(1);
+
+            buf = stbi_load(imagePath, w, h, channels, 4);
+            if (buf == null) {
+                Valkyrie.LOG.severe("Image not loaded: " + stbi_failure_reason());
+                return null;
+            }
+
+            width = w.get();
+            height = h.get();
+        }
+
+        return new ImageData(width, height, buf);
     }
 
     private void storeDataInAttributeList(int attributeNumber, int size, float[] data) {
