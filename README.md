@@ -5,12 +5,9 @@
 <details open="open">
   <summary>Table of contents</summary>
   <ol>
-    <li>
-      <a href="#about-the-project">About the project</a>
-    </li>
-    <li>
-      <a href="#features">Features</a>
-    </li>
+    <li><a href="#about-the-project">About the project</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#requirements">Requirements</a></li>
     <li><a href="#building">Building</a></li>
     <li><a href="#license">License</a></li>
   </ol>
@@ -40,11 +37,28 @@ Valkyrie is a project with the objective of putting together a basic Hytale-like
 - Skybox
 - Fog effect
 
+<div id="requirements"></div>
+
+## Requirements 🎮
+
+>[!IMPORTANT]
+> Native Windows 10/11 ARM builds are not available yet.
+
+|           | Minimum system requirements                   |
+|-----------|-----------------------------------------------|
+| CPU       | 64-bit (x86_64 or arm64-v8a) architecture     |
+| GPU       | OpenGL 4.6+ support                           |
+| RAM       | 2 GB (at least 1 GB free)                     |
+| Storage   | 1 GB free on HDD                              |
+| OS        | Windows 8.1+, macOS or Linux                  |
+| Java      | 11+ (JDK or JRE)                              |
+
 <div id="building"></div>
 
 ## Building 🚀 
 
-_Prerequisites: Java Development Kit 11 or newer and Maven_
+>[!WARNING]
+>_Prerequisites: Java Development Kit 11 or newer and Maven_
 
 1. Clone the repository and access the directory
 ```sh
