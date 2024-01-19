@@ -25,7 +25,7 @@
   <ol>
     <li><a href="#about-the-project">About the project</a></li>
     <li><a href="#features">Features</a></li>
-    <li><a href="#requirements">Requirements</a></li>
+    <li><a href="#system-requirements">System requirements</a></li>
     <li><a href="#building">Building</a></li>
     <li><a href="#license">License</a></li>
   </ol>
@@ -55,9 +55,9 @@ Valkyrie is a project with the objective of putting together a basic Hytale-like
 - Skybox
 - Fog effect
 
-<div id="requirements"></div>
+<div id="system-requirements"></div>
 
-## Requirements 🎮
+## System requirements 🎮
 
 >[!IMPORTANT]
 > Native Windows 10/11 ARM builds are not available yet.
