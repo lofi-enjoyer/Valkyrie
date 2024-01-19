@@ -2,6 +2,24 @@
 
 #### OpenGL &amp; Java 11 Voxel Engine
 
+<div>
+  <a href="https://github.com/lofi-enjoyer/Valkyrie/releases/latest">
+    <img src="https://img.shields.io/github/v/release/lofi-enjoyer/Valkyrie?include_prereleases" alt="Latest release" />
+  </a>
+  <a href="https://github.com/lofi-enjoyer/Valkyrie/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License" />
+  </a>
+  <a href="https://github.com/lofi-enjoyer/Valkyrie/pulls">
+    <img src="https://img.shields.io/github/issues-pr/lofi-enjoyer/Valkyrie" alt="Pull requests" />
+  </a>
+  <a href="https://github.com/lofi-enjoyer/Valkyrie/issues">
+    <img src="https://img.shields.io/github/issues/lofi-enjoyer/Valkyrie" alt="Issues" />
+  </a>
+  <a href="https://discord.gg/wdq3RP6xxY">
+    <img src="https://img.shields.io/badge/discord-Project_Valkyrie-blue?logo=discord">
+  </a>
+</div>
+
 <details open="open">
   <summary>Table of contents</summary>
   <ol>
@@ -47,7 +65,7 @@ Valkyrie is a project with the objective of putting together a basic Hytale-like
 |           | Minimum system requirements                   |
 |-----------|-----------------------------------------------|
 | CPU       | 64-bit (x86_64 or arm64-v8a) architecture     |
-| GPU       | OpenGL 4.6+ support                           |
+| GPU       | Any with OpenGL 4.6+ support                  |
 | RAM       | 2 GB (at least 1 GB free)                     |
 | Storage   | 1 GB free on HDD                              |
 | OS        | Windows 8.1+, macOS or Linux                  |
