@@ -15,6 +15,7 @@
         <joml.version>1.10.4</joml.version>
         <maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
         <platform>unspecified</platform>
+        <arch>unspecified</arch>
         <freetype.version>3.3.3</freetype.version>
     </properties>
 
@@ -30,6 +31,7 @@
             <properties>
                 <lwjgl.natives>natives-linux</lwjgl.natives>
                 <platform>linux</platform>
+                <arch>amd64</arch>                
             </properties>
         </profile>
         <profile>
@@ -42,6 +44,8 @@
             </activation>
             <properties>
                 <lwjgl.natives>natives-linux-arm64</lwjgl.natives>
+                <platform>linux</platform>
+                <arch>aarch64</arch>
             </properties>
         </profile>
         <profile>
@@ -55,6 +59,7 @@
             <properties>
                 <lwjgl.natives>natives-macos</lwjgl.natives>
                 <platform>macos</platform>
+                <arch>amd64</arch>
             </properties>
         </profile>
         <profile>
@@ -68,6 +73,7 @@
             <properties>
                 <lwjgl.natives>natives-windows</lwjgl.natives>
                 <platform>windows</platform>
+                <arch>amd64</arch>
             </properties>
         </profile>
     </profiles>
@@ -87,7 +93,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.5.5</version>
                 <configuration>
-                    <finalName>Valkyrie_${project.version}_${platform}_${maven.build.timestamp}</finalName>
+                    <finalName>Valkyrie_${project.version}_${platform}_${arch}_${maven.build.timestamp}</finalName>
                     <archive>
                         <manifest>
                             <mainClass>me.lofienjoyer.valkyrie.game.Application</mainClass>
