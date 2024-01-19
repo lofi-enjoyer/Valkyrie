@@ -1,8 +1,6 @@
 # Valkyrie ⛅
 
-#### OpenGL &amp; Java 11 Voxel Engine
-
-<div>
+<div align="center">
   <a href="https://github.com/lofi-enjoyer/Valkyrie/releases/latest">
     <img src="https://img.shields.io/github/v/release/lofi-enjoyer/Valkyrie?include_prereleases" alt="Latest release" />
   </a>
@@ -19,6 +17,8 @@
     <img src="https://img.shields.io/badge/discord-Project_Valkyrie-blue?logo=discord">
   </a>
 </div>
+
+#### OpenGL &amp; Java 11 Voxel Engine
 
 <details open="open">
   <summary>Table of contents</summary>
