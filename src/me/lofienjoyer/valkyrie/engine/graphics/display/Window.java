@@ -1,6 +1,7 @@
 package me.lofienjoyer.valkyrie.engine.graphics.display;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
+import me.lofienjoyer.valkyrie.engine.config.Config;
 import me.lofienjoyer.valkyrie.engine.graphics.render.WorldRenderer;
 import me.lofienjoyer.valkyrie.engine.world.World;
 import org.lwjgl.glfw.*;
@@ -27,6 +28,7 @@ public class Window {
 
     private int width;
     private int height;
+    private int msaaSamples;
 
     private boolean wireframe;
     private boolean vsync = true;
@@ -39,6 +41,10 @@ public class Window {
     private Window() {
         this.width = 800;
         this.height = 600;
+
+        var config = Config.getInstance();
+        msaaSamples = config.get("msaa_samples", Integer.class);
+
         String title = "Valkyrie";
 
         GLFWErrorCallback.createPrint(System.err).set();
@@ -49,6 +55,7 @@ public class Window {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_SAMPLES, msaaSamples);
 
         id = glfwCreateWindow(width, height, title, NULL, NULL);
         if (id == NULL)
