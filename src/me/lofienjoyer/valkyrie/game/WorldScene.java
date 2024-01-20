@@ -34,6 +34,7 @@ public class WorldScene implements IScene {
     private WorldRenderer worldRenderer;
     private Player player;
     private String gpuInfo;
+    private String msaaInfo;
     private Timer worldTimer;
     private ValkyrieFont font;
     private ColorNormalFramebuffer worldFbo;
@@ -72,6 +73,7 @@ public class WorldScene implements IScene {
         });
 
         this.gpuInfo = glGetString(GL_VENDOR) + " - " + glGetString(GL_RENDERER);
+        this.msaaInfo = "MSAA: " + glGetInteger(GL_SAMPLES) + "x";
 
         TimerTask task = new TimerTask() {
             @Override
@@ -139,6 +141,7 @@ public class WorldScene implements IScene {
                     "FPS: %04.1f (delta: %06.4fs)" +
                             "\nMemory usage: %06.2f/%06.2f MB" +
                             "\n" + gpuInfo +
+                            "\n" + msaaInfo +
                             "\nX: %.2f | Y: %.2f | Z: %.2f" +
                             "\n\nH: Toggle VSync" +
                             "\nR: Toggle wireframe" +
