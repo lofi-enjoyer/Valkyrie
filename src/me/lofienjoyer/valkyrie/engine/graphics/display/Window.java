@@ -104,7 +104,7 @@ public class Window {
             );
         }
 
-        Valkyrie.LOG.info("Window succesfully created");
+        Valkyrie.LOG.info("Window successfully created");
 
         glfwMakeContextCurrent(id);
         Valkyrie.LOG.info("OpenGL Context set");

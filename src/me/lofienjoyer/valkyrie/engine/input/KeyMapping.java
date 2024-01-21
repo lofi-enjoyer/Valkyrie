@@ -12,6 +12,7 @@ public class KeyMapping {
     public static int TOGGLE_DEBUG_MODE;
     public static int TOGGLE_VSYNC;
     public static int CALL_GC;
+
     public static void update() {
         var config = Config.getInstance();
 
