@@ -37,22 +37,22 @@ public class Player {
         movement.x = 0;
         movement.z = 0;
 
-        if (Input.isKeyPressed(KeyMapping.MOVE_FORWARD)) {
+        if (Input.isKeyPressed(KeyMapping.getMoveForwardKey())) {
             movement.z -= Math.cos(Math.toRadians(rotation.x)) * SPEED * delta;
             movement.x += Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
 
-        if (Input.isKeyPressed(KeyMapping.MOVE_BACKWARDS)) {
+        if (Input.isKeyPressed(KeyMapping.getMoveBackwardsKey())) {
             movement.z += Math.cos(Math.toRadians(rotation.x)) * SPEED * delta;
             movement.x -= Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
 
-        if (Input.isKeyPressed(KeyMapping.MOVE_LEFT)) {
+        if (Input.isKeyPressed(KeyMapping.getMoveLeftKey())) {
             movement.x -= Math.cos(Math.toRadians(rotation.x)) * SPEED * delta;
             movement.z -= Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
 
-        if (Input.isKeyPressed(KeyMapping.MOVE_RIGHT)) {
+        if (Input.isKeyPressed(KeyMapping.getMoveRightKey())) {
             movement.x += Math.cos(Math.toRadians(rotation.x)) * SPEED * delta;
             movement.z += Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
@@ -72,7 +72,7 @@ public class Player {
         position.y += movement.y;
         checkCollisions(new Vector3f(0, movement.y, 0));
 
-        if ((contact || highestMovementResistance != 0) && Input.isKeyPressed(KeyMapping.JUMP)) {
+        if ((contact || highestMovementResistance != 0) && Input.isKeyPressed(KeyMapping.getJumpKey())) {
             movement.y = 15f * (1 - highestMovementResistance) * delta;
             contact = false;
         }

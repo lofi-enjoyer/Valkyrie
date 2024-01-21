@@ -63,18 +63,18 @@ public class Window {
             keyCallbacks.forEach(callback -> callback.invoke(id, key, scancode, action, mods));
         });
         keyCallbacks.add((id, key, scancode, action, mods) -> {
-            if (key == KeyMapping.TOGGLE_WIREFRAME && action == GLFW_RELEASE) {
+            if (key == KeyMapping.getToggleWireframeKey() && action == GLFW_RELEASE) {
                 wireframe = !wireframe;
                 GL30.glPolygonMode(GL30.GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             }
-            if (key == KeyMapping.TOGGLE_DEBUG_MODE && action == GLFW_RELEASE) {
+            if (key == KeyMapping.getToggleDebugModeKey() && action == GLFW_RELEASE) {
                 Valkyrie.DEBUG_MODE = !Valkyrie.DEBUG_MODE;
             }
-            if (key == KeyMapping.TOGGLE_VSYNC && action == GLFW_RELEASE) {
+            if (key == KeyMapping.getToggleVsyncKey() && action == GLFW_RELEASE) {
                 vsync = !vsync;
                 glfwSwapInterval(vsync ? 1 : 0);
             }
-            if (key == KeyMapping.CALL_GC && action == GLFW_RELEASE) {
+            if (key == KeyMapping.getCallGcKey() && action == GLFW_RELEASE) {
                 System.gc();
             }
         });
