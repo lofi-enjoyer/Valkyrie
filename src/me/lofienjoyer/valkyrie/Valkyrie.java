@@ -11,6 +11,7 @@ import me.lofienjoyer.valkyrie.engine.graphics.loader.Loader;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.QuadMesh;
 import me.lofienjoyer.valkyrie.engine.graphics.render.FontRenderer;
 import me.lofienjoyer.valkyrie.engine.input.Input;
+import me.lofienjoyer.valkyrie.engine.input.KeyMapping;
 import me.lofienjoyer.valkyrie.engine.log.ValkyrieLogHandler;
 import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
@@ -40,9 +41,9 @@ public class Valkyrie {
     public static float FOV = (float) Math.toRadians(80.0);
     public static boolean DEBUG_MODE = false;
 
-    private final Window window;
-    private final Input input;
     private final Config config;
+    private final Input input;
+    private final Window window;
 
     private IScene currentScene;
 
@@ -82,6 +83,9 @@ public class Valkyrie {
 
         // Sets up the block registry
         BlockRegistry.setup();
+
+        // Updates the key mapping
+        KeyMapping.update();
 
         // Sets up the window properties and callbacks, and then shows it
         window.setSize(config.get("window_width", Integer.class), config.get("window_height", Integer.class));
