@@ -11,6 +11,7 @@ import me.lofienjoyer.valkyrie.engine.graphics.render.gui.CrosshairRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.render.gui.SelectedBlockRenderer;
 import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
 import me.lofienjoyer.valkyrie.engine.input.Input;
+import me.lofienjoyer.valkyrie.engine.input.KeyMapping;
 import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
@@ -140,9 +141,9 @@ public class WorldScene implements IScene {
                             "\nMemory usage: %06.2f/%06.2f MB" +
                             "\n" + gpuInfo +
                             "\nX: %.2f | Y: %.2f | Z: %.2f" +
-                            "\n\nH: Toggle VSync" +
-                            "\nR: Toggle wireframe" +
-                            "\nP: Garbage collector",
+                            "\n\n" + KeyMapping.getToggleVsyncKey() + ":Toggle VSync" +
+                            "\n" + KeyMapping.getToggleWireframeKey() + ": Toggle wireframe" +
+                            "\n" + KeyMapping.getCallGcKey() + ": Garbage collector",
                     1f / delta,
                     delta,
                     (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),
