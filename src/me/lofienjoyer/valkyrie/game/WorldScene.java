@@ -141,9 +141,9 @@ public class WorldScene implements IScene {
                             "\nMemory usage: %06.2f/%06.2f MB" +
                             "\n" + gpuInfo +
                             "\nX: %.2f | Y: %.2f | Z: %.2f" +
-                            "\n\n" + KeyMapping.getToggleVsyncKey() + ": Toggle VSync" +
-                            "\n" + KeyMapping.getToggleWireframeKey() + ": Toggle wireframe" +
-                            "\n" + KeyMapping.getCallGcKey() + ": Garbage collector",
+                            "\n\n" + GLFW.glfwGetKeyName(KeyMapping.getToggleVsyncKey(), 0).toUpperCase() + ": Toggle VSync" +
+                            "\n" + GLFW.glfwGetKeyName(KeyMapping.getToggleWireframeKey(), 0).toUpperCase() + ": Toggle wireframe" +
+                            "\n" + GLFW.glfwGetKeyName(KeyMapping.getCallGcKey(), 0).toUpperCase() + ": Garbage collector",
                     1f / delta,
                     delta,
                     (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024f),
