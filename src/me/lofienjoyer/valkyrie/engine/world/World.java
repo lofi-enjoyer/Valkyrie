@@ -34,7 +34,7 @@ public class World {
     private final Vector2i playerPosition;
 
     private final PerlinNoise noise;
-    private double seed;
+    private long seed;
 
     private final List<Chunk> chunksToGenerate;
 
@@ -76,15 +76,19 @@ public class World {
 //            e.printStackTrace();
 //        }
 
-        this.noise = new PerlinNoise(seed, 900);
+        var random = new Random(seed);
+        this.noise = new PerlinNoise(seed, 1500);
+        var biomeNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 300);
+        var structureNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 1);
 
         this.populators = new ArrayList<>();
         populators.add(new TerrainPopulator(noise));
+        populators.add(new BigRockPopulator(noise));
         populators.add(new TreePopulator(noise));
-        populators.add(new CastlePopulator(noise));
+        populators.add(new CastlePopulator(structureNoise));
         populators.add(new GrassPopulator(noise));
 
-        Valkyrie.LOG.info("World generation seed set to " + noise.getSeed());
+        Valkyrie.LOG.info("World generation seed set to " + seed);
     }
 
     public synchronized void update(float delta, Camera camera) {

@@ -1,5 +1,5 @@
-id: 34
-texture: 'tall_grass'
+id: 35
+texture: 'short_grass'
 transparent: true
 collision: false
 model: x

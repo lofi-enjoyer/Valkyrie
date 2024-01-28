@@ -7,6 +7,8 @@ import static me.lofienjoyer.valkyrie.engine.world.World.CHUNK_WIDTH;
 
 public class TerrainPopulator extends Populator {
 
+    private static final float PERSISTANCE = 0.5f;
+
     public TerrainPopulator(PerlinNoise noise) {
         super(noise);
     }
@@ -18,7 +20,7 @@ public class TerrainPopulator extends Populator {
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
 
-                double noiseValue = (noise.noise(x + chunkX, z + chunkZ) + 1) / 2f;
+                double noiseValue = getOctave(x + chunkX, z + chunkZ);
                 double maxHeight = noiseValue * noiseValue * 250;
 
                 for (int y = 0; y < (int)maxHeight - 2; y++) {
@@ -48,4 +50,22 @@ public class TerrainPopulator extends Populator {
             }
         }
     }
+
+    private double getOctave(int x, int z) {
+        double octave = 0;
+        float frequency = 1;
+        float amplitude = 1;
+        float amplitudeSum = 0;
+        for (int i = 0; i < 4; i++) {
+            octave += ((noise.noise(x * frequency, z * frequency) + 1) / 2f) * amplitude;
+
+            amplitudeSum += amplitude;
+
+            amplitude *= PERSISTANCE;
+            frequency *= 2;
+        }
+
+        return octave / amplitudeSum;
+    }
+
 }

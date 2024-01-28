@@ -14,17 +14,21 @@ public class CastlePopulator extends Populator {
     private static final int MAX_JAILS = 7;
     private static final int MIN_JAILS = 2;
 
+    private static final int FREQUENCY = 1;
+
     public CastlePopulator(PerlinNoise noise) {
         super(noise);
     }
 
     @Override
     public void populate(Chunk chunk) {
-        double value = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32);
+        double value = noise.noise(chunk.getPosition().x / (float)FREQUENCY, chunk.getPosition().y / (float)FREQUENCY);
         value = (value + 1) / 2f;
 
-        if (value < 0.3 || value > 0.35)
+        if (value < 0.8)
             return;
+
+        System.out.println(chunk.getPosition());
 
         Random random = new Random();
         int castleX = random.nextInt(16);

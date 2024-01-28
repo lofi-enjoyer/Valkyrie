@@ -1,0 +1,4 @@
+id: 16
+texture: 'apple_leaves'
+transparent: true
+drawBetween: true
