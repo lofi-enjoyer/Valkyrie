@@ -181,9 +181,7 @@ public class World {
 
                 var neighbor = getChunk(i + chunk.getPosition().x, j + chunk.getPosition().y);
                 if (neighbor != null) {
-                    for (int k = 0; k < 8; k++) {
-                        Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor, new Vector3i(0, k * CHUNK_SECTION_HEIGHT, 0)));
-                    }
+                    Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor, new Vector3i(0, 0, 0)));
                 }
 
             }

@@ -42,9 +42,9 @@ public class WorldRenderer {
     private final Shader transparencyShader;
 
     private final Map<Vector2i, MeshBundle> chunkMeshes;
-    private final Map<Vector3i, Future<MeshBundle>> meshFutures;
-    private final Map<Vector3i, MeshBundle> meshesToUpload;
-    private final Map<Vector3i, Chunk> chunksToUpdate;
+    private final Map<Vector2i, Future<MeshBundle>> meshFutures;
+    private final Map<Vector2i, MeshBundle> meshesToUpload;
+    private final Map<Vector2i, Chunk> chunksToUpdate;
 
     private final List<Event> eventsToProcess;
 
@@ -142,16 +142,15 @@ public class WorldRenderer {
         solidsShader.loadBoolean("transparent", transparency);
 
         chunksToRender.forEach((position, mesh) -> {
-            for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
-                if (mesh.getSolidMeshes(y).getVertexCount() == 0)
-                    continue;
-                solidsShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
+            if (mesh.getSolidMeshes().getVertexCount() == 0)
+                return;
 
-                glBindVertexArray(mesh.getSolidMeshes(y).getVaoId());
-                glEnableVertexAttribArray(0);
+            solidsShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, 0, position.y)));
 
-                glDrawElements(GL_TRIANGLES, mesh.getSolidMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
-            }
+            glBindVertexArray(mesh.getSolidMeshes().getVaoId());
+            glEnableVertexAttribArray(0);
+
+            glDrawElements(GL_TRIANGLES, mesh.getSolidMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
         });
     }
 
@@ -174,16 +173,15 @@ public class WorldRenderer {
         transparencyShader.loadBoolean("transparent", false);
 
         chunksToRender.forEach((position, mesh) -> {
-            for (int y = 0; y < World.CHUNK_HEIGHT / World.CHUNK_SECTION_HEIGHT; y++) {
-                if (mesh.getSolidMeshes(y).getVertexCount() == 0)
-                    continue;
-                transparencyShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, y, position.y)));
+            if (mesh.getSolidMeshes().getVertexCount() == 0)
+                return;
 
-                glBindVertexArray(mesh.getTransparentMeshes(y).getVaoId());
-                glEnableVertexAttribArray(0);
+            transparencyShader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector3i(position.x, 0, position.y)));
 
-                glDrawElements(GL_TRIANGLES, mesh.getTransparentMeshes(y).getVertexCount(), GL_UNSIGNED_INT, 0);
-            }
+            glBindVertexArray(mesh.getTransparentMeshes().getVaoId());
+            glEnableVertexAttribArray(0);
+
+            glDrawElements(GL_TRIANGLES, mesh.getTransparentMeshes().getVertexCount(), GL_UNSIGNED_INT, 0);
         });
 
         Renderer.disableBlend();
@@ -213,12 +211,12 @@ public class WorldRenderer {
         }
     }
 
-    private void generateMesh(Chunk chunk, MeshBundle meshBundle, int section) {
+    private void generateMesh(Chunk chunk, MeshBundle meshBundle) {
         if (chunk.getState() == ChunkState.UNLOADED)
             return;
 
         var position = chunk.getPosition();
-        var meshPosition = new Vector3i(position.x, section, position.y);
+        var meshPosition = new Vector2i(position.x, position.y);
         var meshFuture = meshFutures.get(meshPosition);
 
         if (meshFuture != null) {
@@ -228,7 +226,7 @@ public class WorldRenderer {
 
         chunk.cacheNeighbors();
         meshFuture = Valkyrie.getMeshingService().submit(() -> {
-            meshBundle.compute(section);
+            meshBundle.compute();
             Valkyrie.EVENT_HANDLER.process(new MeshGenerationEvent(meshPosition, meshBundle));
             return meshBundle;
         });
@@ -244,19 +242,17 @@ public class WorldRenderer {
                     var chunkLoadEvent = (ChunkLoadEvent) event;
                     var meshBundle = new MeshBundle(chunkLoadEvent.getChunk());
                     chunkMeshes.put(chunkLoadEvent.getChunk().getPosition(), meshBundle);
-                    for (int i = 0; i < 8; i++) {
-                        chunksToUpdate.put(new Vector3i(chunkLoadEvent.getChunk().getPosition().x, i, chunkLoadEvent.getChunk().getPosition().y), chunkLoadEvent.getChunk());
-                    }
+                    chunksToUpdate.put(new Vector2i(chunkLoadEvent.getChunk().getPosition().x, chunkLoadEvent.getChunk().getPosition().y), chunkLoadEvent.getChunk());
                 } else if (event instanceof ChunkUpdateEvent) {
                     var chunkUpdateEvent = (ChunkUpdateEvent) event;
                     if (chunkUpdateEvent.getChunk() == null)
                         return;
 
-                    chunksToUpdate.put(new Vector3i(chunkUpdateEvent.getChunk().getPosition().x, chunkUpdateEvent.getUpdatePosition().y / World.CHUNK_SECTION_HEIGHT, chunkUpdateEvent.getChunk().getPosition().y), chunkUpdateEvent.getChunk());
+                    chunksToUpdate.put(new Vector2i(chunkUpdateEvent.getChunk().getPosition().x, chunkUpdateEvent.getChunk().getPosition().y), chunkUpdateEvent.getChunk());
                 } else if (event instanceof ChunkUnloadEvent) {
                     var chunkUnloadEvent = (ChunkUnloadEvent) event;
                     for (int i = 0; i < 8; i++) {
-                        var meshPosition = new Vector3i(chunkUnloadEvent.getChunk().getPosition().x, i, chunkUnloadEvent.getChunk().getPosition().y);
+                        var meshPosition = new Vector2i(chunkUnloadEvent.getChunk().getPosition().x, chunkUnloadEvent.getChunk().getPosition().y);
                         var meshFuture = meshFutures.get(meshPosition);
                         if (meshFuture != null) {
                             meshFuture.cancel(true);
@@ -281,14 +277,14 @@ public class WorldRenderer {
             var currentMeshEntry = meshesToUploadIterator.next();
             meshesToUploadIterator.remove();
 
-            if (currentMeshEntry.getValue().loadMeshToGpu(currentMeshEntry.getKey().y))
+            if (currentMeshEntry.getValue().loadMeshToGpu())
                 break;
         }
     }
 
     private void generatePendingMeshes() {
         chunksToUpdate.forEach((position, chunk) -> {
-            generateMesh(chunk, chunkMeshes.get(chunk.getPosition()), position.y);
+            generateMesh(chunk, chunkMeshes.get(chunk.getPosition()));
         });
         chunksToUpdate.clear();
     }

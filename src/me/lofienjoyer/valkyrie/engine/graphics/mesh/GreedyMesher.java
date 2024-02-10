@@ -34,13 +34,10 @@ public class GreedyMesher implements Mesher {
     private int[] positionsArray;
     private int[] indicesArray;
 
-    private final int section;
-
-    public GreedyMesher(ChunkPreMeshData chunkPreMeshData, int section) {
+    public GreedyMesher(ChunkPreMeshData chunkPreMeshData) {
         this.chunkData = chunkPreMeshData;
-        this.section = section;
 
-        this.dims = new int[] { CHUNK_WIDTH, CHUNK_SECTION_HEIGHT, CHUNK_WIDTH };
+        this.dims = new int[] { CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH };
     }
 
     @Override
@@ -115,8 +112,8 @@ public class GreedyMesher implements Mesher {
 
                         for(x[u] = 0; x[u] < dims[u]; x[u]++) {
 
-                            voxelFace  = chunkData.getBlock(x[0], x[1] + CHUNK_SECTION_HEIGHT * section, x[2]);
-                            voxelFace1 = chunkData.getBlock((x[0] + q[0]), (x[1] + q[1]) + CHUNK_SECTION_HEIGHT * section, (x[2] + q[2]));
+                            voxelFace  = chunkData.getBlock(x[0], x[1], x[2]);
+                            voxelFace1 = chunkData.getBlock((x[0] + q[0]), (x[1] + q[1]), (x[2] + q[2]));
 
                             if (voxelFace != 0 && voxelFace1 != 0) {
                                 var blockA = BlockRegistry.getBlock(voxelFace);
