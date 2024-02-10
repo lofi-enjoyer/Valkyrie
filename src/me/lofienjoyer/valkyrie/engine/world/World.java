@@ -21,7 +21,7 @@ import java.util.*;
 public class World {
 
     public static final int CHUNK_WIDTH = 32;
-    public static final int CHUNK_HEIGHT = 256;
+    public static final int CHUNK_HEIGHT = 128;
     public static final int CHUNK_SECTION_HEIGHT = 32;
     public static int LOAD_DISTANCE = 5;
     public static int FULLY_LOAD_DISTANCE = 1;
@@ -34,7 +34,7 @@ public class World {
     private final Vector2i playerPosition;
 
     private final PerlinNoise noise;
-    private double seed;
+    private long seed;
 
     private final List<Chunk> chunksToGenerate;
 
@@ -76,15 +76,19 @@ public class World {
 //            e.printStackTrace();
 //        }
 
-        this.noise = new PerlinNoise(seed, 900);
+        var random = new Random(seed);
+        this.noise = new PerlinNoise(seed, 1500);
+        var biomeNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 300);
+        var structureNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 1500);
 
         this.populators = new ArrayList<>();
         populators.add(new TerrainPopulator(noise));
+        populators.add(new BigRockPopulator(noise));
         populators.add(new TreePopulator(noise));
-        populators.add(new CastlePopulator(noise));
+        populators.add(new CastlePopulator(structureNoise));
         populators.add(new GrassPopulator(noise));
 
-        Valkyrie.LOG.info("World generation seed set to " + noise.getSeed());
+        Valkyrie.LOG.info("World generation seed set to " + seed);
     }
 
     public synchronized void update(float delta, Camera camera) {
@@ -177,9 +181,7 @@ public class World {
 
                 var neighbor = getChunk(i + chunk.getPosition().x, j + chunk.getPosition().y);
                 if (neighbor != null) {
-                    for (int k = 0; k < 8; k++) {
-                        Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor, new Vector3i(0, k * CHUNK_SECTION_HEIGHT, 0)));
-                    }
+                    Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor, new Vector3i(0, 0, 0)));
                 }
 
             }

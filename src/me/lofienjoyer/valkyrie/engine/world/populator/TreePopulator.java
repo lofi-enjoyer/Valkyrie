@@ -15,6 +15,10 @@ public class TreePopulator extends Populator {
     private static final int TREE_MAX_HEIGHT = 15;
     private static final int LEAVES_HEIGHT = 11;
 
+    private static final int[] LEAVES_ARRAY = new int[] {
+            6, 6, 6, 6, 6, 6, 6, 6, 6, 18, 19, 19
+    };
+
     public TreePopulator(PerlinNoise noise) {
         super(noise);
     }
@@ -22,7 +26,8 @@ public class TreePopulator extends Populator {
     @Override
     public void populate(Chunk chunk) {
         Random random = new Random();
-        var treeAmount = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32) * 20;
+        var treeAmount = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32);
+        treeAmount = Math.sqrt(treeAmount) * 20;
         for (int i = 0; i < treeAmount; i++) {
             int treeX = random.nextInt(CHUNK_WIDTH);
             int treeZ = random.nextInt(CHUNK_WIDTH);
@@ -39,12 +44,15 @@ public class TreePopulator extends Populator {
 
             if (treeY == 0) continue;
 
+            var leavesType = LEAVES_ARRAY[random.nextInt(LEAVES_ARRAY.length)];
+
             for (int x = -TREE_SIDE; x <= TREE_SIDE; x++) {
                 for (int z = -TREE_SIDE; z <= TREE_SIDE; z++) {
                     for (int y = 0; y < LEAVES_HEIGHT; y++) {
                         var distance = x * x + z * z;
-                        if (random.nextFloat() < (1.25 - y/14f - distance/16f) && chunk.getBlock(x + treeX, y + treeY + height, z + treeZ) == 0)
-                            chunk.setBlock(6, x + treeX, y + treeY + height, z + treeZ, false);
+                        if (random.nextFloat() < (1.25 - y/14f - distance/16f) && chunk.getBlock(x + treeX, y + treeY + height, z + treeZ) == 0) {
+                            chunk.setBlock(leavesType, x + treeX, y + treeY + height, z + treeZ, false);
+                        }
                     }
                 }
             }

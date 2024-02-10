@@ -10,7 +10,7 @@ import static me.lofienjoyer.valkyrie.engine.world.World.CHUNK_WIDTH;
 
 public class GrassPopulator extends Populator {
 
-    private static final int MAX_PER_CHUNK = 450;
+    private static final int MAX_PER_CHUNK = 600;
 
     public GrassPopulator(PerlinNoise noise) {
         super(noise);
@@ -19,7 +19,8 @@ public class GrassPopulator extends Populator {
     @Override
     public void populate(Chunk chunk) {
         Random random = new Random();
-        var grassAmount = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32) * MAX_PER_CHUNK;
+        var grassAmount = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32);
+        grassAmount = Math.sqrt(1 - grassAmount) * MAX_PER_CHUNK;
         for (int i = 0; i < grassAmount; i++) {
             int grassX = random.nextInt(CHUNK_WIDTH);
             int grassZ = random.nextInt(CHUNK_WIDTH);
@@ -34,9 +35,13 @@ public class GrassPopulator extends Populator {
 
             if (grassY == 0) continue;
 
-            var blockId = 33;
-            if (random.nextFloat() > 0.7)
+            var blockId = 35;
+            var grassDice = random.nextFloat();
+            if (grassDice > 0.97) {
+                blockId = 33;
+            } else if (grassDice > 0.8) {
                 blockId = 34;
+            }
 
             chunk.setBlock(blockId, grassX, grassY, grassZ, false);
         }

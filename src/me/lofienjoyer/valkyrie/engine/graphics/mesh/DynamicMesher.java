@@ -22,11 +22,8 @@ public class DynamicMesher implements Mesher {
     private float[] positionsArray;
     private int[] indicesArray;
 
-    private final int section;
-
-    public DynamicMesher(ChunkPreMeshData chunkPreMeshData, int section) {
+    public DynamicMesher(ChunkPreMeshData chunkPreMeshData) {
         this.chunkData = chunkPreMeshData;
-        this.section = section;
     }
 
     @Override
@@ -70,9 +67,9 @@ public class DynamicMesher implements Mesher {
     private void computeMesh() {
         int currentVoxel;
         for (int x = 0; x < CHUNK_WIDTH; x++) {
-            for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++) {
+            for (int y = 0; y < CHUNK_HEIGHT; y++) {
                 for (int z = 0; z < CHUNK_WIDTH; z++) {
-                    currentVoxel = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z);
+                    currentVoxel = chunkData.getBlock(x, y, z);
                     if (currentVoxel == 0 || !BlockRegistry.getBlock(currentVoxel).isCustomModel()) continue;
 
                     meshCustomModel(x, y, z, BlockRegistry.getBlock(currentVoxel));

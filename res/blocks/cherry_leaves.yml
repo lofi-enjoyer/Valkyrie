@@ -1,0 +1,4 @@
+id: 18
+texture: 'cherry_leaves'
+transparent: true
+drawBetween: true

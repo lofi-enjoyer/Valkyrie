@@ -2,19 +2,20 @@ package me.lofienjoyer.valkyrie.engine.events.mesh;
 
 import me.lofienjoyer.valkyrie.engine.events.Event;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.MeshBundle;
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 public class MeshGenerationEvent implements Event {
 
     private final MeshBundle meshBundle;
-    private final Vector3i position;
+    private final Vector2i position;
 
-    public MeshGenerationEvent(Vector3i position, MeshBundle meshBundle) {
+    public MeshGenerationEvent(Vector2i position, MeshBundle meshBundle) {
         this.position = position;
         this.meshBundle = meshBundle;
     }
 
-    public Vector3i getPosition() {
+    public Vector2i getPosition() {
         return position;
     }
 

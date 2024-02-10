@@ -164,7 +164,7 @@ public class Chunk {
         if (z > CHUNK_WIDTH - 1) {
             return neighbors[SOUTH] != null ? neighbors[SOUTH].getBlock(x, y, z - CHUNK_WIDTH) : 0;
         }
-        return voxels[x | y << 5 | z << 13];
+        return voxels[x | y << 5 | z << 12];
     }
 
     public void setBlock(int voxel, int x, int y, int z) {
@@ -181,7 +181,7 @@ public class Chunk {
             return;
         }
 
-        voxels[x | y << 5 | z << 13] = (short) voxel;
+        voxels[x | y << 5 | z << 12] = (short) voxel;
 
         if (!updateChunk)
             return;
@@ -193,8 +193,6 @@ public class Chunk {
         if (x == CHUNK_WIDTH - 1) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x + 1, position.y), blockPosition));
         if (z == 0) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y - 1), blockPosition));
         if (z == CHUNK_WIDTH - 1) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y + 1), blockPosition));
-        if (y % CHUNK_SECTION_HEIGHT == 0) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y), new Vector3i(blockPosition.x, blockPosition.y - 1, blockPosition.z)));
-        if ((y + 1) % CHUNK_SECTION_HEIGHT == 0) Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(world.getChunk(position.x, position.y), new Vector3i(blockPosition.x, blockPosition.y + 1, blockPosition.z)));
     }
 
     public void onDestroy() {
