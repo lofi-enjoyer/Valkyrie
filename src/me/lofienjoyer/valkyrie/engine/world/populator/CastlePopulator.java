@@ -9,11 +9,10 @@ import static me.lofienjoyer.valkyrie.engine.world.World.CHUNK_HEIGHT;
 
 public class CastlePopulator extends Populator {
 
-    private static final int WIDTH = 9;
-    private static final int HEIGHT = 90;
+    private static final int HEIGHT = 25;
     private static final int RADIUS = 6;
 
-    private static final int FREQUENCY = 8;
+    private static final int FREQUENCY = 1000;
 
     public CastlePopulator(PerlinNoise noise) {
         super(noise);
@@ -33,7 +32,7 @@ public class CastlePopulator extends Populator {
 
         int castleY = 0;
 
-        for (int y = 1; y < CHUNK_HEIGHT - 100; y++) {
+        for (int y = 1; y < CHUNK_HEIGHT - 30; y++) {
             if (chunk.getBlock(castleX, y, castleZ) == 0 && chunk.getBlock(castleX, y - 1, castleZ) == 1) {
                 castleY = y;
                 break;
@@ -90,8 +89,8 @@ public class CastlePopulator extends Populator {
         }
 
         for (int y = 0; y < HEIGHT; y++) {
-            int stepX = (int) ((RADIUS - 1) * Math.sin(y * 0.5));
-            int stepZ = (int) ((RADIUS - 1) * Math.cos(y * 0.5));
+            int stepX = (int) ((RADIUS - 1) * Math.sin(y * 0.25));
+            int stepZ = (int) ((RADIUS - 1) * Math.cos(y * 0.25));
 
             chunk.setBlock(17, stepX + castleX, y + castleY, stepZ + castleZ, false);
         }
