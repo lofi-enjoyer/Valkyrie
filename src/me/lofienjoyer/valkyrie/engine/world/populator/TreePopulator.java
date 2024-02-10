@@ -26,7 +26,8 @@ public class TreePopulator extends Populator {
     @Override
     public void populate(Chunk chunk) {
         Random random = new Random();
-        var treeAmount = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32) * 20;
+        var treeAmount = noise.noise(chunk.getPosition().x * 32, chunk.getPosition().y * 32);
+        treeAmount = Math.sqrt(treeAmount) * 20;
         for (int i = 0; i < treeAmount; i++) {
             int treeX = random.nextInt(CHUNK_WIDTH);
             int treeZ = random.nextInt(CHUNK_WIDTH);

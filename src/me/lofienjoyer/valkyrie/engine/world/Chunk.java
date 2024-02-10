@@ -164,7 +164,7 @@ public class Chunk {
         if (z > CHUNK_WIDTH - 1) {
             return neighbors[SOUTH] != null ? neighbors[SOUTH].getBlock(x, y, z - CHUNK_WIDTH) : 0;
         }
-        return voxels[x | y << 5 | z << 13];
+        return voxels[x | y << 5 | z << 12];
     }
 
     public void setBlock(int voxel, int x, int y, int z) {
@@ -181,7 +181,7 @@ public class Chunk {
             return;
         }
 
-        voxels[x | y << 5 | z << 13] = (short) voxel;
+        voxels[x | y << 5 | z << 12] = (short) voxel;
 
         if (!updateChunk)
             return;

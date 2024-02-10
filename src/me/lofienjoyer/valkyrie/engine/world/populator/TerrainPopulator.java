@@ -21,7 +21,7 @@ public class TerrainPopulator extends Populator {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
 
                 double noiseValue = getOctave(x + chunkX, z + chunkZ);
-                double maxHeight = noiseValue * noiseValue * 250;
+                double maxHeight = noiseValue * noiseValue * 120;
 
                 for (int y = 0; y < (int)maxHeight - 2; y++) {
                     chunk.setBlock(2, x, y, z, false);

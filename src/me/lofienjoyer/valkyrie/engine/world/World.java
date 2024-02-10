@@ -21,7 +21,7 @@ import java.util.*;
 public class World {
 
     public static final int CHUNK_WIDTH = 32;
-    public static final int CHUNK_HEIGHT = 256;
+    public static final int CHUNK_HEIGHT = 128;
     public static final int CHUNK_SECTION_HEIGHT = 32;
     public static int LOAD_DISTANCE = 5;
     public static int FULLY_LOAD_DISTANCE = 1;
@@ -79,7 +79,7 @@ public class World {
         var random = new Random(seed);
         this.noise = new PerlinNoise(seed, 1500);
         var biomeNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 300);
-        var structureNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 1);
+        var structureNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 1500);
 
         this.populators = new ArrayList<>();
         populators.add(new TerrainPopulator(noise));

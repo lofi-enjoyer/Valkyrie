@@ -38,18 +38,18 @@ public class ChunkPreMeshData {
         if (chunkData == null) return 0;
         if (y < 0 || y > CHUNK_HEIGHT - 1) return 0;
         if (x < 0) {
-            return neighborsData[EAST] != null ? neighborsData[EAST][x + CHUNK_WIDTH | y << 5 | z << 13] : 0;
+            return neighborsData[EAST] != null ? neighborsData[EAST][x + CHUNK_WIDTH | y << 5 | z << 12] : 0;
         }
         if (x > CHUNK_WIDTH - 1) {
-            return neighborsData[WEST] != null ? neighborsData[WEST][x - CHUNK_WIDTH | y << 5 | z << 13] : 0;
+            return neighborsData[WEST] != null ? neighborsData[WEST][x - CHUNK_WIDTH | y << 5 | z << 12] : 0;
         }
         if (z < 0) {
-            return neighborsData[NORTH] != null ? neighborsData[NORTH][x | y << 5 | z + CHUNK_WIDTH << 13] : 0;
+            return neighborsData[NORTH] != null ? neighborsData[NORTH][x | y << 5 | z + CHUNK_WIDTH << 12] : 0;
         }
         if (z > CHUNK_WIDTH - 1) {
-            return neighborsData[SOUTH] != null ? neighborsData[SOUTH][x | y << 5 | z - CHUNK_WIDTH << 13] : 0;
+            return neighborsData[SOUTH] != null ? neighborsData[SOUTH][x | y << 5 | z - CHUNK_WIDTH << 12] : 0;
         }
-        return chunkData[x | y << 5 | z << 13];
+        return chunkData[x | y << 5 | z << 12];
     }
 
 }
