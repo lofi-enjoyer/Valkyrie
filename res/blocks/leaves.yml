@@ -1,4 +1,4 @@
-id: 6
+name: 'leaves'
 texture: 'leaves'
 transparent: true
 drawBetween: true

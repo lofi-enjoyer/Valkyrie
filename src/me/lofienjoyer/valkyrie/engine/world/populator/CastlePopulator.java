@@ -1,6 +1,7 @@
 package me.lofienjoyer.valkyrie.engine.world.populator;
 
 import me.lofienjoyer.valkyrie.engine.utils.PerlinNoise;
+import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
 import me.lofienjoyer.valkyrie.engine.world.Chunk;
 
 import java.util.Random;
@@ -14,8 +15,14 @@ public class CastlePopulator extends Populator {
 
     private static final int FREQUENCY = 1000;
 
+    private final int GRASS_BLOCK_ID;
+    private final int STONE_BRICK_ID;
+
     public CastlePopulator(PerlinNoise noise) {
         super(noise);
+
+        this.GRASS_BLOCK_ID = BlockRegistry.getBlock("grass_block").getId();
+        this.STONE_BRICK_ID = BlockRegistry.getBlock("stone_brick").getId();
     }
 
     @Override
@@ -33,7 +40,7 @@ public class CastlePopulator extends Populator {
         int castleY = 0;
 
         for (int y = 1; y < CHUNK_HEIGHT - 30; y++) {
-            if (chunk.getBlock(castleX, y, castleZ) == 0 && chunk.getBlock(castleX, y - 1, castleZ) == 1) {
+            if (chunk.getBlock(castleX, y, castleZ) == 0 && chunk.getBlock(castleX, y - 1, castleZ) == GRASS_BLOCK_ID) {
                 castleY = y;
                 break;
             }
@@ -60,7 +67,7 @@ public class CastlePopulator extends Populator {
                 if (x*x + z*z >= RADIUS * RADIUS)
                     continue;
 
-                chunk.setBlock(17, x + castleX, castleY, z + castleZ, false);
+                chunk.setBlock(STONE_BRICK_ID, x + castleX, castleY, z + castleZ, false);
             }
         }
 
@@ -71,7 +78,7 @@ public class CastlePopulator extends Populator {
 
                 for (int y = 0; y < HEIGHT; y++) {
                     if (random.nextFloat() > 0.05)
-                        chunk.setBlock(17, x + castleX, y + castleY, z + castleZ, false);
+                        chunk.setBlock(STONE_BRICK_ID, x + castleX, y + castleY, z + castleZ, false);
                 }
             }
         }
@@ -82,7 +89,7 @@ public class CastlePopulator extends Populator {
                     continue;
 
                 for (int y = 0; y < HEIGHT; y += 10) {
-                    chunk.setBlock(17, x + castleX, y + castleY, z + castleZ, false);
+                    chunk.setBlock(STONE_BRICK_ID, x + castleX, y + castleY, z + castleZ, false);
                 }
 
             }
@@ -92,7 +99,7 @@ public class CastlePopulator extends Populator {
             int stepX = (int) ((RADIUS - 1) * Math.sin(y * 0.25));
             int stepZ = (int) ((RADIUS - 1) * Math.cos(y * 0.25));
 
-            chunk.setBlock(17, stepX + castleX, y + castleY, stepZ + castleZ, false);
+            chunk.setBlock(STONE_BRICK_ID, stepX + castleX, y + castleY, stepZ + castleZ, false);
         }
 
     }

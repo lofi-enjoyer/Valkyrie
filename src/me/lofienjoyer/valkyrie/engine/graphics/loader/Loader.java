@@ -153,7 +153,7 @@ public class Loader {
                 var y = i / (textureSize / tileSize);
                 BufferedImage texture = null;
                 try {
-                    texture = ImageIO.read(new File(fileName[i]));
+                    texture = ImageIO.read(new File("res/textures/blocks/" + fileName[i] + ".png"));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
