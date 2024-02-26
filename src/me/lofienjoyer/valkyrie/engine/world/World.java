@@ -51,7 +51,7 @@ public class World {
         FULLY_LOAD_DISTANCE = config.get("fully_load_distance", Integer.class);
 
         // TODO: 22/9/22 Temporary code (replace with proper world loading)
-        this.seed = 33;
+        this.seed = new Random().nextInt(Integer.MAX_VALUE);
 
 //        Yaml yaml = new Yaml();
 //        File worldFolder = new File("world");

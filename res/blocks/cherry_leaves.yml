@@ -1,4 +1,4 @@
-id: 18
+name: 'cherry_leaves'
 texture: 'cherry_leaves'
 transparent: true
 drawBetween: true

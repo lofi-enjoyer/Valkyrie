@@ -73,12 +73,12 @@ public class WorldRenderer {
         VIEW_DISTANCE = config.get("view_distance", Integer.class);
 
         solidsShader.bind();
-        solidsShader.loadInt("leavesId", BlockRegistry.getBlock(6).getTopTexture());
-        solidsShader.loadInt("waterId", BlockRegistry.getBlock(7).getTopTexture());
+        solidsShader.loadInt("leavesId", BlockRegistry.getBlock("leaves").getTopTexture());
+        solidsShader.loadInt("waterId", BlockRegistry.getBlock("water").getTopTexture());
 
         transparencyShader.bind();
-        transparencyShader.loadInt("leavesId", BlockRegistry.getBlock(6).getTopTexture());
-        transparencyShader.loadInt("waterId", BlockRegistry.getBlock(7).getTopTexture());
+        transparencyShader.loadInt("leavesId", BlockRegistry.getBlock("leaves").getTopTexture());
+        transparencyShader.loadInt("waterId", BlockRegistry.getBlock("water").getTopTexture());
 
         Valkyrie.LOG.info("World renderer has been setup");
     }

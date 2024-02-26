@@ -9,98 +9,61 @@ public class Block {
 
     private final int id;
 
-    private int topTexture;
-    private int bottomTexture;
-    private int northTexture;
-    private int southTexture;
-    private int eastTexture;
-    private int westTexture;
+    private String name;
 
-    private BlockMesh mesh;
-    private BlockMeshType meshType = BlockMeshType.FULL;
+    private final int topTexture;
+    private final int bottomTexture;
+    private final int northTexture;
+    private final int southTexture;
+    private final int eastTexture;
+    private final int westTexture;
 
-    private boolean isTransparent;
-    private boolean shouldDrawBetween;
-    private boolean hasCollision = true;
-    private boolean customModel;
+    private final BlockMesh mesh;
+    private final BlockMeshType meshType;
 
-    private float movementResistance = 0f;
+    private final boolean isTransparent;
+    private final boolean shouldDrawBetween;
+    private final boolean hasCollision;
+    private final boolean customModel;
 
-    public Block(int id, int topTexture, int sideTexture) {
+    private final float movementResistance;
+
+    public Block(int id, String name, int topTexture, int bottomTexture, int northTexture, int southTexture, int eastTexture, int westTexture, BlockMesh mesh, BlockMeshType meshType, boolean isTransparent, boolean shouldDrawBetween, boolean customModel, float movementResistance, boolean hasCollision) {
         this.id = id;
-        this.topTexture = topTexture;
-        this.bottomTexture = topTexture;
-        this.northTexture = sideTexture;
-        this.southTexture = sideTexture;
-        this.eastTexture = sideTexture;
-        this.westTexture = sideTexture;
-    }
-
-    public Block(int id, int texture) {
-        this.id = id;
-        this.topTexture = texture;
-        this.bottomTexture = texture;
-        this.northTexture = texture;
-        this.southTexture = texture;
-        this.eastTexture = texture;
-        this.westTexture = texture;
-    }
-
-    public Block(int id, int topTexture, int bottomTexture, int northTexture, int southTexture, int eastTexture, int westTexture) {
-        this.id = id;
+        this.name = name;
         this.topTexture = topTexture;
         this.bottomTexture = bottomTexture;
         this.northTexture = northTexture;
         this.southTexture = southTexture;
         this.eastTexture = eastTexture;
         this.westTexture = westTexture;
+        this.mesh = mesh;
+        this.meshType = meshType;
+        this.isTransparent = isTransparent;
+        this.shouldDrawBetween = shouldDrawBetween;
+        this.customModel = customModel;
+        this.movementResistance = movementResistance;
+        this.hasCollision = hasCollision;
     }
 
-    public void setupMesh() {
-        switch (meshType) {
-            case FULL:
-                this.mesh = BlockMeshBuilder.buildFullBlockMesh(southTexture, eastTexture, topTexture);
-                break;
-            case X:
-                this.mesh = BlockMeshBuilder.buildXMesh(eastTexture);
-                break;
-        }
+    public int getId() {
+        return id;
     }
 
-    public void setTopTexture(int topTexture) {
-        this.topTexture = topTexture;
-    }
-
-    public void setBottomTexture(int bottomTexture) {
-        this.bottomTexture = bottomTexture;
-    }
-
-    public void setNorthTexture(int northTexture) {
-        this.northTexture = northTexture;
-    }
-
-    public void setSouthTexture(int southTexture) {
-        this.southTexture = southTexture;
-    }
-
-    public void setEastTexture(int eastTexture) {
-        this.eastTexture = eastTexture;
-    }
-
-    public void setWestTexture(int westTexture) {
-        this.westTexture = westTexture;
+    public String getName() {
+        return name;
     }
 
     public int getTopTexture() {
         return topTexture;
     }
 
-    public int getNorthTexture() {
-        return northTexture;
-    }
-
     public int getBottomTexture() {
         return bottomTexture;
+    }
+
+    public int getNorthTexture() {
+        return northTexture;
     }
 
     public int getSouthTexture() {
@@ -115,60 +78,32 @@ public class Block {
         return westTexture;
     }
 
-    public boolean isTransparent() {
-        return isTransparent;
-    }
-
-    public void setTransparent(boolean transparent) {
-        isTransparent = transparent;
-    }
-
-    public boolean shouldDrawBetween() {
-        return shouldDrawBetween;
-    }
-
-    public void setShouldDrawBetween(boolean shouldDrawBetween) {
-        this.shouldDrawBetween = shouldDrawBetween;
-    }
-
-    public boolean hasCollision() {
-        return hasCollision;
-    }
-
-    public void setHasCollision(boolean hasCollision) {
-        this.hasCollision = hasCollision;
-    }
-
-    public float getMovementResistance() {
-        return movementResistance;
-    }
-
-    public void setMovementResistance(float movementResistance) {
-        this.movementResistance = movementResistance;
-    }
-
     public BlockMesh getMesh() {
         return mesh;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public boolean isCustomModel() {
-        return customModel;
-    }
-
-    public void setCustomModel(boolean customModel) {
-        this.customModel = customModel;
     }
 
     public BlockMeshType getMeshType() {
         return meshType;
     }
 
-    public void setMeshType(BlockMeshType meshType) {
-        this.meshType = meshType;
+    public boolean isTransparent() {
+        return isTransparent;
+    }
+
+    public boolean shouldDrawBetween() {
+        return shouldDrawBetween;
+    }
+
+    public boolean hasCollision() {
+        return hasCollision;
+    }
+
+    public boolean isCustomModel() {
+        return customModel;
+    }
+
+    public float getMovementResistance() {
+        return movementResistance;
     }
 
 }

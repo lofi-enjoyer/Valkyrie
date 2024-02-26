@@ -1,4 +1,4 @@
-id: 33
+name: 'cornflower'
 texture: 'cornflower'
 transparent: true
 collision: false

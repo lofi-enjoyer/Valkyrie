@@ -1,4 +1,4 @@
-id: 35
+name: 'short_grass'
 texture: 'short_grass'
 transparent: true
 collision: false
