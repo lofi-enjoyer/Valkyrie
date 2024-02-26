@@ -6,7 +6,7 @@
 
     <groupId>me.lofienjoyer</groupId>
     <artifactId>Valkyrie</artifactId>
-    <version>0.1.2</version>
+    <version>0.2</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
