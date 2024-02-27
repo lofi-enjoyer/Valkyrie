@@ -1,16 +1,31 @@
 # Valkyrie ⛅
 
+<div align="center">
+  <a href="https://github.com/lofi-enjoyer/Valkyrie/releases/latest">
+    <img src="https://img.shields.io/github/v/release/lofi-enjoyer/Valkyrie?include_prereleases" alt="Latest release" />
+  </a>
+  <a href="https://github.com/lofi-enjoyer/Valkyrie/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License" />
+  </a>
+  <a href="https://github.com/lofi-enjoyer/Valkyrie/pulls">
+    <img src="https://img.shields.io/github/issues-pr/lofi-enjoyer/Valkyrie" alt="Pull requests" />
+  </a>
+  <a href="https://github.com/lofi-enjoyer/Valkyrie/issues">
+    <img src="https://img.shields.io/github/issues/lofi-enjoyer/Valkyrie" alt="Issues" />
+  </a>
+  <a href="https://discord.gg/wdq3RP6xxY">
+    <img src="https://img.shields.io/badge/discord-Project_Valkyrie-blue?logo=discord">
+  </a>
+</div>
+
 #### OpenGL &amp; Java 11 Voxel Engine
 
 <details open="open">
   <summary>Table of contents</summary>
   <ol>
-    <li>
-      <a href="#about-the-project">About the project</a>
-    </li>
-    <li>
-      <a href="#features">Features</a>
-    </li>
+    <li><a href="#about-the-project">About the project</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#system-requirements">System requirements</a></li>
     <li><a href="#building">Building</a></li>
     <li><a href="#license">License</a></li>
   </ol>
@@ -40,11 +55,28 @@ Valkyrie is a project with the objective of putting together a basic Hytale-like
 - Skybox
 - Fog effect
 
+<div id="system-requirements"></div>
+
+## System requirements 🎮
+
+>[!IMPORTANT]
+> Native Windows 10/11 ARM builds are not available yet.
+
+|           | Minimum system requirements                   |
+|-----------|-----------------------------------------------|
+| CPU       | 64-bit (x86_64 or arm64-v8a) architecture     |
+| GPU       | Any with OpenGL 4.6+ support                  |
+| RAM       | 2 GB (at least 1 GB free)                     |
+| Storage   | 1 GB free on HDD                              |
+| OS        | Windows 8.1+, macOS or Linux                  |
+| Java      | 11+ (JDK or JRE)                              |
+
 <div id="building"></div>
 
 ## Building 🚀 
 
-_Prerequisites: Java Development Kit 11 or newer and Maven_
+>[!WARNING]
+>_Prerequisites: Java Development Kit 11 or newer and Maven_
 
 1. Clone the repository and access the directory
 ```sh

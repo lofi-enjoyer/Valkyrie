@@ -1,0 +1,4 @@
+name: 'apple_leaves'
+texture: 'apple_leaves'
+transparent: true
+drawBetween: true

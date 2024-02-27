@@ -16,17 +16,14 @@ public class DynamicMesher implements Mesher {
 
     private ChunkPreMeshData chunkData;
 
-    private List<Integer> positions;
+    private List<Object> positions;
     private List<Integer> indices;
 
-    private int[] positionsArray;
+    private float[] positionsArray;
     private int[] indicesArray;
 
-    private final int section;
-
-    public DynamicMesher(ChunkPreMeshData chunkPreMeshData, int section) {
+    public DynamicMesher(ChunkPreMeshData chunkPreMeshData) {
         this.chunkData = chunkPreMeshData;
-        this.section = section;
     }
 
     @Override
@@ -40,11 +37,15 @@ public class DynamicMesher implements Mesher {
         // De-references ChunkPreMeshData to avoid memory leaks
         this.chunkData = null;
 
-        positionsArray = new int[positions.size()];
-        for (int i = 0; i < positions.size(); i++) {
-            positionsArray[i] = positions.get(i);
+        try {
+            positionsArray = new float[positions.size()];
+            for (int i = 0; i < positions.size(); i++) {
+                positionsArray[i] = (float)positions.get(i);
+            }
+            positions = null;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        positions = null;
 
         indicesArray = new int[indices.size()];
         for (int i = 0; i < indices.size(); i++) {
@@ -66,12 +67,12 @@ public class DynamicMesher implements Mesher {
     private void computeMesh() {
         int currentVoxel;
         for (int x = 0; x < CHUNK_WIDTH; x++) {
-            for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++) {
+            for (int y = 0; y < CHUNK_HEIGHT; y++) {
                 for (int z = 0; z < CHUNK_WIDTH; z++) {
-                    currentVoxel = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z);
-                    if (currentVoxel == 0 || !BlockRegistry.getBlock(currentVoxel).isTransparent()) continue;
+                    currentVoxel = chunkData.getBlock(x, y, z);
+                    if (currentVoxel == 0 || !BlockRegistry.getBlock(currentVoxel).isCustomModel()) continue;
 
-                    meshBlock(x, y, z, BlockRegistry.getBlock(currentVoxel));
+                    meshCustomModel(x, y, z, BlockRegistry.getBlock(currentVoxel));
                 }
             }
         }
@@ -79,148 +80,25 @@ public class DynamicMesher implements Mesher {
 
     int passes = 0;
 
-    private void meshBlock(int x, int y, int z, Block block) {
-        int westBlock = chunkData.getBlock(x + 1, y + (CHUNK_SECTION_HEIGHT * section), z);
-        if (westBlock == 0 || block.shouldDrawBetween() || (block.getId() != westBlock && BlockRegistry.getBlock(westBlock).isTransparent())) {
-            int[] vertices = new int[4];
-            vertices[0] = getVertex(x + 1, y + 0, z + 0, 1, 1, block.getWestTexture());
-            vertices[1] = getVertex(x + 1, y + 1, z + 0, 1, 0, block.getWestTexture());
-            vertices[2] = getVertex(x + 1, y + 1, z + 1, 0, 0, block.getWestTexture());
-            vertices[3] = getVertex(x + 1, y + 0, z + 1, 0, 1, block.getWestTexture());
-            positions.add(vertices[0]);
-            positions.add(vertices[1]);
-            positions.add(vertices[2]);
-            positions.add(vertices[3]);
-
-            indices.addAll(List.of(
-                    0 + passes,
-                    1 + passes,
-                    2 + passes,
-                    2 + passes,
-                    3 + passes,
-                    0 + passes
-            ));
-            passes += 4;
+    private void meshCustomModel(int x, int y, int z, Block block) {
+        var blockPositions = block.getMesh().getPositions();
+        for (int i = 0; i < blockPositions.size() / 4; i++) {
+            positions.add(x + blockPositions.get(i * 4));
+            positions.add(y + blockPositions.get(i * 4 + 1));
+            positions.add(z + blockPositions.get(i * 4 + 2));
+            positions.add(blockPositions.get(i * 4 + 3));
         }
 
-        int eastBlock = chunkData.getBlock(x - 1, y + (CHUNK_SECTION_HEIGHT * section), z);
-        if (eastBlock == 0 || block.shouldDrawBetween() || (block.getId() != eastBlock && BlockRegistry.getBlock(eastBlock).isTransparent())) {
-            int[] vertices = new int[4];
-            vertices[0] = getVertex(x + 0, y + 0, z + 0, 1, 1, block.getEastTexture());
-            vertices[1] = getVertex(x + 0, y + 1, z + 0, 1, 0, block.getEastTexture());
-            vertices[2] = getVertex(x + 0, y + 1, z + 1, 0, 0, block.getEastTexture());
-            vertices[3] = getVertex(x + 0, y + 0, z + 1, 0, 1, block.getEastTexture());
-            positions.add(vertices[0]);
-            positions.add(vertices[1]);
-            positions.add(vertices[2]);
-            positions.add(vertices[3]);
-
-            indices.addAll(List.of(
-                    2 + passes,
-                    1 + passes,
-                    0 + passes,
-                    0 + passes,
-                    3 + passes,
-                    2 + passes
-            ));
-            passes += 4;
+        var blockIndices = block.getMesh().getIndices();
+        for (Integer blockIndex : blockIndices) {
+            indices.add(blockIndex + passes);
         }
 
-        int northBlock = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z - 1);
-        if (northBlock == 0 || block.shouldDrawBetween() || (block.getId() != northBlock && BlockRegistry.getBlock(northBlock).isTransparent())) {
-            int[] vertices = new int[4];
-            vertices[0] = getVertex(x + 0, y + 0, z + 0, 1, 1, block.getNorthTexture());
-            vertices[1] = getVertex(x + 0, y + 1, z + 0, 1, 0, block.getNorthTexture());
-            vertices[2] = getVertex(x + 1, y + 1, z + 0, 0, 0, block.getNorthTexture());
-            vertices[3] = getVertex(x + 1, y + 0, z + 0, 0, 1, block.getNorthTexture());
-            positions.add(vertices[0]);
-            positions.add(vertices[1]);
-            positions.add(vertices[2]);
-            positions.add(vertices[3]);
-
-            indices.addAll(List.of(
-                    0 + passes,
-                    1 + passes,
-                    2 + passes,
-                    2 + passes,
-                    3 + passes,
-                    0 + passes
-            ));
-            passes += 4;
-        }
-
-        int southBlock = chunkData.getBlock(x, y + (CHUNK_SECTION_HEIGHT * section), z + 1);
-        if (southBlock == 0 || block.shouldDrawBetween() || (block.getId() != southBlock && BlockRegistry.getBlock(southBlock).isTransparent())) {
-            int[] vertices = new int[4];
-            vertices[0] = getVertex(x + 0, y + 0, z + 1, 1, 1, block.getSouthTexture());
-            vertices[1] = getVertex(x + 0, y + 1, z + 1, 1, 0, block.getSouthTexture());
-            vertices[2] = getVertex(x + 1, y + 1, z + 1, 0, 0, block.getSouthTexture());
-            vertices[3] = getVertex(x + 1, y + 0, z + 1, 0, 1, block.getSouthTexture());
-            positions.add(vertices[0]);
-            positions.add(vertices[1]);
-            positions.add(vertices[2]);
-            positions.add(vertices[3]);
-
-            indices.addAll(List.of(
-                    2 + passes,
-                    1 + passes,
-                    0 + passes,
-                    0 + passes,
-                    3 + passes,
-                    2 + passes
-            ));
-            passes += 4;
-        }
-
-        int upBlock = chunkData.getBlock(x, y + 1 + (CHUNK_SECTION_HEIGHT * section), z);
-        if (upBlock == 0 || block.shouldDrawBetween() || (block.getId() != upBlock && BlockRegistry.getBlock(upBlock).isTransparent())) {
-            int[] vertices = new int[4];
-            vertices[0] = getVertex(x + 0, y + 1, z + 0, 1, 1, block.getTopTexture());
-            vertices[1] = getVertex(x + 0, y + 1, z + 1, 1, 0, block.getTopTexture());
-            vertices[2] = getVertex(x + 1, y + 1, z + 1, 0, 0, block.getTopTexture());
-            vertices[3] = getVertex(x + 1, y + 1, z + 0, 0, 1, block.getTopTexture());
-            positions.add(vertices[0]);
-            positions.add(vertices[1]);
-            positions.add(vertices[2]);
-            positions.add(vertices[3]);
-
-            indices.addAll(List.of(
-                    0 + passes,
-                    1 + passes,
-                    2 + passes,
-                    2 + passes,
-                    3 + passes,
-                    0 + passes
-            ));
-            passes += 4;
-        }
-
-        int bottomBlock = chunkData.getBlock(x, y - 1 + (CHUNK_SECTION_HEIGHT * section), z);
-        if (bottomBlock == 0 || block.shouldDrawBetween() || (block.getId() != bottomBlock && BlockRegistry.getBlock(bottomBlock).isTransparent())) {
-            int[] vertices = new int[4];
-            vertices[0] = getVertex(x + 0, y + 0, z + 0, 1, 1, block.getBottomTexture());
-            vertices[1] = getVertex(x + 0, y + 0, z + 1, 1, 0, block.getBottomTexture());
-            vertices[2] = getVertex(x + 1, y + 0, z + 1, 0, 0, block.getBottomTexture());
-            vertices[3] = getVertex(x + 1, y + 0, z + 0, 0, 1, block.getBottomTexture());
-            positions.add(vertices[0]);
-            positions.add(vertices[1]);
-            positions.add(vertices[2]);
-            positions.add(vertices[3]);
-
-            indices.addAll(List.of(
-                    2 + passes,
-                    1 + passes,
-                    0 + passes,
-                    0 + passes,
-                    3 + passes,
-                    2 + passes
-            ));
-            passes += 4;
-        }
+        passes += blockPositions.size() / 4;
     }
 
-    private int getVertex(int x, int y, int z, int xUv, int yUv, int zUv) {
-        return zUv | yUv << 7 | xUv << 8 | z << 9 | x << 16 | y << 23;
+    private int compressData(int xUv, int yUv, int texture, int normal, int cull, int wave) {
+        return xUv | yUv << 1 | normal << 2 | cull << 5 | wave << 6 | texture << 7;
     }
 
 }

@@ -3,13 +3,17 @@ package me.lofienjoyer.valkyrie.engine.graphics.render;
 import me.lofienjoyer.valkyrie.Valkyrie;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.Mesh;
-import me.lofienjoyer.valkyrie.engine.graphics.shaders.SkyboxShader;
+import me.lofienjoyer.valkyrie.engine.graphics.shaders.Shader;
+import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
+import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL45.*;
 
 public class SkyboxRenderer {
+
+    private static SkyboxRenderer instance;
 
     private static final float SIZE = 10f;
 
@@ -57,28 +61,38 @@ public class SkyboxRenderer {
              SIZE, -SIZE,  SIZE
     };
 
-    private static String[] TEXTURE_FILES = { "right", "left", "top", "bottom", "back", "front" };
+    private static final String[] TEXTURE_FILES = { "right", "left", "top", "bottom", "back", "front" };
 
-    private final Mesh mesh;
-    private final int texture;
-    private final SkyboxShader shader;
-    private Matrix4f projectionMatrix;
+    private static Mesh mesh;
+    private static int texture;
+    private static Shader shader;
+    private static Vector3f fogColor;
 
-    public SkyboxRenderer() {
-        this.mesh = new Mesh(VERTICES);
-        this.texture = Valkyrie.LOADER.loadCubeMap(TEXTURE_FILES);
-        this.shader = new SkyboxShader();
-        setupProjectionMatrix(640, 360);
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.loadFogColor(new Vector3f(0.45f, 0.71f, 1.00f));
+    private static boolean loaded;
+
+    private SkyboxRenderer() {
+
     }
 
-    public void render(Camera camera) {
-        glDisable(GL_DEPTH_TEST);
+    public static void init() {
+        if (loaded)
+            return;
 
-        shader.start();
-        shader.loadViewMatrix(camera);
+        // TODO: 9/1/24 Dispose mesh and texture
+        mesh = new Mesh(VERTICES);
+        texture = Valkyrie.LOADER.loadCubeMap(TEXTURE_FILES);
+        shader = ResourceLoader.loadShader("Skybox Shader", "res/shaders/skybox/skybox_vert.glsl", "res/shaders/skybox/skybox_frag.glsl");
+        fogColor = new Vector3f();
+
+        loaded = true;
+    }
+
+    public static void render(Camera camera) {
+        Renderer.disableDepthTest();
+
+        shader.bind();
+        shader.loadMatrix("viewMatrix", Maths.createViewMatrixWithNoRotation(camera));
+        shader.loadVector("fogColor", fogColor);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
@@ -89,12 +103,34 @@ public class SkyboxRenderer {
 
         glBindVertexArray(0);
 
-        glEnable(GL_DEPTH_TEST);
+        Renderer.enableDepthTest();
     }
 
-    public void setupProjectionMatrix(int width, int height) {
-        this.projectionMatrix = new Matrix4f();
-        this.projectionMatrix.perspective(Valkyrie.FOV, width / (float)height, 0.01f, 5000f);
+    public static void dispose() {
+        if (!loaded)
+            return;
+
+        shader.dispose();
+        fogColor = null;
+
+        loaded = false;
     }
 
+    public static void setFogColor(float r, float g, float b) {
+        fogColor.x = r;
+        fogColor.y = g;
+        fogColor.z = b;
+    }
+
+    public static void setFogColor(Vector3f color) {
+        setFogColor(color.x, color.y, color.z);
+    }
+
+    public static void setupProjectionMatrix(int width, int height) {
+        Matrix4f projectionMatrix = new Matrix4f();
+        projectionMatrix.perspective(Valkyrie.FOV, width / (float)height, 0.01f, 5000f);
+
+        shader.bind();
+        shader.loadMatrix("projectionMatrix", projectionMatrix);
+    }
 }

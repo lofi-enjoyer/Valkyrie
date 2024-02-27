@@ -14,6 +14,8 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.stb.STBImage.stbi_failure_reason;
+import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -37,7 +39,7 @@ public class Window {
     private Window() {
         this.width = 800;
         this.height = 600;
-        String title = "Nublada";
+        String title = "Valkyrie";
 
         GLFWErrorCallback.createPrint(System.err).set();
 
@@ -110,6 +112,18 @@ public class Window {
         glfwMakeContextCurrent(id);
         Valkyrie.LOG.info("OpenGL Context set");
         glfwSwapInterval(vsync ? 1 : 0);
+
+        loadIcon();
+    }
+
+    private void loadIcon() {
+        var imageData = Valkyrie.LOADER.loadImageData("res/textures/icon/icon256.png");
+
+        var iconImage = GLFWImage.malloc();
+        var iconBuffer = GLFWImage.malloc(1);
+        iconImage.set(imageData.getWidth(), imageData.getHeight(), imageData.getData());
+        iconBuffer.put(0, iconImage);
+        glfwSetWindowIcon(id, iconBuffer);
     }
 
     public void show() {

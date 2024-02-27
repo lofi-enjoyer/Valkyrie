@@ -1,0 +1,4 @@
+name: 'golden_leaves'
+texture: 'golden_leaves'
+transparent: true
+drawBetween: true

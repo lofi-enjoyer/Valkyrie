@@ -2,6 +2,7 @@ package me.lofienjoyer.valkyrie.engine.graphics.loader;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
 import me.lofienjoyer.valkyrie.engine.graphics.mesh.Mesh;
+import me.lofienjoyer.valkyrie.engine.graphics.texture.ImageData;
 import me.lofienjoyer.valkyrie.engine.graphics.texture.Texture;
 import me.lofienjoyer.valkyrie.engine.graphics.texture.TextureArray;
 import org.lwjgl.opengl.GL30;
@@ -57,7 +58,7 @@ public class Loader {
 
     public int loadToVAO(float[] positions, int[] indices) {
         int vao = createVAO();
-        storeDataInAttributeList(0, 3, positions);
+        storeDataInAttributeList(0, 4, positions);
         bindIndicesBuffer(indices);
         return vao;
     }
@@ -85,6 +86,18 @@ public class Loader {
     public void updateVAO(int vaoId, int[] positions, int[] indices) {
         GL30.glBindVertexArray(vaoId);
         storeDataInAttributeList(0, 1, positions);
+        bindIndicesBuffer(indices);
+    }
+
+    public void updateVAO(int vaoId, float[] positions, int[] indices) {
+        GL30.glBindVertexArray(vaoId);
+        int vboId = GL30.glGenBuffers();
+        vboList.add(vboId);
+        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
+        GL30.glBufferData(GL30.GL_ARRAY_BUFFER, positions, GL30.GL_STATIC_DRAW);
+        GL30.glEnableVertexAttribArray(0);
+        GL30.glVertexAttribPointer(0, 4, GL30.GL_FLOAT, false, 4 * Float.BYTES, 0);
+        GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
         bindIndicesBuffer(indices);
     }
 
@@ -122,46 +135,51 @@ public class Loader {
     }
 
     public int loadTileset(String... fileName) {
-        var image = new BufferedImage(8192, 8192, BufferedImage.TYPE_INT_ARGB);
-        var graphics = image.createGraphics();
-        for (int i = 0; i < fileName.length; i++) {
-            var x = i % (8192 / 32);
-            var y = i / (8192 / 32);
-            BufferedImage texture = null;
-            try {
-                texture = ImageIO.read(new File(fileName[i]));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            graphics.drawImage(texture, x * 32, y * 32, 32, 32, null);
-        }
-
-        int[] pixels = new int[image.getWidth() * image.getHeight()];
-        image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-
-        ByteBuffer buffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
-
-        for(int h = 0; h < image.getHeight(); h++) {
-            for(int w = 0; w < image.getWidth(); w++) {
-                int pixel = pixels[h * image.getWidth() + w];
-
-                buffer.put((byte) ((pixel >> 16) & 0xFF));
-                buffer.put((byte) ((pixel >> 8) & 0xFF));
-                buffer.put((byte) (pixel & 0xFF));
-                buffer.put((byte) ((pixel >> 24) & 0xFF));
-            }
-        }
-
-        buffer.flip();
-
         int textureId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureId);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 8192, 8192, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        var levelCount = (int)(Math.log(8192) / Math.log(2));
+
+        for (int level = 0; level < levelCount; level++) {
+            var textureSize = 8192 / (level + 1);
+            var tileSize = 32 * (level + 1);
+            var image = new BufferedImage(textureSize, textureSize, BufferedImage.TYPE_INT_ARGB);
+            var graphics = image.createGraphics();
+            for (int i = 0; i < fileName.length; i++) {
+                var x = i % (textureSize / tileSize);
+                var y = i / (textureSize / tileSize);
+                BufferedImage texture = null;
+                try {
+                    texture = ImageIO.read(new File("res/textures/blocks/" + fileName[i] + ".png"));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                graphics.drawImage(texture, x * tileSize, y * tileSize, tileSize, tileSize, null);
+            }
+
+            int[] pixels = new int[image.getWidth() * image.getHeight()];
+            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+
+            ByteBuffer buffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
+
+            for(int h = 0; h < image.getHeight(); h++) {
+                for(int w = 0; w < image.getWidth(); w++) {
+                    int pixel = pixels[h * image.getWidth() + w];
+
+                    buffer.put((byte) ((pixel >> 16) & 0xFF));
+                    buffer.put((byte) ((pixel >> 8) & 0xFF));
+                    buffer.put((byte) (pixel & 0xFF));
+                    buffer.put((byte) ((pixel >> 24) & 0xFF));
+                }
+            }
+
+            buffer.flip();
+
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA8, textureSize, textureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        }
 
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -228,7 +246,8 @@ public class Loader {
                 IntBuffer h = stack.mallocInt(1);
                 IntBuffer channels = stack.mallocInt(1);
 
-                buf = stbi_load("res/skybox/" + textureFiles[i] + ".png", w, h, channels, 4);
+                // TODO: 9/1/24 Change this to not be a hardcoded path
+                buf = stbi_load("res/textures/skybox/" + textureFiles[i] + ".png", w, h, channels, 4);
                 if (buf == null) {
                     Valkyrie.LOG.severe("Image file [" + textureFiles[i]  + "] not loaded: " + stbi_failure_reason());
                     return -1;
@@ -247,6 +266,29 @@ public class Loader {
         GL30.glTexParameteri(GL30.GL_TEXTURE_CUBE_MAP, GL30.GL_TEXTURE_WRAP_T, GL30.GL_CLAMP_TO_EDGE);
         textureList.add(textureId);
         return textureId;
+    }
+
+    public ImageData loadImageData(String imagePath) {
+        ByteBuffer buf;
+        int width;
+        int height;
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer channels = stack.mallocInt(1);
+
+            buf = stbi_load(imagePath, w, h, channels, 4);
+            if (buf == null) {
+                Valkyrie.LOG.severe("Image not loaded: " + stbi_failure_reason());
+                return null;
+            }
+
+            width = w.get();
+            height = h.get();
+        }
+
+        return new ImageData(width, height, buf);
     }
 
     private void storeDataInAttributeList(int attributeNumber, int size, float[] data) {

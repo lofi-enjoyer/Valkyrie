@@ -34,7 +34,7 @@ public class ValkyrieFont {
         graphicsContext.setFont(font);
         var fontMetrics = graphicsContext.getFontMetrics();
 
-        int estimatedWidth = (int) Math.sqrt(font.getNumGlyphs()) * font.getSize() + 1;
+        int estimatedWidth = (int) (Math.sqrt(font.getNumGlyphs()) * font.getSize()) * 2 + 1;
         width = 0;
         height = fontMetrics.getHeight();
         lineHeight = fontMetrics.getHeight();
@@ -44,15 +44,18 @@ public class ValkyrieFont {
 
         for (int i = 0; i < font.getNumGlyphs(); i++) {
             if (font.canDisplay(i)) {
-                var charInfo = new CharInfo(x, y, fontMetrics.charWidth(i), fontMetrics.getHeight());
+                var lineMetrics = fontMetrics.getLineMetrics(String.valueOf((char) i), graphicsContext);
+                var charHeight = lineMetrics.getAscent();
+                var descent = lineMetrics.getDescent();
+                var charInfo = new CharInfo(x, y, fontMetrics.charWidth(i), (int) charHeight, (int) descent);
                 characterMap.put(i, charInfo);
                 width = Math.max(x + fontMetrics.charWidth(i), width);
 
-                x += charInfo.getWidth();
+                x += charInfo.getWidth() * 2;
                 if (x > estimatedWidth) {
                     x = 0;
-                    y += fontMetrics.getHeight() * 1.4f;
-                    height += fontMetrics.getHeight() * 1.4f;
+                    y += (fontMetrics.getHeight() * 1.4f) * 2;
+                    height += (fontMetrics.getHeight() * 1.4f) * 2;
                 }
             }
         }
@@ -91,6 +94,10 @@ public class ValkyrieFont {
 
     public int getHeight() {
         return height;
+    }
+
+    public int getLineHeight() {
+        return lineHeight;
     }
 
 }

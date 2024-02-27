@@ -8,19 +8,12 @@ import me.lofienjoyer.valkyrie.engine.events.world.ChunkUpdateEvent;
 import me.lofienjoyer.valkyrie.engine.graphics.camera.Camera;
 import me.lofienjoyer.valkyrie.engine.utils.Maths;
 import me.lofienjoyer.valkyrie.engine.utils.PerlinNoise;
-import me.lofienjoyer.valkyrie.engine.world.populator.CastlePopulator;
-import me.lofienjoyer.valkyrie.engine.world.populator.Populator;
-import me.lofienjoyer.valkyrie.engine.world.populator.TerrainPopulator;
-import me.lofienjoyer.valkyrie.engine.world.populator.TreePopulator;
+import me.lofienjoyer.valkyrie.engine.world.populator.*;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * Handles the render and data for a world
@@ -28,7 +21,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 public class World {
 
     public static final int CHUNK_WIDTH = 32;
-    public static final int CHUNK_HEIGHT = 256;
+    public static final int CHUNK_HEIGHT = 128;
     public static final int CHUNK_SECTION_HEIGHT = 32;
     public static int LOAD_DISTANCE = 5;
     public static int FULLY_LOAD_DISTANCE = 1;
@@ -41,14 +34,14 @@ public class World {
     private final Vector2i playerPosition;
 
     private final PerlinNoise noise;
-    private double seed;
+    private long seed;
 
-    private final List<Future<Chunk>> chunkGenerationFutures;
+    private final List<Chunk> chunksToGenerate;
 
     public World() {
         this.chunks = new HashMap<>();
         this.futureChunks = new HashMap<>();
-        this.chunkGenerationFutures = new ArrayList<>();
+        this.chunksToGenerate = new ArrayList<>();
         this.playerPosition = new Vector2i();
 
         Valkyrie.EVENT_HANDLER.registerListener(ChunkUpdateEvent.class, this::handleChunkUpdate);
@@ -58,7 +51,7 @@ public class World {
         FULLY_LOAD_DISTANCE = config.get("fully_load_distance", Integer.class);
 
         // TODO: 22/9/22 Temporary code (replace with proper world loading)
-        this.seed = new Random().nextGaussian() * 255;
+        this.seed = new Random().nextInt(Integer.MAX_VALUE);
 
 //        Yaml yaml = new Yaml();
 //        File worldFolder = new File("world");
@@ -83,18 +76,24 @@ public class World {
 //            e.printStackTrace();
 //        }
 
-        this.noise = new PerlinNoise(seed, 900);
+        var random = new Random(seed);
+        this.noise = new PerlinNoise(seed, 1500);
+        var biomeNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 300);
+        var structureNoise = new PerlinNoise(random.nextInt(Short.MAX_VALUE), 1500);
 
         this.populators = new ArrayList<>();
         populators.add(new TerrainPopulator(noise));
+        populators.add(new BigRockPopulator(noise));
         populators.add(new TreePopulator(noise));
-        populators.add(new CastlePopulator(noise));
+        populators.add(new CastlePopulator(structureNoise));
+        populators.add(new GrassPopulator(noise));
 
-        Valkyrie.LOG.info("World generation seed set to " + noise.getSeed());
+        Valkyrie.LOG.info("World generation seed set to " + seed);
     }
 
     public synchronized void update(float delta, Camera camera) {
-        checkGeneratingChunks();
+//        checkGeneratingChunks();
+        generateChunkIfPending();
 
         int playerX = (int) Math.floor(camera.getPosition().x / (float) World.CHUNK_WIDTH);
         int playerZ = (int) Math.floor(camera.getPosition().z / (float) World.CHUNK_WIDTH);
@@ -119,6 +118,7 @@ public class World {
         playerPosition.x = playerX;
         playerPosition.y = playerZ;
 
+        boolean sortGenerationOrder = false;
         for (int x = -LOAD_DISTANCE; x <= LOAD_DISTANCE; x++) {
             for (int z = -LOAD_DISTANCE; z <= LOAD_DISTANCE; z++) {
                 int chunkX = playerX + x;
@@ -127,6 +127,7 @@ public class World {
                 var chunk = getChunk(chunkX, chunkZ);
                 if (chunk == null) {
                     addChunk(chunkX, chunkZ);
+                    sortGenerationOrder = true;
                 } else {
                     if (chunk.getState() == ChunkState.UNLOADED)
                         continue;
@@ -139,6 +140,12 @@ public class World {
                 }
 
             }
+        }
+
+        if (sortGenerationOrder) {
+            chunksToGenerate.sort((chunk1, chunk2) -> {
+                return (int) (chunk1.getPosition().distanceSquared(playerPosition) - chunk2.getPosition().distanceSquared(playerPosition));
+            });
         }
     }
 
@@ -156,13 +163,7 @@ public class World {
 
         chunks.put(position, chunk);
 
-        Future<Chunk> future = Valkyrie.getGenerationService().submit(() -> {
-            chunk.loadChunk(this);
-            loadFutureChunk(chunk);
-            return chunk;
-        });
-
-        chunkGenerationFutures.add(future);
+        chunksToGenerate.add(chunk);
     }
 
     /**
@@ -180,9 +181,7 @@ public class World {
 
                 var neighbor = getChunk(i + chunk.getPosition().x, j + chunk.getPosition().y);
                 if (neighbor != null) {
-                    for (int k = 0; k < 8; k++) {
-                        Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor, new Vector3i(0, k * CHUNK_SECTION_HEIGHT, 0)));
-                    }
+                    Valkyrie.EVENT_HANDLER.process(new ChunkUpdateEvent(neighbor, new Vector3i(0, 0, 0)));
                 }
 
             }
@@ -193,25 +192,14 @@ public class World {
 
     }
 
-    /**
-     * Checks the chunks in the generation queue and adds those which finished
-     */
-    private void checkGeneratingChunks() {
-        var iterator = chunkGenerationFutures.iterator();
-
-        while (iterator.hasNext()) {
-            var future = iterator.next();
-
-            if (!future.isDone())
-                return;
-
+    private void generateChunkIfPending() {
+        var iterator = chunksToGenerate.iterator();
+        if (iterator.hasNext()) {
+            var chunk = iterator.next();
+            chunk.loadChunk(this);
+            loadFutureChunk(chunk);
+            initializeChunk(chunk);
             iterator.remove();
-
-            try {
-                initializeChunk(future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e.getCause());
-            }
         }
     }
 
@@ -241,6 +229,7 @@ public class World {
         float faceZ = 0;
 
         do {
+            // FIXME: 12/1/24 This causes a deadlock sometimes
             if (getBlock((int)xPos, (int)yPos, (int)zPos) != 0) {
                 if (!isPlace) {
                     return new Vector3f(xPos, yPos, zPos);

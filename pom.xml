@@ -6,15 +6,17 @@
 
     <groupId>me.lofienjoyer</groupId>
     <artifactId>Valkyrie</artifactId>
-    <version>0.1.2</version>
+    <version>0.2</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <lwjgl.version>3.3.1</lwjgl.version>
-        <joml.version>1.10.4</joml.version>
+        <joml.version>1.10.5</joml.version>
         <maven.build.timestamp.format>yyMMdd_HHmm</maven.build.timestamp.format>
         <platform>unspecified</platform>
+        <arch>unspecified</arch>
+        <freetype.version>3.3.3</freetype.version>
     </properties>
 
     <profiles>
@@ -29,6 +31,21 @@
             <properties>
                 <lwjgl.natives>natives-linux</lwjgl.natives>
                 <platform>linux</platform>
+                <arch>amd64</arch>                
+            </properties>
+        </profile>
+        <profile>
+            <id>lwjgl-natives-linux-aarch64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-linux-arm64</lwjgl.natives>
+                <platform>linux</platform>
+                <arch>aarch64</arch>
             </properties>
         </profile>
         <profile>
@@ -42,6 +59,7 @@
             <properties>
                 <lwjgl.natives>natives-macos</lwjgl.natives>
                 <platform>macos</platform>
+                <arch>amd64</arch>
             </properties>
         </profile>
         <profile>
@@ -55,6 +73,7 @@
             <properties>
                 <lwjgl.natives>natives-windows</lwjgl.natives>
                 <platform>windows</platform>
+                <arch>amd64</arch>
             </properties>
         </profile>
     </profiles>
@@ -74,7 +93,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.5.5</version>
                 <configuration>
-                    <finalName>Valkyrie_${project.version}_${platform}_${maven.build.timestamp}</finalName>
+                    <finalName>Valkyrie_${project.version}_${platform}_${arch}_${maven.build.timestamp}</finalName>
                     <archive>
                         <manifest>
                             <mainClass>me.lofienjoyer.valkyrie.game.Application</mainClass>
@@ -143,6 +162,15 @@
         </dependencies>
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.lwjgl</groupId>
@@ -206,12 +234,23 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.9.0</version>
+            <version>2.10.1</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.30</version>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-freetype</artifactId>
+            <version>${freetype.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-freetype</artifactId>
+            <version>${freetype.version}</version>
+            <classifier>${lwjgl.natives}</classifier>
         </dependency>
     </dependencies>
 

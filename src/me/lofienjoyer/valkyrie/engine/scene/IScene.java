@@ -6,12 +6,8 @@ public interface IScene {
 
     void render(float delta);
 
-    void fixedUpdate();
-
     void dispose();
 
     void onResize(int width, int height );
-
-    void onClose();
 
 }

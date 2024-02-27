@@ -1,4 +1,4 @@
-id: 7
+name: 'water'
 texture: 'water'
 transparent: true
 collision: false

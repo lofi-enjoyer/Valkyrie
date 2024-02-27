@@ -24,7 +24,7 @@ public class Player {
     private boolean contact;
 
     public Player(World world) {
-        this.position = new Vector3f(0, 60, 0);
+        this.position = new Vector3f(-110, 125, -50);
         this.rotation = new Vector3f();
         this.movement = new Vector3f();
         this.world = world;
@@ -58,7 +58,7 @@ public class Player {
             movement.z += Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
 
-        movement.y += -1 / 64f;
+        movement.y += -1 * delta * 0.875f;
 
         var highestMovementResistance = getCollidingBlockWithHighestMovementResistance();
 
@@ -74,7 +74,7 @@ public class Player {
         checkCollisions(new Vector3f(0, movement.y, 0));
 
         if ((contact || highestMovementResistance != 0) && Input.isKeyPressed(GLFW_KEY_SPACE)) {
-            movement.y = 0.25f * (1 - highestMovementResistance);
+            movement.y = 15f * (1 - highestMovementResistance) * delta;
             contact = false;
         }
     }

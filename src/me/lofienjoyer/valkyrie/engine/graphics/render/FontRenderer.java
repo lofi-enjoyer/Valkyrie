@@ -17,27 +17,30 @@ public class FontRenderer {
 
     private static final int BATCH_SIZE = 1024 * 32;
 
-    private final ValkyrieFont font;
-    private final BatchMesh batchMesh;
-    private final Shader shader;
+    private static BatchMesh batchMesh;
+    private static Shader shader;
 
-    public FontRenderer(ValkyrieFont font) {
-        this.font = font;
-        this.batchMesh = new BatchMesh(BATCH_SIZE);
+    private static boolean loaded;
 
-        this.shader = ResourceLoader.loadShader("fontShader", "res/shaders/font/font_vertex.glsl", "res/shaders/font/font_fragment.glsl");
-        var projMatrix = new Matrix4f();
-        projMatrix.ortho(-8, 8, -8, 8, -50, 50);
-        shader.bind();
-        shader.loadMatrix("projMatrix", projMatrix);
-        shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(0, 0), 32));
+    private FontRenderer() {
     }
 
-    public void render(String text, int x, int y) {
+    public static void init() {
+        if (loaded)
+            return;
+        batchMesh = new BatchMesh(BATCH_SIZE);
+
+        shader = ResourceLoader.loadShader("fontShader", "res/shaders/font/font_vertex.glsl", "res/shaders/font/font_fragment.glsl");
+
+        loaded = true;
+    }
+
+    public static void render(String text, int x, int y, ValkyrieFont font) {
         shader.bind();
-        shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(x, y), 2048));
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
+        shader.loadMatrix("transformationMatrix", Maths.createTransformationMatrix(new Vector2f(x, y), 1));
+        Renderer.disableDepthTest();
+        Renderer.disableCullFace();
+        Renderer.enableBlend();
         glBindTexture(GL_TEXTURE_2D, font.getTextureId());
 
         List<Float> data = new ArrayList<>();
@@ -46,7 +49,7 @@ public class FontRenderer {
         for (byte aByte : text.getBytes()) {
             var charInfo = font.getGlyph(aByte);
             if (aByte == '\n') {
-                yOffset += 1 / 600f + charInfo.getHeight() / (float)font.getHeight();
+                yOffset += font.getLineHeight() + 4;
                 xOffset = 0;
                 continue;
             }
@@ -54,23 +57,24 @@ public class FontRenderer {
                 draw(data);
             }
 
-            data.addAll(List.of(xOffset, 0f - charInfo.getHeight() / (float)font.getHeight() + yOffset, charInfo.getTextureCoords()[0].x, charInfo.getTextureCoords()[0].y));
+            data.addAll(List.of(xOffset, 0f - charInfo.getHeight() + yOffset, charInfo.getTextureCoords()[0].x, charInfo.getTextureCoords()[0].y));
             data.addAll(List.of(xOffset, 0f + yOffset, charInfo.getTextureCoords()[1].x, charInfo.getTextureCoords()[1].y));
-            data.addAll(List.of(xOffset + charInfo.getWidth() / (float)font.getWidth(), 0f - charInfo.getHeight() / (float)font.getHeight() + yOffset, charInfo.getTextureCoords()[2].x, charInfo.getTextureCoords()[2].y));
+            data.addAll(List.of(xOffset + charInfo.getWidth(), 0f - charInfo.getHeight() + yOffset, charInfo.getTextureCoords()[2].x, charInfo.getTextureCoords()[2].y));
 
-            data.addAll(List.of(xOffset + charInfo.getWidth() / (float)font.getWidth(), 0f - charInfo.getHeight() / (float)font.getHeight() + yOffset, charInfo.getTextureCoords()[2].x, charInfo.getTextureCoords()[2].y));
+            data.addAll(List.of(xOffset + charInfo.getWidth(), 0f - charInfo.getHeight() + yOffset, charInfo.getTextureCoords()[2].x, charInfo.getTextureCoords()[2].y));
             data.addAll(List.of(xOffset, 0f + yOffset, charInfo.getTextureCoords()[1].x, charInfo.getTextureCoords()[1].y));
-            data.addAll(List.of(xOffset + charInfo.getWidth() / (float)font.getWidth(), 0f + yOffset, charInfo.getTextureCoords()[3].x, charInfo.getTextureCoords()[3].y));
+            data.addAll(List.of(xOffset + charInfo.getWidth(), 0f + yOffset, charInfo.getTextureCoords()[3].x, charInfo.getTextureCoords()[3].y));
 
-            xOffset += charInfo.getWidth() / (float)font.getWidth();
+            xOffset += charInfo.getWidth();
         }
         draw(data);
 
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
+        Renderer.enableDepthTest();
+        Renderer.enableCullFace();
+        Renderer.disableBlend();
     }
 
-    private void draw(List<Float> data) {
+    private static void draw(List<Float> data) {
         var dataArray = new float[data.size()];
         for (int i = 0; i < dataArray.length; i++) {
             dataArray[i] = data.get(i);
@@ -83,7 +87,7 @@ public class FontRenderer {
         glDrawArrays(GL_TRIANGLES, 0, dataArray.length / 4);
     }
 
-    public void setupProjectionMatrix(int width, int height) {
+    public static void setupProjectionMatrix(int width, int height) {
         var projMatrix = new Matrix4f();
         projMatrix.ortho(0, width, height, 0, -50, 50);
         shader.bind();

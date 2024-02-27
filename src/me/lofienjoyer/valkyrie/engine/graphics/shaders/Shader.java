@@ -82,7 +82,7 @@ public class Shader {
         glUseProgram(programID);
     }
 
-    public void cleanUp(){
+    public void dispose(){
         glUseProgram(0);
         glDetachShader(programID, vertexShaderID);
         glDetachShader(programID, fragmentShaderID);

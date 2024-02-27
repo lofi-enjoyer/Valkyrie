@@ -1,112 +1,32 @@
 package me.lofienjoyer.valkyrie.engine.world;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
+import me.lofienjoyer.valkyrie.engine.graphics.mesh.BlockMeshType;
+import me.lofienjoyer.valkyrie.engine.utils.YamlLoader;
+import me.lofienjoyer.valkyrie.engine.world.registry.BlockBuilder;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BlockRegistry {
 
     private static Block[] BLOCKS;
-    public static int TILESET_ID;
+    public static int TILESET_TEXTURE_ID;
     private static List<String> texturesList;
 
     public static void setup() {
         Valkyrie.LOG.info("Setting up block registry...");
         long timer = System.nanoTime();
 
-        List<Block> blocksToLoad = new ArrayList<>();
         texturesList = new ArrayList<>();
 
-        File blocksFolder = new File("res/blocks");
-        if (!blocksFolder.exists()) {
-            return;
-        }
+        loadTextures();
 
-        Yaml yaml = new Yaml();
-        int maxId = 0;
-
-        for (File blockFile : blocksFolder.listFiles()) {
-            if (!blockFile.getName().endsWith(".yml")) continue;
-
-            Map<String, Object> data;
-            try {
-                data = yaml.load(new FileReader(blockFile));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                continue;
-            }
-
-            int id = (int) data.get("id");
-            if (maxId < id) maxId = id;
-
-            String texture = (String) data.get("texture");
-
-            Block block = new Block(id, getTextureId(texture), getTextureId(texture));
-
-            String northTexture = (String) data.get("northTexture");
-            if (northTexture != null)
-                block.setNorthTexture(getTextureId(northTexture));
-
-            String southTexture = (String) data.get("southTexture");
-            if (southTexture != null)
-                block.setSouthTexture(getTextureId(southTexture));
-
-            String westTexture = (String) data.get("westTexture");
-            if (westTexture != null)
-                block.setWestTexture(getTextureId(westTexture));
-
-            String eastTexture = (String) data.get("eastTexture");
-            if (eastTexture != null)
-                block.setEastTexture(getTextureId(eastTexture));
-
-            String topTexture = (String) data.get("topTexture");
-            if (topTexture != null)
-                block.setTopTexture(getTextureId(topTexture));
-
-            String bottomTexture = (String) data.get("bottomTexture");
-            if (bottomTexture != null)
-                block.setBottomTexture(getTextureId(bottomTexture));
-
-            Boolean isTransparent = (Boolean) data.get("transparent");
-            if (isTransparent != null) {
-                block.setTransparent(isTransparent);
-            }
-
-            Boolean shouldDrawBetween = (Boolean) data.get("drawBetween");
-            if (shouldDrawBetween != null) {
-                block.setShouldDrawBetween(shouldDrawBetween);
-            }
-
-            Boolean hasCollision = (Boolean) data.get("collision");
-            if (hasCollision != null) {
-                block.setHasCollision(hasCollision);
-            }
-
-            Double movementResistance = (Double) data.get("movementResistance");
-            if (movementResistance != null) {
-                block.setMovementResistance((float) (double)movementResistance);
-            }
-
-            blocksToLoad.add(block);
-        }
-
-        blocksToLoad.sort(Comparator.comparingInt(Block::getId));
-
-        TILESET_ID = Valkyrie.LOADER.loadTileset(texturesList.toArray(new String[0]));
-
-        blocksToLoad.forEach(Block::setupMesh);
-
-        BLOCKS = new Block[maxId + 1];
-        for (Block block : blocksToLoad) {
-            BLOCKS[block.getId()] = block;
-        }
+        loadBlocks();
 
         Valkyrie.LOG.info("Block registry has been setup (" + ((System.nanoTime() - timer) / 1000000f) + "ms)");
     }
@@ -115,11 +35,101 @@ public class BlockRegistry {
         return BLOCKS[id];
     }
 
+    public static Block getBlock(String name) {
+        for (Block block : BLOCKS) {
+            if (block != null && block.getName().equals(name))
+                return block;
+        }
+        return null;
+    }
+
+    private static void loadBlocks() {
+        File blocksFolder = new File("res/blocks");
+        if (!blocksFolder.exists()) {
+            throw new RuntimeException("res/blocks folder not found!");
+        }
+
+        var blocksToLoad = new ArrayList<BlockBuilder>();
+
+        var loader = new YamlLoader();
+
+        var blockFiles = Arrays.stream(blocksFolder.listFiles()).collect(Collectors.toList());
+
+        for (int i = 0; i < blockFiles.size(); i++) {
+            var blockFile = blockFiles.get(i);
+
+            if (!blockFile.getName().endsWith(".yml"))
+                continue;
+
+            loader.loadFile(blockFile);
+
+            var builder = new BlockBuilder();
+
+            String name = loader.get("name", String.class);
+            int texture = texturesList.indexOf(loader.get("texture", String.class));
+
+            builder.setName(name);
+            builder.setTexture(texture);
+
+            loader.ifDataPresent("northTexture", String.class, (value) -> builder.setNorthTexture(texturesList.indexOf(value)));
+            loader.ifDataPresent("southTexture", String.class, (value) -> builder.setSouthTexture(texturesList.indexOf(value)));
+            loader.ifDataPresent("westTexture", String.class, (value) -> builder.setWestTexture(texturesList.indexOf(value)));
+            loader.ifDataPresent("eastTexture", String.class, (value) -> builder.setEastTexture(texturesList.indexOf(value)));
+            loader.ifDataPresent("topTexture", String.class, (value) -> builder.setTopTexture(texturesList.indexOf(value)));
+            loader.ifDataPresent("bottomTexture", String.class, (value) -> builder.setBottomTexture(texturesList.indexOf(value)));
+
+            builder.setTransparent(loader.get("transparent", Boolean.class, false));
+            builder.setShouldDrawBetween(loader.get("drawBetween", Boolean.class, false));
+            builder.setHasCollision(loader.get("collision", Boolean.class, true));
+
+            loader.ifDataPresent("movementResistance", Double.class, (value) -> {
+                builder.setMovementResistance((float) (double)value);
+            });
+
+            loader.ifDataPresent("model", String.class, (value) -> {
+                switch (value) {
+                    case "x":
+                        builder.setMeshType(BlockMeshType.X);
+                        builder.setCustomModel(true);
+                        break;
+                    case "block":
+                    default:
+                        builder.setMeshType(BlockMeshType.FULL);
+                }
+            });
+
+            blocksToLoad.add(builder);
+        }
+
+        BLOCKS = new Block[blocksToLoad.size() + 1];
+        for (int i = 0; i < blocksToLoad.size(); i++) {
+            BLOCKS[i + 1] = blocksToLoad.get(i).toBlock(i + 1);
+        }
+    }
+
+    private static void loadTextures() {
+        var texturesFolder = new File("res/textures/blocks");
+        if (!texturesFolder.exists()) {
+            throw new RuntimeException("res/textures folder not found!");
+        }
+
+        for (var textureFile : texturesFolder.listFiles()) {
+            if (!textureFile.getName().endsWith(".png")) {
+                Valkyrie.LOG.info("Non-texture file found while loading textures: " + textureFile.getName());
+                continue;
+            }
+
+            texturesList.add(textureFile.getName().replace(".png", ""));
+        }
+
+        TILESET_TEXTURE_ID = Valkyrie.LOADER.loadTileset(texturesList.toArray(new String[0]));
+    }
+
     private static int getTextureId(String textureName) {
-        int textureId = texturesList.indexOf("res/textures/" + textureName + ".png");
+        int textureId = texturesList.indexOf("res/textures/blocks/" + textureName + ".png");
 
         if (textureId == -1) {
-            texturesList.add("res/textures/" + textureName + ".png");
+            texturesList.add("res/textures/blocks/" + textureName + ".png");
             textureId = texturesList.size() - 1;
         }
 

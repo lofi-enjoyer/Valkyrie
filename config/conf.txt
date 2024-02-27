@@ -4,5 +4,4 @@ load_distance: 6
 fully_load_distance: 2
 view_distance: 6
 fov: 85.0
-generation_thread_count: 1
 meshing_thread_count: 2
