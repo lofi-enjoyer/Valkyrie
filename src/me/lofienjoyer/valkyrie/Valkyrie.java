@@ -15,8 +15,18 @@ import me.lofienjoyer.valkyrie.engine.log.ValkyrieLogHandler;
 import me.lofienjoyer.valkyrie.engine.resources.ResourceLoader;
 import me.lofienjoyer.valkyrie.engine.scene.IScene;
 import me.lofienjoyer.valkyrie.engine.world.BlockRegistry;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
@@ -31,6 +41,7 @@ public class Valkyrie {
     public static final Logger LOG = ValkyrieLogHandler.initLogs();
     public static final Loader LOADER = new Loader();
     public static final EventHandler EVENT_HANDLER = new EventHandler();
+    public static final SimpleDateFormat SCREENSHOT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS");
 
     private static ScheduledExecutorService meshingService;
     private static Framebuffer mainFramebuffer;
@@ -131,6 +142,9 @@ public class Valkyrie {
             glBindTexture(GL_TEXTURE_2D, mainFramebuffer.getColorTextureId());
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
+            if (Input.isKeyJustPressed(GLFW.GLFW_KEY_F2))
+                takeScreenshot();
+
             // Updates the input handler and window
             // IMPORTANT: the window must be always updated after the input handler,
             // so it registers properly all the key and button updates
@@ -166,6 +180,34 @@ public class Valkyrie {
             currentScene.dispose();
 
         LOADER.dispose();
+    }
+
+    public void takeScreenshot() {
+        var image = new BufferedImage(window.getWidth(), window.getHeight(), BufferedImage.TYPE_INT_RGB);
+        var buffer = BufferUtils.createByteBuffer(window.getWidth() * window.getHeight() * 4);
+        glReadPixels(0, 0, window.getWidth(), window.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        new Thread(() -> {
+            for (int x = image.getWidth() - 1; x >= 0; x--) {
+                for (int y = image.getHeight() - 1; y >= 0; y--) {
+                    int i = (x + window.getWidth() * y) * 4;
+                    image.setRGB(x, image.getHeight() - 1 - y, (((buffer.get(i) & 0xFF) & 0x0ff) << 16) | (((buffer.get(i + 1) & 0xFF) & 0x0ff) << 8) | ((buffer.get(i + 2) & 0xFF) & 0x0ff));
+                }
+            }
+
+            var calendar = Calendar.getInstance();
+            var date = Date.from(calendar.toInstant());
+            var fileName = SCREENSHOT_DATE_FORMAT.format(date) + ".png";
+            var screenshotsFolder = new File("screenshots");
+            if (!screenshotsFolder.exists())
+                screenshotsFolder.mkdir();
+
+            try {
+                ImageIO.write(image, "png", Paths.get("screenshots", fileName).toFile());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
     }
 
     public static ScheduledExecutorService getMeshingService() {
