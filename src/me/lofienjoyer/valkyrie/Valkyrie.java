@@ -72,8 +72,11 @@ public class Valkyrie {
     public void init() {
         // Sets up the meshing service
         var meshingThreadCount = config.get("meshing_thread_count", Integer.class);
-        meshingService = new ScheduledThreadPoolExecutor(config.get("meshing_thread_count", Integer.class), r -> {
-            Thread thread = new Thread(r, "Meshing Thread");
+        meshingService = new ScheduledThreadPoolExecutor(meshingThreadCount, r -> {
+            Thread thread = Thread
+                    .ofVirtual()
+                    .name("Meshing Thread")
+                    .unstarted(r);
             thread.setDaemon(true);
 
             return thread;
