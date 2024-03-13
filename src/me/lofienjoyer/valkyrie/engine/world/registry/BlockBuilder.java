@@ -31,7 +31,9 @@ public class BlockBuilder {
             case X:
                 mesh = BlockMeshBuilder.buildXMesh(eastTexture);
                 break;
-            case FULL:
+            case LEAVES:
+                mesh = BlockMeshBuilder.buildLeavesMesh(eastTexture);
+                break;
             default:
                 mesh = BlockMeshBuilder.buildFullBlockMesh(southTexture, eastTexture, topTexture);
                 break;
