@@ -2,3 +2,4 @@ name: 'leaves'
 texture: 'leaves'
 transparent: true
 drawBetween: true
+model: leaves

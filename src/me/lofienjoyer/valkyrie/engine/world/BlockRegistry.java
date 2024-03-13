@@ -92,6 +92,10 @@ public class BlockRegistry {
                         builder.setMeshType(BlockMeshType.X);
                         builder.setCustomModel(true);
                         break;
+                    case "leaves":
+                        builder.setMeshType(BlockMeshType.LEAVES);
+                        builder.setCustomModel(true);
+                        break;
                     case "block":
                     default:
                         builder.setMeshType(BlockMeshType.FULL);
