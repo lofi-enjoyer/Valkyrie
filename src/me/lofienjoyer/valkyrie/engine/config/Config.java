@@ -1,6 +1,8 @@
 package me.lofienjoyer.valkyrie.engine.config;
 
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +28,7 @@ public class Config {
     }
 
     private void loadData(File file) {
-        var yaml = new Yaml();
+        var yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         try {
             this.data = yaml.load(new FileInputStream(file));
         } catch (FileNotFoundException e) {
