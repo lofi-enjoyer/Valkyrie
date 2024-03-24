@@ -5,3 +5,15 @@ fully_load_distance: 2
 view_distance: 6
 fov: 85.0
 meshing_thread_count: 2
+
+# Game keyboard mapping
+# https://www.glfw.org/docs/3.3/group__keys.html
+keys.move_forward: 87
+keys.move_backwards: 83
+keys.move_left: 65
+keys.move_right: 68
+keys.jump: 32
+keys.toggle_wireframe: 82
+keys.toggle_debug_mode: 292
+keys.toggle_vsync: 72
+keys.call_gc: 80

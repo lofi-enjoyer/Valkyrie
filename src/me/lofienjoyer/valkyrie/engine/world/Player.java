@@ -1,11 +1,10 @@
 package me.lofienjoyer.valkyrie.engine.world;
 
 import me.lofienjoyer.valkyrie.engine.input.Input;
+import me.lofienjoyer.valkyrie.engine.input.KeyMapping;
 import org.joml.Vector3f;
 
 import static me.lofienjoyer.valkyrie.engine.world.World.CHUNK_WIDTH;
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 
 // TODO: 11/02/2022 Temporary class to test collisions
 public class Player {
@@ -38,22 +37,22 @@ public class Player {
         movement.x = 0;
         movement.z = 0;
 
-        if (Input.isKeyPressed(GLFW_KEY_W)) {
+        if (Input.isKeyPressed(KeyMapping.getMoveForwardKey())) {
             movement.z -= Math.cos(Math.toRadians(rotation.x)) * SPEED * delta;
             movement.x += Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
 
-        if (Input.isKeyPressed(GLFW_KEY_S)) {
+        if (Input.isKeyPressed(KeyMapping.getMoveBackwardsKey())) {
             movement.z += Math.cos(Math.toRadians(rotation.x)) * SPEED * delta;
             movement.x -= Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
 
-        if (Input.isKeyPressed(GLFW_KEY_A)) {
+        if (Input.isKeyPressed(KeyMapping.getMoveLeftKey())) {
             movement.x -= Math.cos(Math.toRadians(rotation.x)) * SPEED * delta;
             movement.z -= Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
 
-        if (Input.isKeyPressed(GLFW_KEY_D)) {
+        if (Input.isKeyPressed(KeyMapping.getMoveRightKey())) {
             movement.x += Math.cos(Math.toRadians(rotation.x)) * SPEED * delta;
             movement.z += Math.sin(Math.toRadians(rotation.x)) * SPEED * delta;
         }
@@ -73,7 +72,7 @@ public class Player {
         position.y += movement.y;
         checkCollisions(new Vector3f(0, movement.y, 0));
 
-        if ((contact || highestMovementResistance != 0) && Input.isKeyPressed(GLFW_KEY_SPACE)) {
+        if ((contact || highestMovementResistance != 0) && Input.isKeyPressed(KeyMapping.getJumpKey())) {
             movement.y = 15f * (1 - highestMovementResistance) * delta;
             contact = false;
         }

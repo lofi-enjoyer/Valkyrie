@@ -1,8 +1,7 @@
 package me.lofienjoyer.valkyrie.engine.graphics.display;
 
 import me.lofienjoyer.valkyrie.Valkyrie;
-import me.lofienjoyer.valkyrie.engine.graphics.render.WorldRenderer;
-import me.lofienjoyer.valkyrie.engine.world.World;
+import me.lofienjoyer.valkyrie.engine.input.KeyMapping;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
@@ -14,8 +13,6 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.stb.STBImage.stbi_failure_reason;
-import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -66,18 +63,18 @@ public class Window {
             keyCallbacks.forEach(callback -> callback.invoke(id, key, scancode, action, mods));
         });
         keyCallbacks.add((id, key, scancode, action, mods) -> {
-            if (key == GLFW_KEY_R && action == GLFW_RELEASE) {
+            if (key == KeyMapping.getToggleWireframeKey() && action == GLFW_RELEASE) {
                 wireframe = !wireframe;
                 GL30.glPolygonMode(GL30.GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             }
-            if (key == GLFW_KEY_F3 && action == GLFW_RELEASE) {
+            if (key == KeyMapping.getToggleDebugModeKey() && action == GLFW_RELEASE) {
                 Valkyrie.DEBUG_MODE = !Valkyrie.DEBUG_MODE;
             }
-            if (key == GLFW_KEY_H && action == GLFW_RELEASE) {
+            if (key == KeyMapping.getToggleVsyncKey() && action == GLFW_RELEASE) {
                 vsync = !vsync;
                 glfwSwapInterval(vsync ? 1 : 0);
             }
-            if (key == GLFW_KEY_P && action == GLFW_RELEASE) {
+            if (key == KeyMapping.getCallGcKey() && action == GLFW_RELEASE) {
                 System.gc();
             }
         });
@@ -107,7 +104,7 @@ public class Window {
             );
         }
 
-        Valkyrie.LOG.info("Window succesfully created");
+        Valkyrie.LOG.info("Window successfully created");
 
         glfwMakeContextCurrent(id);
         Valkyrie.LOG.info("OpenGL Context set");
