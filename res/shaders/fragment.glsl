@@ -22,6 +22,7 @@ uniform float fogMinDistance;
 uniform float fogMaxDistance;
 uniform int triangleSizeMultiplier;
 uniform int blending;
+uniform int transparency;
 
 const int atlasSize = 256;
 const int textureSize = 16;
@@ -73,13 +74,19 @@ void main()
     float xUv = mod(outData.z, texturesPerSide) / texturesPerSide + mod(outData.x + texOffset.x, 1.0) / texturesPerSide;
     float yUv = int(outData.z / texturesPerSide) / float(texturesPerSide) + mod(outData.y + texOffset.y, 1.0) / texturesPerSide;
     vec4 color = texture(textureSampler, vec2(xUv, yUv));
-    if (blending == 0) {
-        if (color.a != 1) {
+    if (transparency == 0) {
+        if (color.a == 0) {
             discard;
         }
     } else {
-        if (color.a == 1 || color.a == 0) {
-            discard;
+        if (blending == 0) {
+            if (color.a != 1) {
+                discard;
+            }
+        } else {
+            if (color.a == 1 || color.a == 0) {
+                discard;
+            }
         }
     }
 

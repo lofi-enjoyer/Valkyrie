@@ -55,6 +55,7 @@ public class WorldScene implements Scene {
     ImBoolean experimentalRendering = new ImBoolean(false);
     float[] sensitivity = new float[] { 0.5f };
     int[] fov = new int[] { 75 };
+    int[] transparencyDistance = new int[] { 2 };
     float dayTime = 0.3f;
     boolean debug = false;
 
@@ -314,6 +315,7 @@ public class WorldScene implements Scene {
         program.setUniformFloat("fogMaxDistance", fogDistance[1]);
         program.setUniformInt("triangleSizeMultiplier", experimentalRendering.get() ? 2 : 1);
         program.setUniformInt("blending", 0);
+        program.setUniformInt("transparency", 0);
         glDisable(GL_BLEND);
         glActiveTexture(GL_TEXTURE0);
         glEnable(GL_SAMPLE_SHADING);
@@ -331,6 +333,10 @@ public class WorldScene implements Scene {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, shadowIndirectBuffer);
+        program.setUniformInt("transparency", 1);
+        program.setUniformInt("blending", 0);
+        glMultiDrawArraysIndirect(GL_TRIANGLE_FAN, 0, drawLength, 0);
         program.setUniformInt("blending", 1);
         glMultiDrawArraysIndirect(GL_TRIANGLE_FAN, 0, drawLength, 0);
 
@@ -376,6 +382,7 @@ public class WorldScene implements Scene {
                 ImGui.textColored(0xff00ff44, "World");
                 ImGui.sliderFloat("Time speed", timeSpeed, 0f, 10f);
                 ImGui.sliderInt("Render distance", renderRadius, 1, 32, renderRadius[0] * 32 + "m");
+                ImGui.sliderInt("Transparency distance", transparencyDistance, 0, renderRadius[0], transparencyDistance[0] * 32 + "m");
                 ImGui.sliderFloat2("Fog distance", fogDistance, 0f, 512f);
                 ImGui.colorEdit3("Sky color", baseSkyColor);
                 ImGui.textColored(0xff3377ff, "Graphics");
@@ -537,31 +544,30 @@ public class WorldScene implements Scene {
         var chunkPositions = new ArrayList<Long>();
         var shadowIndirectCmdsList = new ArrayList<Integer>();
         var triangleCount = experimentalRendering.get() ? 3 : 4;
+        var transparencyDistance = this.transparencyDistance[0];
         allocator.getMeshes().forEach(mesh -> {
             var meshX = (mesh.getId() & 0xffff);
             var meshZ = (mesh.getId() >> 32) & 0xffff;
 
-            if (intersection.testAab(meshX * 32, 0, meshZ * 32, meshX * 32 + 32, 128, meshZ * 32 + 32)) {
-                indirectCmdsList.add(triangleCount);
-                indirectCmdsList.add(mesh.getLength());
-                indirectCmdsList.add(0);
-                indirectCmdsList.add(mesh.getIndex() / (Integer.BYTES * 2));
-            } else {
-                indirectCmdsList.add(triangleCount);
-                indirectCmdsList.add(0);
-                indirectCmdsList.add(0);
-                indirectCmdsList.add(mesh.getIndex() / (Integer.BYTES * 2));
-            }
+            var inFrustum = intersection.testAab(meshX * 32, 0, meshZ * 32, meshX * 32 + 32, 128, meshZ * 32 + 32);
+
+            if (!inFrustum)
+                return;
 
             chunkPositions.add(mesh.getId());
 
+            indirectCmdsList.add(triangleCount);
             shadowIndirectCmdsList.add(triangleCount);
-            if (meshX > camPos.x + 1 || meshX < camPos.x - 1 || meshZ > camPos.z + 1 || meshZ < camPos.z - 1) {
+            if (meshX > camPos.x + transparencyDistance || meshX < camPos.x - transparencyDistance || meshZ > camPos.z + transparencyDistance || meshZ < camPos.z - transparencyDistance) {
+                indirectCmdsList.add(mesh.getLength());
                 shadowIndirectCmdsList.add(0);
             } else {
+                indirectCmdsList.add(0);
                 shadowIndirectCmdsList.add(mesh.getLength());
             }
 
+            indirectCmdsList.add(0);
+            indirectCmdsList.add(mesh.getIndex() / (Integer.BYTES * 2));
             shadowIndirectCmdsList.add(0);
             shadowIndirectCmdsList.add(mesh.getIndex() / (Integer.BYTES * 2));
         });

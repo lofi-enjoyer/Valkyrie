@@ -30,7 +30,7 @@ public class World {
 
     public World() {
         this.chunks = new HashMap<>();
-        var random = new SplittableRandom(16);
+        var random = new SplittableRandom(System.nanoTime());
         this.noise = new FastNoiseLite(random.nextInt());
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
         noise.SetFrequency(1 / 512f);
@@ -139,11 +139,20 @@ public class World {
             for (int z = 0; z < 32; z++) {
                 var height = heightMap[x | z << 5] * 90 + 30;
                 for (int y = 0; y < height; y++) {
-                    if (y > height - 3) {
-                        chunk.setBlock(x, y, z, 2);
+                    if (y == (int) height) {
+                        if (height < 63) {
+                            chunk.setBlock(x, y, z, 10);
+                        } else {
+                            chunk.setBlock(x, y, z, 2);
+                        }
+                    } else if (y > height - 4) {
+                        chunk.setBlock(x, y, z, 11);
                     } else {
                         chunk.setBlock(x, y, z, 1);
                     }
+
+                    if (height < 66 && y > height - 3)
+                        continue;
 
                     var cave1 = caveNoise.GetNoise((chunkX * 32 + x), y, (chunkZ * 32 + z));
                     var cave2 = caveNoise2.GetNoise((chunkX * 32 + x), y * 2, (chunkZ * 32 + z));
@@ -161,7 +170,7 @@ public class World {
                     }
                 }
 
-                if (height > 64 && chunk.getBlock(x, (int) height, z) != 0 && noise.GetNoise((chunkX * 32 + x) * 512, (chunkZ * 32 + z) * 512) > 0.95 && height + 7 < 128 && x < 30 && x > 2 && z < 30 && z > 2) {
+                if (height > 64 && chunk.getBlock(x, (int) height, z) != 0 && noise.GetNoise((chunkX * 32 + x) * 1024, (chunkZ * 32 + z) * 1024) > 0.8 && height + 7 < 128 && x < 30 && x > 1 && z < 30 && z > 1) {
                     if (random.nextInt(100) == 0) {
                         for (int i = -3; i <= 3; i++) {
                             for (int j = -3; j <= 3; j++) {
