@@ -20,6 +20,8 @@ public class Input {
     private final Vector2d cursorPosition;
     private final Vector2d cursorMovement;
 
+    private final Vector2d scrollMovement;
+
     private Input() {
         this.pressedKeys = new boolean[KEY_COUNT];
         this.justPressedKeys = new boolean[KEY_COUNT];
@@ -29,6 +31,8 @@ public class Input {
 
         this.cursorPosition = new Vector2d();
         this.cursorMovement = new Vector2d();
+
+        this.scrollMovement = new Vector2d();
     }
 
     public synchronized void update() {
@@ -42,14 +46,14 @@ public class Input {
 
         cursorMovement.x = 0;
         cursorMovement.y = 0;
+
+        scrollMovement.set(0);
     }
 
     public void setup(long id) {
         glfwSetKeyCallback(id, this::keyCallback);
         glfwSetMouseButtonCallback(id, this::mouseButtonCallback);
-//        window.registerKeyCallback(this::keyCallback);
-//        window.registerButtonCallback(this::mouseButtonCallback);
-//        window.registerCursorPosCallback(this::cursorPositionCallback);
+        glfwSetScrollCallback(id, this::scrollCallback);
     }
 
     private void keyCallback(long id, int key, int scancode, int action, int mods) {
@@ -68,6 +72,11 @@ public class Input {
 
         cursorPosition.x = posX;
         cursorPosition.y = posY;
+    }
+
+    private void scrollCallback(long id, double scrollX, double scrollY) {
+        scrollMovement.x = scrollX;
+        scrollMovement.y = scrollY;
     }
 
     public synchronized static boolean isKeyPressed(int key) {
@@ -100,6 +109,10 @@ public class Input {
 
     public synchronized static double getCursorMovementY() {
         return (int)instance.cursorMovement.y;
+    }
+
+    public synchronized static double getScrollY() {
+        return (int)instance.scrollMovement.y;
     }
 
     public static Input getInstance() {

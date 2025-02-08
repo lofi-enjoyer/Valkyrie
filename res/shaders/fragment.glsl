@@ -78,7 +78,7 @@ void main()
             discard;
         }
     } else {
-        if (color.a == 1) {
+        if (color.a == 1 || color.a == 0) {
             discard;
         }
     }

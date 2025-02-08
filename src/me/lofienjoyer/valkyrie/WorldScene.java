@@ -208,14 +208,11 @@ public class WorldScene implements Scene {
                 }
             }
 
-            if (Input.isKeyJustPressed(GLFW_KEY_Q)) {
-                selectedBlock--;
-                if (selectedBlock < 0)
-                    selectedBlock = 255;
-            } else if (Input.isKeyJustPressed(GLFW_KEY_E)) {
-                selectedBlock++;
-                if (selectedBlock > 255)
-                    selectedBlock = 0;
+            selectedBlock += (int) Input.getScrollY();
+            if (selectedBlock < 0) {
+                selectedBlock = 255;
+            } else if (selectedBlock > 255) {
+                selectedBlock = 0;
             }
 
             if (Input.isKeyJustPressed(GLFW_KEY_SPACE)) {
