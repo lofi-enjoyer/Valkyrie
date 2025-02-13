@@ -2,12 +2,15 @@ package me.lofienjoyer.valkyrie;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryStack;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,6 +20,7 @@ import java.util.concurrent.Executors;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.stb.STBImage.*;
 
 public class Valkyrie {
 
@@ -47,6 +51,7 @@ public class Valkyrie {
         glfwMakeContextCurrent(windowId);
         glfwSwapInterval(vsync);
         GL.createCapabilities();
+        setIcon();
 
         glfwSetWindowSizeCallback(Valkyrie.windowId, (id, width, height) -> {
             Valkyrie.width = width;
@@ -111,6 +116,32 @@ public class Valkyrie {
                 throw new RuntimeException(e);
             }
         }).start();
+    }
+
+    private static void setIcon() {
+        ByteBuffer iconData;
+        int iconWidth, iconHeight;
+
+        try (var stack = MemoryStack.stackPush()) {
+            var w = stack.mallocInt(1);
+            var h = stack.mallocInt(1);
+            var channels = stack.mallocInt(1);
+
+            iconData = stbi_load("res/textures/icon/icon256.png", w, h, channels, 4);
+            if (iconData == null) {
+                System.err.println("Could not load icon!");
+                return;
+            }
+
+            iconWidth = w.get();
+            iconHeight = h.get();
+        }
+
+        var iconImage = GLFWImage.malloc();
+        var iconBuffer = GLFWImage.malloc(1);
+        iconImage.set(iconWidth, iconHeight, iconData);
+        iconBuffer.put(0, iconImage);
+        glfwSetWindowIcon(windowId, iconBuffer);
     }
 
 }
