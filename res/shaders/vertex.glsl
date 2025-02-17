@@ -86,8 +86,8 @@ void main()
 
     texOffset = vec2(0);
     if (texture == 3 || texture == 7 || texture == 8 || texture == 9) {
-        texOffset.x += (sin((positionX + worldTime) * 4) + 1) / 16;
-        texOffset.y += (sin((positionY + worldTime + 2) * 20) + 1) / 32;
+        texOffset.x += (sin(worldTime * 4) + 1) / 16;
+        texOffset.y += (sin((worldTime + 2) * 20) + 1) / 32;
     }
 
     float offsetX = positionX + chunkPosition.x * 32;
