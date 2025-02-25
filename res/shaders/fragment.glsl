@@ -12,6 +12,7 @@ const vec2 texelSize = vec2(1 / 1024.0, 1 / 1024.0);
 
 layout (binding = 0) uniform sampler2D textureSampler;
 layout (binding = 1) uniform sampler2D shadowSampler;
+layout (binding = 2) uniform sampler2D normalsSampler;
 uniform float dayTime;
 uniform vec3 lightDir;
 uniform float timeOfDay;
@@ -23,6 +24,7 @@ uniform float fogMaxDistance;
 uniform int triangleSizeMultiplier;
 uniform int blending;
 uniform int transparency;
+uniform float normalMappingStrength;
 
 const int atlasSize = 256;
 const int textureSize = 16;
@@ -33,6 +35,7 @@ in VS_OUT {
     vec3 Normal;
     vec2 TexCoords;
     vec4 FragPosLightSpace;
+    mat3 tbn;
 } fs_in;
 
 float calculateShadow(vec4 fragPosLightSpace, float dotProduct) {
@@ -90,9 +93,32 @@ void main()
         }
     }
 
-    FragColor = vec4((vec3(color.r * passLight.r, color.g * passLight.g, color.b * passLight.b) * outData.a), color.a);
+    float shininess = 0.2;
+    float minShininess = 0.5;
+
+    if (color.a != 1) {
+        shininess = 32;
+        minShininess = 0.95;
+    }
 
     vec3 distance = vec3(fs_in.FragPos.x - mod(camPos.x, 32), fs_in.FragPos.y - camPos.y, fs_in.FragPos.z - mod(camPos.z, 32));
+
+    vec3 viewDir = normalize(vec3(mod(camPos.x, 32), camPos.y, mod(camPos.z, 32)) - fs_in.FragPos);
+
+    vec3 normal = texture(normalsSampler, vec2(xUv, yUv)).rgb;
+    normal = normal * 2.0 - 1.0;
+    normal = normalize(fs_in.tbn * normal);
+
+    vec3 reflectDir = reflect(-lightDir, normal);
+
+    float spec = pow(max(-dot(reflectDir, -viewDir), minShininess), shininess);
+
+    float normalLight = (dot(normal, lightDir) + 1.0) / 2.0;
+    normalLight = normalMappingStrength * normalLight + (1 - normalMappingStrength);
+    float s = max(0.05, passLight.a * light * normalLight * spec);
+
+    FragColor = vec4((vec3(color.r * max(passLight.r, s), color.g * max(passLight.g, s), color.b * max(passLight.b, s)) * outData.a * normalLight), color.a);
+
     if (length(distance) > fogMinDistance) {
         FragColor.xyz = mix(FragColor.xyz, skyColor, min((length(distance) - fogMinDistance) / (fogMaxDistance - fogMinDistance), 1));
     }

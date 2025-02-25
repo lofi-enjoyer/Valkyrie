@@ -71,6 +71,7 @@ public class Camera {
         movement.z = 0;
 
         var movementSpeed = SPEED * delta * (Input.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1.5f : 1f);
+        movementSpeed *= Input.isKeyPressed(GLFW_KEY_LEFT_CONTROL) ? 0.25f : 1f;
 
         if (glfwGetKey(window, GLFW_KEY_W) != 0) {
             movement.z -= Math.cos(Math.toRadians(rotationX)) * movementSpeed;

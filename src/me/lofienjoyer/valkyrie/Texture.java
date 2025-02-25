@@ -11,8 +11,16 @@ import static org.lwjgl.stb.STBImage.*;
 public class Texture {
 
     private final int id;
+    private final String fileName;
 
     public Texture(String fileName) {
+        this.fileName = fileName;
+        this.id = glGenTextures();
+
+        reloadFromFile();
+    }
+
+    public void reloadFromFile() {
         int width;
         int height;
         ByteBuffer buf;
@@ -31,9 +39,7 @@ public class Texture {
             height = h.get();
         }
 
-        this.id = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, id);
-
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

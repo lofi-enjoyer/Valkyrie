@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import org.joml.*;
 import org.lwjgl.glfw.GLFW;
 
@@ -36,7 +35,7 @@ public class WorldScene implements Scene {
     private Framebuffer fbo;
     private DepthFramebuffer shadowFbo;
     private IntermediateFramebuffer intermediateFbo;
-    private Texture texture, versionTexture, sunTexture;
+    private Texture texture, versionTexture, sunTexture, normalsTexture;
     private int indirectBuffer, chunkPositionBuffer, shadowIndirectBuffer, fontIndirectBuffer, fontPositionBuffer;
     private Camera camera, shadowCamera;
     private World world;
@@ -58,6 +57,9 @@ public class WorldScene implements Scene {
     int[] transparencyDistance = new int[] { 2 };
     float dayTime = 0.3f;
     boolean debug = false;
+    boolean reloadTextures = false;
+    float[] normalMapping = new float[] { 0.2f };
+    boolean recompileShaders = false;
 
     private static final int[] msaaLevels = new int[] { 0, 1, 2, 4, 8, 16 };
 
@@ -143,6 +145,7 @@ public class WorldScene implements Scene {
 
         texture = new Texture("res/textures/blocks/terrain.png");
         glBindTexture(GL_TEXTURE_2D, texture.getId());
+        normalsTexture = new Texture("res/textures/blocks/terrainNormals.png");
 
         indirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBuffer);
@@ -279,6 +282,7 @@ public class WorldScene implements Scene {
 //        glEnable(GL_CULL_FACE);
 
         // Color pass
+        glEnable(GL_FRAMEBUFFER_SRGB);
         glViewport(0, 0, (int) (Valkyrie.width * (resolutionScale[0] * 0.25f)), (int) (Valkyrie.height * (resolutionScale[0] * 0.25f)));
         glBindFramebuffer(GL_FRAMEBUFFER, fbo.getId());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -316,6 +320,7 @@ public class WorldScene implements Scene {
         program.setUniformInt("triangleSizeMultiplier", experimentalRendering.get() ? 2 : 1);
         program.setUniformInt("blending", 0);
         program.setUniformInt("transparency", 0);
+        program.setUniformFloat("normalMappingStrength", normalMapping[0]);
         glDisable(GL_BLEND);
         glActiveTexture(GL_TEXTURE0);
         glEnable(GL_SAMPLE_SHADING);
@@ -323,6 +328,8 @@ public class WorldScene implements Scene {
         glBindTexture(GL_TEXTURE_2D, texture.getId());
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, shadowFbo.getDepthTextureId());
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, normalsTexture.getId());
         glEnable(GL_DEPTH_TEST);
         glBindVertexArray(vaoId);
         glBindBuffer(GL_ARRAY_BUFFER, vboId);
@@ -339,6 +346,7 @@ public class WorldScene implements Scene {
         glMultiDrawArraysIndirect(GL_TRIANGLE_FAN, 0, drawLength, 0);
         program.setUniformInt("blending", 1);
         glMultiDrawArraysIndirect(GL_TRIANGLE_FAN, 0, drawLength, 0);
+        glDisable(GL_FRAMEBUFFER_SRGB);
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo.getId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFbo.getId());
@@ -390,8 +398,11 @@ public class WorldScene implements Scene {
                 ImGui.sliderInt("FOV", fov, 20, 135);
                 ImGui.sliderInt("Resolution", resolutionScale, 1, 6, (resolutionScale[0] * 0.25f) + "x");
                 ImGui.sliderInt("MSAA samples", msaaSamples, 0, msaaLevels.length - 1, msaaLevels[msaaSamples[0]] + "x");
+                ImGui.sliderFloat("Normal mapping", normalMapping, 0f, 1f);
                 ImGui.checkbox("VSync", vsync);
                 ImGui.checkbox("Experimental polygon rendering", experimentalRendering);
+                reloadTextures = ImGui.button("Reload textures");
+                recompileShaders = ImGui.button("Recompile shaders");
                 ImGui.endTabItem();
             }
 
@@ -426,6 +437,19 @@ public class WorldScene implements Scene {
             imGuiGl3.renderDrawData(ImGui.getDrawData());
 
             resize(Valkyrie.width, Valkyrie.height);
+
+            if (reloadTextures) {
+                reloadTextures = false;
+
+                texture.reloadFromFile();
+                normalsTexture.reloadFromFile();
+            }
+
+            if (recompileShaders) {
+                recompileShaders = false;
+
+                program.compileShader();
+            }
         }
 
         glfwSwapInterval(vsync.get() ? 1 : 0);

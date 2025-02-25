@@ -43,11 +43,21 @@ vec3(0, 1, 0),
 vec3(0, -1, 0)
 };
 
+const vec3 tangents[6] = {
+vec3(1, 0, 0),
+vec3(-1, 0, 0),
+vec3(0, 0, 1),
+vec3(0, 0, -1),
+vec3(1, 0, 0),
+vec3(1, 0, 0)
+};
+
 out VS_OUT {
     vec3 FragPos;
     vec3 Normal;
     vec2 TexCoords;
     vec4 FragPosLightSpace;
+    mat3 tbn;
 } vs_out;
 
 vec3 getChunkPosition(int index) {
@@ -108,15 +118,20 @@ void main()
         gl_Position = vec4(x * width + offsetX, offsetY, y * height + offsetZ, 1.0);
     }
     textureCoords = vec2(x, y + triangleSizeMultiplier - 1);
-    outData = vec4(x * width, y * height, texture, shadow[face]);
+    outData = vec4(x * width, y * height, float(texture), shadow[face]);
 
     float dotProduct = max(dot(normal[face], lightDir), 0.85);
     passLight = vec4((blockLight >> 9) & 0x7, (blockLight >> 6) & 0x7, (blockLight >> 3) & 0x7, blockLight & 0x7) / 7.0;
     float s = max(0.125, passLight.a * light * dotProduct);
-    passLight = vec4(vec3(max(passLight.r, s), max(passLight.g, s), max(passLight.b, s)), 1.0);
+
+    vec3 faceNormal = normal[face];
+    vec3 tangent = tangents[face];
+    vec3 bitangent = cross(faceNormal, tangent);
+    mat3 tbn = mat3(tangent, bitangent, faceNormal);
 
     vs_out.FragPos = vec3(gl_Position.xyz);
     vs_out.Normal = normal[face];
+    vs_out.tbn = tbn;
     vs_out.FragPosLightSpace = shadowProj * shadowView * vec4(vs_out.FragPos, 1.0);
     gl_Position = proj * view * vec4(vs_out.FragPos, 1.0);
     outCamPos = camChunkPos;

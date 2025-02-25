@@ -21,23 +21,34 @@ public class ShaderProgram {
 
     private final FloatBuffer buffer;
 
+    private final String vertexSrc, fragmentSrc;
+
     public ShaderProgram(String vertexSrc, String fragmentSrc) {
         this.buffer = BufferUtils.createFloatBuffer(16);
+        this.vertexSrc = vertexSrc;
+        this.fragmentSrc = fragmentSrc;
         shaderProgram = glCreateProgram();
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+        compileShader();
+    }
+
+    public void compileShader() {
         glShaderSource(vertexShader, getShaderSource(vertexSrc));
         glCompileShader(vertexShader);
         glAttachShader(shaderProgram, vertexShader);
         if (glGetShaderi(vertexShader, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println(glGetShaderInfoLog(vertexShader, 512));
         }
-        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
         glShaderSource(fragmentShader, getShaderSource(fragmentSrc));
         glCompileShader(fragmentShader);
         glAttachShader(shaderProgram, fragmentShader);
         if (glGetShaderi(fragmentShader, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println(glGetShaderInfoLog(fragmentShader, 512));
         }
+
         glLinkProgram(shaderProgram);
         glValidateProgram(shaderProgram);
     }
