@@ -63,7 +63,7 @@ public class WorldScene implements Scene {
     float[] normalMapping = new float[] { 0.2f };
     boolean recompileShaders = false;
 
-    private static final int[] msaaLevels = new int[] { 0, 1, 2, 4, 8, 16 };
+    private static final int[] msaaLevels = new int[] { 0, 2, 4, 8, 16 };
 
     private int selectedBlock = 1;
 
