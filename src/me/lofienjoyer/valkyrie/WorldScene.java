@@ -27,6 +27,7 @@ public class WorldScene implements Scene {
     public static int drawLength;
 
     private String gpuName;
+    private String glVersion;
     private ImGuiImplGlfw imGuiGlfw;
     private ImGuiImplGl3 imGuiGl3;
     private int quadVao, quadVbo, vaoId, vboId;
@@ -65,11 +66,16 @@ public class WorldScene implements Scene {
 
     private int selectedBlock = 1;
 
+    private AudioEngine audioEngine;
+    private SoundSource blockSound;
+    private SoundSource jumpSound;
+
     public void init() {
         final var shouldUseSsboRendering = false;
         System.out.println("Using SSBO: " + shouldUseSsboRendering);
 
         gpuName = glGetString(GL_RENDERER);
+        glVersion = glGetString(GL_VERSION);
 
         ImGui.createContext();
         imGuiGlfw = new ImGuiImplGlfw();
@@ -186,6 +192,12 @@ public class WorldScene implements Scene {
 
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+
+        audioEngine = new AudioEngine();
+        audioEngine.init();
+
+        blockSound = new SoundSource(SoundLoader.loadSound("res/tap.ogg"));
+        jumpSound = new SoundSource(SoundLoader.loadSound("res/jump.ogg"));
     }
 
     public void draw(float delta) {
@@ -202,6 +214,7 @@ public class WorldScene implements Scene {
                 var position = world.rayCast(camera.getPosition(), camera.getDirection(), 8, false);
                 if (position != null) {
                     world.setBlock(0, position);
+                    blockSound.play(0.5f);
                 }
             }
 
@@ -209,6 +222,7 @@ public class WorldScene implements Scene {
                 var position = world.rayCast(camera.getPosition(), camera.getDirection(), 8, true);
                 if (position != null) {
                     world.setBlock(selectedBlock, position);
+                    blockSound.play(0.25f);
                 }
             }
 
@@ -222,6 +236,7 @@ public class WorldScene implements Scene {
             if (Input.isKeyJustPressed(GLFW_KEY_SPACE)) {
                 if (camera.movement.y == 0d) {
                     camera.movement.y += 10f;
+                    jumpSound.play(1f);
                 }
             }
         } else {
@@ -379,7 +394,7 @@ public class WorldScene implements Scene {
             ImGui.text(String.format("Chunk: %d,%d", (int)(camera.getPosition().x / 32), (int)(camera.getPosition().z / 32)));
             ImGui.text("FPS: " + 1 / delta);
             ImGui.text("Frame time: " + delta);
-            ImGui.text("GPU: " + gpuName);
+            ImGui.text("GPU: " + gpuName + " (" + glVersion + ")");
             ImGui.text("Resolution: " + Valkyrie.width + "x" + Valkyrie.height);
 
             ImGui.beginTabBar("tabs");
@@ -460,6 +475,9 @@ public class WorldScene implements Scene {
         imGuiGlfw.dispose();
         worldTimer.cancel();
 
+        blockSound.cleanup();
+        audioEngine.cleanup();
+
         glfwDestroyWindow(Valkyrie.windowId);
     }
 
@@ -468,6 +486,8 @@ public class WorldScene implements Scene {
         height *= (resolutionScale[0] * 0.25f);
         program.bind();
         program.setUniform("proj", Camera.createProjectionMatrix(width, height, fov[0]));
+        sunProgram.bind();
+        sunProgram.setUniform("proj", Camera.createProjectionMatrix(width, height, fov[0]));
         fbo.resize(width, height, msaaLevels[msaaSamples[0]]);
         intermediateFbo.resize(width, height);
         intersection.set(Camera.createProjectionMatrix(Valkyrie.width, Valkyrie.height, fov[0]).mul(Camera.createCompleteViewMatrix(camera)));
