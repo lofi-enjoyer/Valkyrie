@@ -45,6 +45,7 @@ public class WorldScene implements Scene {
 
     boolean wireframe = false;
     float[] saturation = new float[] { 1.2f };
+    float[] gamma = new float[] { 2.2f };
     float[] timeSpeed = new float[] { 0.001f };
     int[] renderRadius = new int[] { 4 };
     float[] fogDistance = new float[] { 64f, 128f };
@@ -297,7 +298,6 @@ public class WorldScene implements Scene {
 //        glEnable(GL_CULL_FACE);
 
         // Color pass
-        glEnable(GL_FRAMEBUFFER_SRGB);
         glViewport(0, 0, (int) (Valkyrie.width * (resolutionScale[0] * 0.25f)), (int) (Valkyrie.height * (resolutionScale[0] * 0.25f)));
         glBindFramebuffer(GL_FRAMEBUFFER, fbo.getId());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -361,7 +361,6 @@ public class WorldScene implements Scene {
         glMultiDrawArraysIndirect(GL_TRIANGLE_FAN, 0, drawLength, 0);
         program.setUniformInt("blending", 1);
         glMultiDrawArraysIndirect(GL_TRIANGLE_FAN, 0, drawLength, 0);
-        glDisable(GL_FRAMEBUFFER_SRGB);
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo.getId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFbo.getId());
@@ -375,12 +374,14 @@ public class WorldScene implements Scene {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         fboProgram.bind();
         fboProgram.setUniformFloat("saturation", saturation[0]);
+        fboProgram.setUniformFloat("gamma", gamma[0]);
         glBindVertexArray(quadVao);
         glDisable(GL_DEPTH_TEST);
         glBindBuffer(GL_ARRAY_BUFFER, quadVbo);
         glBindTexture(GL_TEXTURE_2D, intermediateFbo.getTextureId());
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
+        fboProgram.setUniformFloat("gamma", 1f);
         drawMenu(uiProgram, versionTexture);
 
         if (debug) {
@@ -410,6 +411,7 @@ public class WorldScene implements Scene {
                 ImGui.colorEdit3("Sky color", baseSkyColor);
                 ImGui.textColored(0xff3377ff, "Graphics");
                 ImGui.sliderFloat("Saturation", saturation, 0f, 2f);
+                ImGui.sliderFloat("Gamma", gamma, 1.5f, 3f);
                 ImGui.sliderInt("FOV", fov, 20, 135);
                 ImGui.sliderInt("Resolution", resolutionScale, 1, 6, (resolutionScale[0] * 0.25f) + "x");
                 ImGui.sliderInt("MSAA samples", msaaSamples, 0, msaaLevels.length - 1, msaaLevels[msaaSamples[0]] + "x");

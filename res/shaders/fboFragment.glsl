@@ -5,6 +5,7 @@ in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
 uniform float saturation;
+uniform float gamma;
 
 const float Epsilon = 1e-10;
 
@@ -36,5 +37,5 @@ void main()
     col_hsv.y *= saturation;
     vec3 col_rgb = HSVtoRGB(col_hsv.rgb);
 
-    FragColor = vec4(col_rgb.rgb, color.a);
+    FragColor = vec4(pow(col_rgb.rgb, vec3(1.0/gamma)), color.a);
 }
